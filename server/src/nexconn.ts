@@ -121,6 +121,25 @@ export class NexconnClient {
     const res = await this.post('/v4/group-channel/join', { channelId, userIds });
     return res.code;
   }
+
+  // docs: POST /v4/group-channel/message/send (rate limit 20/s)
+  // Sends a text message AS fromUserId. `user` inside content is the sender
+  // info the Web SDK exposes as message.content.senderUserInfo.
+  async sendGroupText(
+    fromUserId: string,
+    channelId: string,
+    text: string,
+    sender: { id: string; name: string },
+  ): Promise<number> {
+    const res = await this.post('/v4/group-channel/message/send', {
+      fromUserId,
+      toChannelIds: [channelId],
+      messageType: 'RC:TxtMsg',
+      content: JSON.stringify({ content: text, user: { id: sender.id, name: sender.name } }),
+      needReadReceipt: 1,
+    });
+    return res.code;
+  }
 }
 
 function redactTokens(obj: unknown): unknown {

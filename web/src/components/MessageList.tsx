@@ -1,55 +1,123 @@
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useMemo, useRef } from 'react';
+import { ComfortMessage, type ReaderMode, type Speech } from '../features/reader-view';
 import type { ChatMessage } from '../nexconn/types';
+import { CourtyardIllustration } from './CourtyardIllustration';
+import { buildItems } from './messageModel';
+import { StandardMessage } from './StandardMessage';
 
 interface Props {
   messages: ChatMessage[];
   myUserId: string;
+  mode: ReaderMode;
   loading: boolean;
+  animateIds: ReadonlySet<string>;
+  speech: Speech;
+  /** Read state shown under my latest message, e.g. "Seen by Dadi, Papa". */
+  seenBy: { messageId: string; text: string } | null;
+  onSuggest: (text: string) => void;
 }
 
-function formatTime(ms: number): string {
-  return new Date(ms).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
+const NEAR_BOTTOM_PX = 160;
 
-export function MessageList({ messages, myUserId, loading }: Props) {
-  const bottomRef = useRef<HTMLDivElement>(null);
+const SUGGESTIONS = ['Namaste, everyone! 🙏', 'Good morning, family ☀️', 'Who is free this Sunday?'];
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ block: 'end' });
-  }, [messages.length]);
+export function MessageList({ messages, myUserId, mode, loading, animateIds, speech, seenBy, onSuggest }: Props) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const nearBottom = useRef(true);
+  const hasScrolledOnce = useRef(false);
+  const items = useMemo(() => buildItems(messages, myUserId), [messages, myUserId]);
+  const lastMsg = messages[messages.length - 1];
 
-  if (loading) {
-    return <p className="p-6 text-center text-lg text-stone-500">Loading earlier messages…</p>;
-  }
-  if (messages.length === 0) {
-    return <p className="p-6 text-center text-lg text-stone-500">No messages yet. Say hello!</p>;
-  }
+  // Keep the newest message in view: on first load, on mode change, when the
+  // read state appears, and for new messages if the reader was near the bottom.
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (!el || messages.length === 0) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mineJustSent = lastMsg?.senderId === myUserId && animateIds.has(lastMsg.id);
+    if (!hasScrolledOnce.current) {
+      el.scrollTop = el.scrollHeight;
+      hasScrolledOnce.current = true;
+    } else if (nearBottom.current || mineJustSent) {
+      el.scrollTo({ top: el.scrollHeight, behavior: reduced ? 'auto' : 'smooth' });
+    }
+  }, [messages.length, lastMsg, myUserId, animateIds, seenBy?.text]);
+
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [mode]);
+
+  const comfort = mode === 'comfort';
 
   return (
-    <ol className="flex flex-col gap-3 p-4" aria-label="Messages">
-      {messages.map((m) => {
-        const mine = m.senderId === myUserId;
-        return (
-          <li key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-            <div
-              className={`max-w-[80%] rounded-2xl px-4 py-2 text-lg leading-relaxed shadow-sm ${
-                mine ? 'bg-emerald-600 text-white' : 'bg-white text-stone-900'
-              }`}
-            >
-              {!mine && (
-                <div className="mb-0.5 text-sm font-semibold text-emerald-800">
-                  {m.senderName ?? m.senderId}
-                </div>
-              )}
-              <div className="whitespace-pre-wrap break-words">{m.text}</div>
-              <div className={`mt-1 text-right text-xs ${mine ? 'text-emerald-100' : 'text-stone-500'}`}>
-                {formatTime(m.sentAt)}
-              </div>
-            </div>
-          </li>
-        );
-      })}
-      <div ref={bottomRef} />
-    </ol>
+    // Focusable region so keyboard users can scroll history with the arrow keys.
+    <div
+      ref={scrollRef}
+      role="region"
+      aria-label="Message history"
+      tabIndex={0}
+      className="min-h-0 flex-1 overflow-y-auto focus-visible:outline-offset-[-3px]"
+      onScroll={(e) => {
+        const el = e.currentTarget;
+        nearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < NEAR_BOTTOM_PX;
+      }}
+    >
+      {loading ? (
+        <p role="status" className="px-6 py-10 text-center text-ink-muted">
+          Gathering your family's messages…
+        </p>
+      ) : messages.length === 0 ? (
+        <div className="flex flex-col items-center px-6 py-10 text-center">
+          <CourtyardIllustration width={210} />
+          <p className="mt-6 text-[1.375rem] font-bold text-green">Your courtyard is ready</p>
+          <p className="mt-1 max-w-[20rem] text-ink-muted">
+            Start the conversation. Everyone will read it their own way.
+          </p>
+          <p className="mt-6 font-semibold text-ink">Try saying</p>
+          <ul className="mt-2 flex flex-wrap justify-center gap-2">
+            {SUGGESTIONS.map((s) => (
+              <li key={s}>
+                <button
+                  type="button"
+                  onClick={() => onSuggest(s)}
+                  className="rounded-full border-2 border-line-strong bg-surface px-4 font-semibold text-ink hover:border-green hover:bg-green-soft"
+                  style={{ minHeight: 'var(--tap)' }}
+                >
+                  {s}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <ol aria-label="Messages" className={`list-none px-4 pb-4 ${comfort ? 'flex flex-col gap-4 pt-2' : 'pt-1'}`}>
+          {items.map((item) => {
+            if (item.kind === 'day') {
+              return (
+                <li key={item.key} className={`flex justify-center ${comfort ? 'pt-2' : 'pb-1 pt-5'}`}>
+                  <span className="rounded-full bg-sand px-4 py-1 font-semibold text-ink">{item.label}</span>
+                </li>
+              );
+            }
+            const animate = animateIds.has(item.msg.id);
+            const seen = seenBy && seenBy.messageId === item.msg.id ? seenBy.text : null;
+            return comfort ? (
+              <ComfortMessage key={item.key} msg={item.msg} mine={item.mine} animate={animate} speech={speech} seenBy={seen} />
+            ) : (
+              <StandardMessage
+                key={item.key}
+                msg={item.msg}
+                mine={item.mine}
+                first={item.first}
+                last={item.last}
+                animate={animate}
+                seenBy={seen}
+              />
+            );
+          })}
+        </ol>
+      )}
+    </div>
   );
 }

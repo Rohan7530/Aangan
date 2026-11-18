@@ -61,6 +61,14 @@ export function listSavedSessions(): Session[] {
   return Object.values(readSaved());
 }
 
+// Drop sessions saved for a different (older) room ID, e.g. after the family
+// channel was changed in .env. Those users are not members of the new room.
+export function forgetOtherRooms(channelId: string): void {
+  const all = readSaved();
+  const kept = Object.fromEntries(Object.entries(all).filter(([, s]) => s.channelId === channelId));
+  if (Object.keys(kept).length !== Object.keys(all).length) writeSaved(kept);
+}
+
 export function saveSession(session: Session): void {
   writeSaved({ ...readSaved(), [session.userId]: session });
   try {

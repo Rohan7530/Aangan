@@ -23,10 +23,23 @@ function areaCode(): AreaCode {
   throw new Error(`NEXCONN_AREA_CODE must be SG, NA or SA (got "${raw}")`);
 }
 
+// AANGAN_ROOM=test switches the server to the separate test channel so automated
+// tests never post into the real family room.
+function familyChannelId(): { channelId: string; isTestRoom: boolean } {
+  const family = required('AANGAN_FAMILY_CHANNEL_ID');
+  if (process.env.AANGAN_ROOM !== 'test') return { channelId: family, isTestRoom: false };
+  const test = required('AANGAN_TEST_CHANNEL_ID');
+  if (test === family) {
+    throw new Error('AANGAN_TEST_CHANNEL_ID must differ from AANGAN_FAMILY_CHANNEL_ID');
+  }
+  return { channelId: test, isTestRoom: true };
+}
+
 export function loadConfig() {
   const area = areaCode();
+  const room = familyChannelId();
   return {
-    port: Number(process.env.PORT ?? 3001),
+    port: Number(room.isTestRoom ? process.env.TEST_PORT ?? 3002 : process.env.PORT ?? 3001),
     nexconn: {
       appKey: required('NEXCONN_APP_KEY'),
       appSecret: required('NEXCONN_APP_SECRET'),
@@ -34,8 +47,19 @@ export function loadConfig() {
       baseUrls: BASE_URLS[area],
     },
     family: {
-      channelId: required('AANGAN_FAMILY_CHANNEL_ID'),
-      channelName: process.env.AANGAN_FAMILY_CHANNEL_NAME?.trim() || 'Aangan Family',
+      channelId: room.channelId,
+      channelName: room.isTestRoom
+        ? 'Aangan Test Room'
+        : process.env.AANGAN_FAMILY_CHANNEL_NAME?.trim() || 'Aangan Family',
+      isTestRoom: room.isTestRoom,
+    },
+    // The showcase/demo room: its own channel, seeded once with a family conversation.
+    // In test mode it is derived from the test channel, so tests never touch the real demo room.
+    demo: {
+      channelId: room.isTestRoom
+        ? `${room.channelId}demo`.slice(0, 64)
+        : process.env.AANGAN_DEMO_CHANNEL_ID?.trim() || 'aangandemo1',
+      channelName: 'The Sharma Family',
     },
   };
 }

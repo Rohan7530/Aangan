@@ -1,10 +1,45 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { getRoomConfig } from './api';
+import { AppShell } from './components/AppShell';
+import { BrandMark } from './components/BrandMark';
+import { ReaderPrefsProvider } from './features/reader-view';
 import { ChatPage } from './pages/ChatPage';
-import { LoginPage } from './pages/LoginPage';
-import { clearSession, loadSession, saveSession, type Session } from './session';
+import { PhonePage } from './pages/PhonePage';
+import { ShowcasePage } from './pages/ShowcasePage';
+import { WelcomePage } from './pages/WelcomePage';
+import { clearSession, forgetOtherRooms, listSavedSessions, loadSession, saveSession, type Session } from './session';
 
+type Boot = { status: 'loading' } | { status: 'ready' } | { status: 'error'; message: string };
+
+// Tiny path router: no login needed for the showcase routes.
 export default function App() {
-  const [session, setSession] = useState<Session | null>(() => loadSession());
+  const path = window.location.pathname.replace(/\/+$/, '') || '/';
+  if (path === '/showcase') return <ShowcasePage />;
+  if (path === '/showcase/phone') return <PhonePage />;
+  return <FamilyApp />;
+}
+
+function FamilyApp() {
+  const [boot, setBoot] = useState<Boot>({ status: 'loading' });
+  const [session, setSession] = useState<Session | null>(null);
+  const [saved, setSaved] = useState<Session[]>([]);
+
+  // Ask the server which room is current, and drop sessions saved for an older room.
+  useEffect(() => {
+    let cancelled = false;
+    getRoomConfig()
+      .then((room) => {
+        if (cancelled) return;
+        forgetOtherRooms(room.channelId);
+        setSession(loadSession());
+        setSaved(listSavedSessions());
+        setBoot({ status: 'ready' });
+      })
+      .catch(() => !cancelled && setBoot({ status: 'error', message: 'Aangan cannot reach its server right now.' }));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleLoggedIn = useCallback((s: Session) => {
     saveSession(s);
@@ -16,8 +51,31 @@ export default function App() {
       clearSession(current?.userId);
       return null;
     });
+    setSaved(listSavedSessions());
   }, []);
 
-  if (!session) return <LoginPage onLoggedIn={handleLoggedIn} />;
-  return <ChatPage key={session.userId} session={session} onLogout={handleLogout} />;
+  if (boot.status === 'loading') {
+    return (
+      <div className="flex min-h-full items-center justify-center" role="status" aria-label="Loading Aangan">
+        <BrandMark size={64} />
+      </div>
+    );
+  }
+  if (boot.status === 'error') {
+    return (
+      <div className="flex min-h-full flex-col items-center justify-center gap-3 px-8 text-center" role="alert">
+        <BrandMark size={64} />
+        <p className="text-[1.25rem] font-semibold">{boot.message}</p>
+        <p className="text-ink-muted">Please check that the server is running, then reload.</p>
+      </div>
+    );
+  }
+  if (!session) return <WelcomePage savedSessions={saved} onLoggedIn={handleLoggedIn} />;
+  return (
+    <AppShell>
+      <ReaderPrefsProvider key={session.userId} userId={session.userId}>
+        <ChatPage session={session} onLogout={handleLogout} />
+      </ReaderPrefsProvider>
+    </AppShell>
+  );
 }

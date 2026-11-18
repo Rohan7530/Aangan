@@ -171,3 +171,23 @@ function toChatMessage(msg: Message): ChatMessage | null {
     sentAt: msg.sentTime,
   };
 }
+
+// ---- added: read receipts ---------------------------------------------------
+
+// Same as sendText, but asks group members to send read receipts
+// (SendMessageParams.needReceipt), so the sender can show "Seen by ...".
+export async function sendTextWithReceipt(channelId: string, text: string, sender: Sender): Promise<ChatMessage> {
+  const channel = new GroupChannel(channelId);
+  const params = new SendTextMessageParams({
+    text,
+    senderUserInfo: { userId: sender.userId, name: sender.name },
+  });
+  params.needReceipt = true;
+  const res = await channel.sendMessage(params);
+  if (!res.isOk || !res.data) {
+    throw new Error(`Send failed (code ${res.code})`);
+  }
+  const msg = toChatMessage(res.data);
+  if (!msg) throw new Error('Sent message was not a text message');
+  return msg;
+}
