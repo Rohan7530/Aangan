@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
-import { useVoiceReply, voiceSupport } from '../../features/voice-reply/useVoiceReply';
+import { UNSUPPORTED_REASON, useVoiceReply, voiceSupport } from '../../features/voice-reply/useVoiceReply';
 import { VoicePanel } from '../../features/voice-reply/VoicePanel';
 import { SpeakButton } from '../../features/voice-reply/VoiceReplySlot';
 import { PhotoIcon, SendIcon } from '../icons';
@@ -27,6 +27,14 @@ export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill, speech
   const canSend = !disabled && !sending && text.trim().length > 0;
   const voice = useVoiceReply(speechLang);
   const [canSpeak] = useState(() => voiceSupport().speech);
+
+  // The box grows with the text (up to ~5 lines), then scrolls.
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight + 4, 200)}px`;
+  }, [text]);
 
   useEffect(() => {
     if (!prefill) return;
@@ -58,11 +66,11 @@ export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill, speech
     }
   }
 
-  const big = 'inline-flex min-h-[64px] items-center justify-center gap-2 rounded-2xl px-5 text-[1.375rem] font-bold';
+  const big = 'inline-flex min-h-[64px] items-center justify-center gap-2 rounded-2xl px-4 text-[1.375rem] font-bold';
 
   return (
     <form onSubmit={submit} className="shrink-0 border-t border-line bg-cream px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3" aria-label="Write a message">
-      <div className="mx-auto flex max-w-3xl flex-col gap-3">
+      <div className="mx-auto flex max-w-5xl flex-col gap-3">
         {voice.state.phase !== 'idle' ? (
           <VoicePanel voice={voice} size="comfort" onSend={onSendVoice} />
         ) : (
@@ -72,22 +80,9 @@ export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill, speech
             {error}
           </p>
         )}
-        <label htmlFor={COMFORT_INPUT_ID} className="text-[1.25rem] font-bold">
+        <label htmlFor={COMFORT_INPUT_ID} className="sr-only">
           Your message
         </label>
-        <textarea
-          ref={inputRef}
-          id={COMFORT_INPUT_ID}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={onKeyDown}
-          rows={2}
-          placeholder={disabled ? 'Waiting for connection…' : 'Type your message here'}
-          disabled={disabled}
-          aria-describedby={error ? errorId : undefined}
-          className="w-full resize-none rounded-2xl border-2 border-line-strong bg-surface px-5 py-4 leading-snug text-ink placeholder:text-ink-muted focus:border-green focus-visible:outline-offset-1 disabled:bg-sand"
-          style={{ fontSize: 'var(--input-size)', minHeight: 112 }}
-        />
         <input
           ref={fileRef}
           type="file"
@@ -101,26 +96,43 @@ export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill, speech
             e.target.value = '';
           }}
         />
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
+        {/* One line: message box, Photo, Speak, Send (buttons wrap below on phones). */}
+        <div className="flex flex-wrap items-end gap-3">
+          <textarea
+            ref={inputRef}
+            id={COMFORT_INPUT_ID}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={onKeyDown}
+            rows={1}
+            placeholder={disabled ? 'Waiting for connection…' : 'Type your message here'}
             disabled={disabled}
-            onClick={() => fileRef.current?.click()}
-            className={`${big} border-2 border-green bg-surface text-green hover:bg-green-soft disabled:opacity-60`}
-          >
-            <PhotoIcon />
-            <span>Photo</span>
-          </button>
-          <SpeakButton supported={canSpeak} disabled={disabled} onStart={() => void voice.start()} />
-          <button
-            type="submit"
-            disabled={!canSend}
-            className={`${big} min-w-[9rem] flex-1 bg-terracotta text-white hover:bg-terracotta-deep disabled:bg-line disabled:text-ink-muted`}
-          >
-            <span>{sending ? 'Sending…' : 'Send'}</span>
-            <SendIcon />
-          </button>
+            aria-describedby={error ? errorId : undefined}
+            className="min-w-0 flex-[1_1_16rem] resize-none rounded-2xl border-2 border-line-strong bg-surface px-5 py-[14px] leading-snug text-ink placeholder:text-ink-muted focus:border-green focus-visible:outline-offset-1 disabled:bg-sand"
+            style={{ fontSize: 'var(--input-size)', minHeight: 64, maxHeight: 200 }}
+          />
+          <div className="flex shrink-0 gap-3">
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => fileRef.current?.click()}
+              className={`${big} border-2 border-green bg-surface text-green hover:bg-green-soft disabled:opacity-60`}
+            >
+              <PhotoIcon />
+              <span>Photo</span>
+            </button>
+            {canSpeak && <SpeakButton supported disabled={disabled} onStart={() => void voice.start()} />}
+            <button
+              type="submit"
+              disabled={!canSend}
+              className={`${big} bg-terracotta text-white hover:bg-terracotta-deep disabled:bg-line disabled:text-ink-muted`}
+            >
+              <span>{sending ? 'Sending…' : 'Send'}</span>
+              <SendIcon />
+            </button>
+          </div>
         </div>
+        {!canSpeak && <p className="text-[1.125rem] text-ink-muted">{UNSUPPORTED_REASON}</p>}
         </>
         )}
       </div>

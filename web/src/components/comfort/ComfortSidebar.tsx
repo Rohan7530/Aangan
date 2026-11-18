@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { RoomSummary } from '../../nexconn/rooms';
 import type { ConnectionState } from '../../nexconn/types';
 import { Avatar } from '../Avatar';
@@ -13,7 +14,9 @@ interface Props {
   activeId: string | null;
   onSelect: (channelId: string) => void;
   onNewRoom: () => void;
-  onOpenSettings: () => void;
+  settingsOpen: boolean;
+  onToggleSettings: () => void;
+  settingsPanel: ReactNode;
   me: { userId: string; name: string };
   connection: ConnectionState;
   /** Phones: the room list is the whole screen. */
@@ -23,7 +26,7 @@ interface Props {
 // Comfort room list: always visible on wide screens, the home screen on phones.
 // Big rows, large text, everything spelled out ("3 new messages"), no icon-only
 // buttons and nothing hidden behind a collapse toggle.
-export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, onOpenSettings, me, connection, fullWidth }: Props) {
+export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, settingsOpen, onToggleSettings, settingsPanel, me, connection, fullWidth }: Props) {
   return (
     <nav aria-label="Rooms" className={`flex h-full shrink-0 flex-col border-r-2 border-line bg-sand/70 ${fullWidth ? 'w-full' : 'w-[360px] xl:w-[400px]'}`}>
       <div className="flex items-center gap-3 px-5 pb-3 pt-5">
@@ -31,17 +34,12 @@ export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, o
         <span className="text-[1.75rem] font-bold text-green">Aangan</span>
       </div>
 
-      <div className="mx-4 mb-4 flex items-center gap-3 rounded-2xl border-2 border-line bg-surface px-4 py-3">
-        <Avatar id={me.userId} name={me.name} size={52} mine />
-        <div className="min-w-0">
-          <p className="truncate text-[1.375rem] font-bold leading-tight">{me.name}</p>
-          <p className="text-[1.125rem]">
-            <ConnectionChip state={connection} />
-          </p>
-        </div>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 px-5 pb-2">
+        <h2 className="text-[1.5rem] font-bold text-ink">My rooms</h2>
+        <span className="text-[1.125rem]">
+          <ConnectionChip state={connection} />
+        </span>
       </div>
-
-      <h2 className="px-5 pb-2 text-[1.5rem] font-bold text-ink">My rooms</h2>
 
       <ul className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
         {!loaded && <li className="px-3 py-4 text-[1.25rem] text-ink-muted">Loading your rooms…</li>}
@@ -93,15 +91,24 @@ export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, o
           <PlusIcon />
           <span>New room</span>
         </button>
-        <button
-          type="button"
-          onClick={onOpenSettings}
-          aria-haspopup="dialog"
-          className="inline-flex min-h-[64px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-line-strong bg-surface text-[1.25rem] font-bold text-ink hover:border-green"
-        >
-          <GearIcon />
-          <span>Settings</span>
-        </button>
+        {/* Me: my avatar on the Settings button; my name and everything else inside. */}
+        <div className="relative">
+          <button
+            type="button"
+            data-settings-trigger
+            onClick={onToggleSettings}
+            aria-expanded={settingsOpen}
+            title={`${me.name}: settings`}
+            className={`inline-flex min-h-[64px] w-full items-center gap-3 rounded-2xl border-2 px-3 text-[1.25rem] font-bold text-ink ${
+              settingsOpen ? 'border-green bg-green-soft' : 'border-line-strong bg-surface hover:border-green'
+            }`}
+          >
+            <Avatar id={me.userId} name={me.name} size={44} mine />
+            <span className="flex-1 text-left">Settings</span>
+            <GearIcon />
+          </button>
+          {settingsPanel}
+        </div>
       </div>
     </nav>
   );

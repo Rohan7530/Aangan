@@ -203,7 +203,13 @@ textarea::placeholder {
   /* ---------------- Comfort messages: one card per row ----------------
      Light surfaces with charcoal text (AAA). Others: white with the sender's
      colour as a thick left border. Mine: soft terracotta tint + terracotta border. */
+  /* Others on the left (their colour on the left edge), mine on the right
+     (terracotta on the right edge), like any chat. */
   .comfort-card {
+    align-self: flex-start;
+    width: fit-content;
+    max-width: min(85%, 46rem);
+    min-width: min(85%, 18rem);
     border-radius: 20px;
     padding: 18px 20px 20px;
     border: 2px solid var(--color-line);
@@ -212,9 +218,11 @@ textarea::placeholder {
     color: var(--color-ink);
   }
   .comfort-card.comfort-mine {
+    align-self: flex-end;
     background: var(--color-terracotta-soft);
     border-color: #ecc9b8;
-    border-left-color: var(--color-terracotta);
+    border-left-width: 2px;
+    border-right: 10px solid var(--color-terracotta);
   }
   .comfort-name {
     font-size: var(--name-size);
@@ -844,6 +852,38 @@ dialog.sheet[open] {
   color: var(--tone);
 }
 
+/* Settings: a panel that pops up from the Settings button (both modes). */
+.settings-pop {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 60;
+  width: min(400px, calc(100vw - 24px));
+  max-height: calc(100dvh - 120px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--color-line);
+  border-radius: 22px;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-3);
+  transform-origin: bottom left;
+  animation:
+    pop-fade 160ms ease-out both,
+    pop-in var(--spring-dur) var(--spring) both;
+}
+.settings-pop.is-comfort {
+  width: min(460px, calc(100vw - 24px));
+  border-width: 2px;
+}
+.settings-pop:focus {
+  outline: none;
+}
+.settings-pop:focus-visible {
+  outline: 3px solid var(--color-green);
+  outline-offset: 2px;
+}
+
 /* ==================================================================
    Dark mode. Neutrals are redefined; accent fills (green, terracotta,
    danger) stay, so white text on them keeps its contrast; accent TEXT and
@@ -903,7 +943,7 @@ dialog.sheet[open] {
 [data-theme="dark"] .comfort-card.comfort-mine {
   background: var(--color-terracotta-soft);
   border-color: #6b3a26;
-  border-left-color: var(--color-terracotta);
+  border-right-color: var(--color-terracotta);
 }
 [data-theme="dark"] .radio-dot {
   background: var(--color-surface);

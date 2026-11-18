@@ -5,7 +5,7 @@ import { useMediaQuery, useStoredFlag } from '../../hooks/useMediaQuery';
 import { useRooms } from '../../hooks/useRooms';
 import { getColors, updateProfile } from '../../api';
 import { useProfileColor, setProfileColors } from '../../features/settings/profileColors';
-import { SettingsSheet } from '../../features/settings/SettingsSheet';
+import { SettingsPanel } from '../../features/settings/SettingsPanel';
 import { isSoundOn, playChime } from '../../features/settings/sound';
 import * as nexconn from '../../nexconn/client';
 import { setMyNickname, updateMyName } from '../../nexconn/profile';
@@ -117,6 +117,26 @@ export function Workspace({ session, onLogout, onSessionChange, embedded = false
     logout();
   }
 
+  const closeSettings = useCallback(() => setSettingsOpen(false), []);
+  const settingsPanel = settingsOpen ? (
+    <SettingsPanel
+      onClose={closeSettings}
+      connection={conn.state}
+      comfort={comfort}
+      me={me}
+      myColor={myColor}
+      profileEditable={!embedded}
+      onRename={rename}
+      onColor={changeColor}
+      onOpenReader={() => {
+        setSettingsOpen(false);
+        setReaderOpen(true);
+      }}
+      onSignOut={embedded ? undefined : signOut}
+    />
+  ) : null;
+  const settingsProps = { settingsOpen, onToggleSettings: () => setSettingsOpen((o) => !o), settingsPanel };
+
   const sidebar = (fullWidth: boolean) => (
     <Sidebar
       rooms={rooms}
@@ -135,7 +155,7 @@ export function Workspace({ session, onLogout, onSessionChange, embedded = false
           setCollapsed(!collapsed);
         }
       }}
-      onOpenSettings={() => setSettingsOpen(true)}
+      {...settingsProps}
       fullWidth={fullWidth}
     />
   );
@@ -150,7 +170,7 @@ export function Workspace({ session, onLogout, onSessionChange, embedded = false
         activeId={fullWidth ? null : activeId}
         onSelect={select}
         onNewRoom={() => setNewRoomOpen(true)}
-        onOpenSettings={() => setSettingsOpen(true)}
+        {...settingsProps}
         me={me}
         connection={conn.state}
         fullWidth={fullWidth}
@@ -227,21 +247,7 @@ export function Workspace({ session, onLogout, onSessionChange, embedded = false
     <div className="reader-root flex h-dvh w-full overflow-hidden bg-cream" data-reader-mode={prefs.mode} data-text-step={prefs.textStep}>
       {body}
       <ReaderSettingsSheet open={readerOpen} onClose={() => setReaderOpen(false)} speech={speech} myName={session.name} />
-      <SettingsSheet
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        comfort={comfort}
-        me={me}
-        myColor={myColor}
-        profileEditable={!embedded}
-        onRename={rename}
-        onColor={changeColor}
-        onOpenReader={() => {
-          setSettingsOpen(false);
-          setReaderOpen(true);
-        }}
-        onSignOut={embedded ? undefined : signOut}
-      />
+
       <NewRoomSheet
         open={newRoomOpen}
         authKey={session.authKey}

@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
-import { initialOf } from '../../components/Avatar';
-import { Sheet } from '../../components/Sheet';
+import { Avatar, initialOf } from '../../components/Avatar';
+import { CloseIcon } from '../../components/icons';
+import type { ConnectionState } from '../../nexconn/types';
 import { useReaderPrefs } from '../reader-view';
 import { TEXT_STEP_LABELS } from '../reader-view/prefs';
 import { LANGUAGES } from '../reader-view/translation';
@@ -9,8 +10,8 @@ import { AVATAR_COLORS } from './profileColors';
 import { isSoundOn, playChime, setSoundOn } from './sound';
 
 interface Props {
-  open: boolean;
   onClose: () => void;
+  connection: ConnectionState;
   comfort: boolean;
   me: { userId: string; name: string };
   myColor: string;
@@ -23,9 +24,13 @@ interface Props {
   onSignOut?: () => void;
 }
 
+const CONNECTION_TEXT: Record<ConnectionState, string> = { connected: 'Connected', connecting: 'Connecting…', offline: 'Offline' };
+
 // Settings: profile, how I read, appearance, notifications, sign out.
-// The same sheet in both modes; Comfort gets larger text and controls.
-export function SettingsSheet({ open, onClose, comfort, me, myColor, profileEditable = true, onRename, onColor, onOpenReader, onSignOut }: Props) {
+// A panel that pops up from the Settings button (not a full-screen dialog):
+// Escape or a click outside closes it and focus goes back to the button.
+// Mount it only while open. Same panel in both modes; Comfort is larger.
+export function SettingsPanel({ onClose, connection, comfort, me, myColor, profileEditable = true, onRename, onColor, onOpenReader, onSignOut }: Props) {
   const { prefs } = useReaderPrefs();
   const [theme, setTheme] = useTheme();
   const [name, setName] = useState(me.name);
@@ -36,19 +41,36 @@ export function SettingsSheet({ open, onClose, comfort, me, myColor, profileEdit
   const [colorStatus, setColorStatus] = useState<string | null>(null);
   const [sound, setSound] = useState(() => isSoundOn(me.userId));
   const nameId = useId();
+  const titleId = useId();
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Focus the panel once on open; Escape / click outside closes it.
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    const wrapper = panel.parentElement; // also holds the Settings button
+    const trigger = wrapper?.querySelector<HTMLElement>('[data-settings-trigger]');
+    panel.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || document.querySelector('dialog[open]')) return;
+      e.preventDefault();
+      closeRef.current();
+      trigger?.focus();
+    };
+    const onDown = (e: PointerEvent) => {
+      if (wrapper && !wrapper.contains(e.target as Node) && !(e.target as Element).closest?.('dialog')) closeRef.current();
+    };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onDown);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', onDown);
+    };
+  }, []);
   const nameMsgId = useId();
 
-  // Fresh form each time the panel opens (not when the name changes while open,
-  // or the "Saved" message would vanish right after saving).
-  const currentName = useRef(me.name);
-  currentName.current = me.name;
-  useEffect(() => {
-    if (open) {
-      setName(currentName.current);
-      setNameStatus(null);
-      setColorStatus(null);
-    }
-  }, [open]);
 
   async function saveName(e: FormEvent) {
     e.preventDefault();
@@ -92,8 +114,35 @@ export function SettingsSheet({ open, onClose, comfort, me, myColor, profileEdit
   const langName = LANGUAGES.find((l) => l.code === prefs.language)?.english ?? 'English';
 
   return (
-    <Sheet open={open} onClose={onClose} title="Settings" subtitle={`Signed in as ${me.name}`}>
-      <div className={`flex flex-col gap-8 ${text}`}>
+    <div ref={panelRef} role="dialog" aria-modal="false" aria-labelledby={titleId} tabIndex={-1} className={`settings-pop ${comfort ? 'is-comfort' : ''}`}>
+      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-line bg-cream px-5 py-4">
+        <Avatar id={me.userId} name={me.name} size={comfort ? 56 : 44} mine />
+        <div className="min-w-0 flex-1">
+          <h2 id={titleId} className={`font-bold leading-tight text-green ${comfort ? 'text-[1.5rem]' : 'text-[1.25rem]'}`}>
+            Settings
+          </h2>
+          <p className={`truncate text-ink-muted ${comfort ? 'text-[1.125rem]' : 'text-[1rem]'}`}>
+            {me.name} · {CONNECTION_TEXT[connection]}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            onClose();
+            panelRef.current?.parentElement?.querySelector<HTMLElement>('[data-settings-trigger]')?.focus();
+          }}
+          className={
+            comfort
+              ? 'inline-flex min-h-[64px] items-center gap-2 rounded-2xl border-2 border-green bg-surface px-4 text-[1.25rem] font-bold text-green hover:bg-green-soft'
+              : 'grid h-12 w-12 place-items-center rounded-2xl text-ink-muted hover:bg-sand hover:text-ink'
+          }
+          aria-label={comfort ? undefined : 'Close settings'}
+        >
+          <CloseIcon />
+          {comfort && <span>Close</span>}
+        </button>
+      </header>
+      <div className={`flex flex-col gap-8 px-5 pb-6 pt-5 ${text}`}>
         {/* ---- Profile ---- */}
         {profileEditable && (
           <section aria-labelledby={`${nameId}-h`}>
@@ -221,6 +270,6 @@ export function SettingsSheet({ open, onClose, comfort, me, myColor, profileEdit
           </section>
         )}
       </div>
-    </Sheet>
+    </div>
   );
 }

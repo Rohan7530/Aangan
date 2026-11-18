@@ -12,7 +12,7 @@ export function SpeakButton({ supported, disabled, onStart }: { supported: boole
       type="button"
       onClick={onStart}
       disabled={disabled}
-      className="inline-flex min-h-[64px] shrink-0 items-center justify-center gap-2 rounded-2xl border-2 border-danger bg-surface px-5 text-[1.375rem] font-bold text-danger hover:bg-terracotta-soft disabled:opacity-60"
+      className="inline-flex min-h-[64px] shrink-0 items-center justify-center gap-2 rounded-2xl border-2 border-danger bg-surface px-4 text-[1.375rem] font-bold text-danger hover:bg-terracotta-soft disabled:opacity-60"
     >
       <MicIcon />
       <span>Speak</span>

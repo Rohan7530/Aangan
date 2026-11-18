@@ -131,7 +131,7 @@ export function MessageList({
       ) : (
         <ol
           aria-label="Messages"
-          className={`list-none pb-4 ${comfort ? 'mx-auto flex max-w-3xl flex-col gap-4 px-4 pt-2' : 'px-4 pt-1 sm:px-6'}`}
+          className={`list-none pb-4 ${comfort ? 'mx-auto flex max-w-5xl flex-col gap-4 px-4 pt-2' : 'px-4 pt-1 sm:px-6'}`}
         >
           {items.map((item) => {
             if (item.kind === 'day') {

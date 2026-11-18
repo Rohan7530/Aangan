@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { RoomSummary } from '../../nexconn/rooms';
 import type { ConnectionState } from '../../nexconn/types';
 import { Avatar } from '../Avatar';
@@ -17,7 +18,10 @@ interface Props {
   connection: ConnectionState;
   collapsed: boolean;
   onToggleCollapsed?: () => void;
-  onOpenSettings: () => void;
+  settingsOpen: boolean;
+  onToggleSettings: () => void;
+  /** The Settings panel; pops up from the gear button. */
+  settingsPanel: ReactNode;
   /** Mobile: the room list is the whole screen. */
   fullWidth?: boolean;
 }
@@ -29,7 +33,7 @@ function preview(r: RoomSummary, myId: string): string {
   return `${who}: ${what}`;
 }
 
-export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, connection, collapsed, onToggleCollapsed, onOpenSettings, fullWidth }: Props) {
+export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, connection, collapsed, onToggleCollapsed, settingsOpen, onToggleSettings, settingsPanel, fullWidth }: Props) {
   const rail = collapsed && !fullWidth;
   const totalUnread = rooms.reduce((n, r) => n + r.unread, 0);
 
@@ -132,7 +136,7 @@ export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, conn
       </ul>
 
       {/* me: avatar, name, connection, settings */}
-      <div className={`flex shrink-0 items-center gap-3 border-t border-line px-3 py-3 ${rail ? 'flex-col gap-2 px-2' : ''}`}>
+      <div className={`relative flex shrink-0 items-center gap-3 border-t border-line px-3 py-3 ${rail ? 'flex-col gap-2 px-2' : ''}`}>
         <span title={rail ? `${me.name} (you)` : undefined} className="relative">
           <Avatar id={me.userId} name={me.name} size={40} mine />
           {rail && (
@@ -152,14 +156,16 @@ export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, conn
         )}
         <button
           type="button"
-          onClick={onOpenSettings}
-          aria-haspopup="dialog"
+          data-settings-trigger
+          onClick={onToggleSettings}
+          aria-expanded={settingsOpen}
           aria-label="Settings"
           title="Settings"
           className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-ink-muted hover:bg-surface hover:text-ink"
         >
           <GearIcon />
         </button>
+        {settingsPanel}
       </div>
     </nav>
   );
