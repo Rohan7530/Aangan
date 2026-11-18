@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useReaderPrefs, useTranslations, type Speech } from '../../features/reader-view';
+import { speechLang, useReaderPrefs, useTranslations, type Speech } from '../../features/reader-view';
 import { useRoom } from '../../hooks/useRoom';
 import type { RichMessage } from '../../nexconn/rich';
 import type { ConnectionState } from '../../nexconn/types';
@@ -119,6 +119,8 @@ export function ComfortRoom(props: Props) {
           onOpenImage={(url, alt) => setLightbox({ url, alt })}
         />
         <ComfortComposer
+            speechLang={speechLang(prefs.language)}
+            onSendVoice={async (transcript, audio) => onSent(await room.sendVoiceReply(transcript, audio, speechLang(prefs.language)))}
           disabled={connection !== 'connected'}
           onSend={async (text) => onSent(await room.sendText(text))}
           onPickPhoto={setPhoto}

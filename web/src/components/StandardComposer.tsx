@@ -1,7 +1,9 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useVoiceReply, voiceSupport, UNSUPPORTED_REASON } from '../features/voice-reply/useVoiceReply';
+import { VoicePanel } from '../features/voice-reply/VoicePanel';
 import type { RichMessage } from '../nexconn/rich';
 import { EmojiPicker } from './EmojiPicker';
-import { CloseIcon, MicIcon, PaperclipIcon, SendIcon, SmileIcon, StopIcon, TrashIcon } from './icons';
+import { CloseIcon, MicIcon, PaperclipIcon, SendIcon, SmileIcon } from './icons';
 import { senderLabel } from './messageModel';
 
 export const COMPOSER_INPUT_ID = 'composer-input';
@@ -14,23 +16,20 @@ interface Props {
   replyTo: RichMessage | null;
   onCancelReply: () => void;
   prefill?: { text: string; nonce: number } | null;
-}
-
-function elapsed(ms: number): string {
-  const s = Math.floor(ms / 1000);
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  /** Voice reply: speech-to-text language (e.g. "hi-IN") and how to send. */
+  speechLang: string;
+  onSendVoice: (transcript: string, audio: File | null) => Promise<void>;
 }
 
 // Standard composer: one compact row
 // [ attach ] [ emoji ] [ text field, grows to 5 lines ] [ mic ] [ send ]
-export function StandardComposer({ disabled, onSend, onPickPhoto, replyTo, onCancelReply, prefill }: Props) {
+export function StandardComposer({ disabled, onSend, onPickPhoto, replyTo, onCancelReply, prefill, speechLang, onSendVoice }: Props) {
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
-  const [recordingSince, setRecordingSince] = useState<number | null>(null);
-  const [now, setNow] = useState(Date.now());
-  const [note, setNote] = useState<string | null>(null);
+  const voice = useVoiceReply(speechLang);
+  const [canSpeak] = useState(() => voiceSupport().speech);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const emojiBtn = useRef<HTMLButtonElement>(null);
@@ -57,17 +56,6 @@ export function StandardComposer({ disabled, onSend, onPickPhoto, replyTo, onCan
     el.style.height = `${Math.min(el.scrollHeight, line * MAX_LINES + pad)}px`;
   }, [text]);
 
-  useEffect(() => {
-    if (recordingSince === null) return;
-    const t = window.setInterval(() => setNow(Date.now()), 250);
-    return () => window.clearInterval(t);
-  }, [recordingSince]);
-
-  useEffect(() => {
-    if (!note) return;
-    const t = window.setTimeout(() => setNote(null), 4000);
-    return () => window.clearTimeout(t);
-  }, [note]);
 
   async function submit(e?: FormEvent) {
     e?.preventDefault();
@@ -134,33 +122,8 @@ export function StandardComposer({ disabled, onSend, onPickPhoto, replyTo, onCan
           {error}
         </p>
       )}
-      <p role="status" className={note ? 'mb-2 rounded-xl bg-sand px-3 py-2 text-ink' : 'sr-only'}>
-        {note ?? ''}
-      </p>
-
-      {recordingSince !== null ? (
-        // Recording UI state only. Audio capture and sending come next.
-        <div className="flex items-center gap-2" role="group" aria-label="Voice message">
-          <button type="button" className={iconBtn} aria-label="Cancel recording" onClick={() => setRecordingSince(null)}>
-            <TrashIcon />
-          </button>
-          <div className="flex min-h-[48px] flex-1 items-center gap-3 rounded-3xl border-2 border-terracotta bg-terracotta-soft px-4" aria-live="off">
-            <span className="rec-dot h-3 w-3 rounded-full bg-danger" aria-hidden="true" />
-            <span className="font-semibold tabular-nums text-ink">{elapsed(now - recordingSince)}</span>
-            <span className="text-ink-muted">Recording…</span>
-          </div>
-          <button
-            type="button"
-            className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-terracotta text-white hover:bg-terracotta-deep"
-            aria-label="Stop recording"
-            onClick={() => {
-              setRecordingSince(null);
-              setNote('Voice messages arrive in the next update. Nothing was sent.');
-            }}
-          >
-            <StopIcon />
-          </button>
-        </div>
+      {voice.state.phase !== 'idle' ? (
+        <VoicePanel voice={voice} size="standard" onSend={onSendVoice} />
       ) : (
         <div className="flex items-end gap-1">
           <input
@@ -220,19 +183,18 @@ export function StandardComposer({ disabled, onSend, onPickPhoto, replyTo, onCan
             className="min-h-[48px] w-full flex-1 resize-none overflow-y-auto rounded-3xl border-2 border-line-strong bg-surface px-4 py-[9px] leading-normal text-ink placeholder:text-ink-muted focus:border-green focus-visible:outline-offset-1 disabled:bg-sand"
             style={{ fontSize: 'var(--input-size)' }}
           />
-          <button
-            type="button"
-            className={iconBtn}
-            aria-label="Record a voice message"
-            title="Record a voice message"
-            disabled={disabled}
-            onClick={() => {
-              setNow(Date.now());
-              setRecordingSince(Date.now());
-            }}
-          >
-            <MicIcon />
-          </button>
+          {canSpeak && (
+            <button
+              type="button"
+              className={iconBtn}
+              aria-label="Speak a message"
+              title="Speak a message"
+              disabled={disabled}
+              onClick={() => void voice.start()}
+            >
+              <MicIcon />
+            </button>
+          )}
           <button
             type="submit"
             disabled={!canSend}
@@ -244,6 +206,7 @@ export function StandardComposer({ disabled, onSend, onPickPhoto, replyTo, onCan
           </button>
         </div>
       )}
+      {!canSpeak && <p className="mt-1 px-2 text-[1rem] text-ink-muted">{UNSUPPORTED_REASON}</p>}
     </form>
   );
 }

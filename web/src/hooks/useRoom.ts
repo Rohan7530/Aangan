@@ -11,6 +11,8 @@ import {
   reactionKey,
   sendImage,
   sendRichText,
+  sendSpokenText,
+  sendVoice,
   setMyReactions,
   type RichMessage,
 } from '../nexconn/rich';
@@ -215,6 +217,14 @@ export function useRoom(session: Session, channelId: string, connection: Connect
     [channelId, me],
   );
 
+  // Voice reply: a Nexconn voice message with its transcript, or (no audio) the
+  // transcript as text marked "spoken".
+  const sendVoiceReply = useCallback(
+    async (transcript: string, audio: File | null, lang: string) =>
+      addSent(audio ? await sendVoice(channelId, audio, transcript, lang, me) : await sendSpokenText(channelId, transcript, me)),
+    [channelId, me],
+  );
+
   const myKey = reactionKey(myId);
   const toggleReaction = useCallback(
     async (messageId: string, emoji: string) => {
@@ -268,6 +278,7 @@ export function useRoom(session: Session, channelId: string, connection: Connect
     myReactionKey: myKey,
     sendText,
     sendPhoto,
+    sendVoiceReply,
     toggleReaction,
   };
 }

@@ -35,7 +35,7 @@ export function useTranslations(messages: RichMessage[], myUserId: string, langu
   // dropped only if the reader changes language or leaves the room).
   useEffect(() => {
     const todo = messages.filter(
-      (m) => m.senderId !== myUserId && (m.kind === 'text' || m.kind === 'reply') && m.text && !started.current.has(m.id),
+      (m) => m.senderId !== myUserId && (m.kind === 'text' || m.kind === 'reply' || m.kind === 'voice') && m.text && !started.current.has(m.id),
     );
     if (!todo.length) return;
     todo.forEach((m) => started.current.add(m.id));

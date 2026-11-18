@@ -24,7 +24,7 @@ interface Props {
 function preview(r: RoomSummary, myId: string): string {
   if (!r.last) return 'No messages yet';
   const who = r.last.senderId === myId ? 'You' : senderLabel(r.last);
-  const what = r.last.kind === 'image' ? '📷 Photo' : r.last.text;
+  const what = r.last.kind === 'image' ? '📷 Photo' : r.last.kind === 'voice' ? `🎤 ${r.last.text || 'Voice message'}` : r.last.text;
   return `${who}: ${what}`;
 }
 

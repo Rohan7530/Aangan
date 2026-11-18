@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { VoiceAttachment } from '../features/voice-reply/VoiceAttachment';
 import { TranslationNote } from '../features/reader-view/TranslationNote';
 import type { TranslationState } from '../features/reader-view/useTranslations';
 import type { RichMessage } from '../nexconn/rich';
@@ -117,6 +118,8 @@ export function StandardMessage({
                 <span className="line-clamp-2 block">{msg.reply.text || 'Message'}</span>
               </button>
             )}
+
+            <VoiceAttachment msg={msg} size="standard" />
 
             {msg.kind === 'image' ? (
               <button

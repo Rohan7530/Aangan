@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
-import { VoiceReplySlot } from '../../features/voice-reply/VoiceReplySlot';
+import { useVoiceReply, voiceSupport } from '../../features/voice-reply/useVoiceReply';
+import { VoicePanel } from '../../features/voice-reply/VoicePanel';
+import { SpeakButton } from '../../features/voice-reply/VoiceReplySlot';
 import { PhotoIcon, SendIcon } from '../icons';
 
 export const COMFORT_INPUT_ID = 'composer-input';
@@ -9,11 +11,13 @@ interface Props {
   onSend: (text: string) => Promise<void>;
   onPickPhoto: (file: File) => void;
   prefill?: { text: string; nonce: number } | null;
+  speechLang: string;
+  onSendVoice: (transcript: string, audio: File | null) => Promise<void>;
 }
 
 // Comfort composer: one large text field and large labelled buttons:
 // Photo, Speak (reserved slot), Send. Icons always come with text here.
-export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill }: Props) {
+export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill, speechLang, onSendVoice }: Props) {
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +25,8 @@ export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill }: Prop
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const canSend = !disabled && !sending && text.trim().length > 0;
+  const voice = useVoiceReply(speechLang);
+  const [canSpeak] = useState(() => voiceSupport().speech);
 
   useEffect(() => {
     if (!prefill) return;
@@ -57,6 +63,10 @@ export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill }: Prop
   return (
     <form onSubmit={submit} className="shrink-0 border-t border-line bg-cream px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3" aria-label="Write a message">
       <div className="mx-auto flex max-w-3xl flex-col gap-3">
+        {voice.state.phase !== 'idle' ? (
+          <VoicePanel voice={voice} size="comfort" onSend={onSendVoice} />
+        ) : (
+        <>
         {error && (
           <p id={errorId} role="alert" className="font-semibold text-danger">
             {error}
@@ -101,8 +111,7 @@ export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill }: Prop
             <PhotoIcon />
             <span>Photo</span>
           </button>
-          {/* SLOT: voice-reply "Speak" button (see VoiceReplySlot). */}
-          <VoiceReplySlot onText={(t) => setText((cur) => (cur ? `${cur} ${t}` : t))} disabled={disabled} />
+          <SpeakButton supported={canSpeak} disabled={disabled} onStart={() => void voice.start()} />
           <button
             type="submit"
             disabled={!canSend}
@@ -112,6 +121,8 @@ export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill }: Prop
             <SendIcon />
           </button>
         </div>
+        </>
+        )}
       </div>
     </form>
   );

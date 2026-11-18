@@ -51,3 +51,24 @@ engine therefore tries `TRANSLATE_MODEL` (default `gemini-3.8-flash`) and then t
 (`gemini-flash-lite-latest`, `gemini-3.5-flash-lite`), rests a failing model for a while,
 gives up after 25 s (the reader then sees the original with "Translation not available yet"),
 and rejects answers that come back untranslated or in the wrong script instead of caching them.
+
+### Tests never use the real translation engine
+
+`npm run dev:test` starts the server with `TRANSLATE_MOCK=1`: translations come from a fixed
+table in `server/src/translate/mock.ts`, are cached separately (`translations.mock.json`), and
+no request leaves the machine. This keeps the Gemini free-tier quota for real use.
+`/api/translate/config` reports `{"llm":true,"mock":true}` so test scripts can refuse to run
+against a real engine.
+
+## Notes: voice reply
+
+Tap **Speak** (Comfort) or the microphone (Standard), talk, see the words appear live, then
+**Send** or **Redo**. Speech-to-text uses the browser's `SpeechRecognition` in the speaker's
+chosen language (`hi-IN`, `en-IN`, …); where the browser lacks it, the button is hidden and a
+short reason is shown.
+
+What is sent is a real Nexconn voice message (`RC:HQVCMsg`, up to 60 s, recorded with
+`MediaRecorder`) with the transcript in the message's `extra` field. Readers see a player,
+the duration and the words, and the words are translated and read aloud like any text. If the
+microphone audio cannot be recorded but speech-to-text worked, the transcript is sent as a
+text message marked "Spoken" instead, and the person is told before sending.

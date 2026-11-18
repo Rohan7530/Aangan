@@ -47,7 +47,7 @@ export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, m
         {rooms.map((r) => {
           const active = r.channelId === activeId;
           const who = r.last ? (r.last.senderId === me.userId ? 'You' : senderLabel(r.last)) : null;
-          const what = r.last ? (r.last.kind === 'image' ? 'sent a photo' : r.last.text) : 'No messages yet';
+          const what = r.last ? (r.last.kind === 'image' ? 'sent a photo' : r.last.kind === 'voice' ? `voice message: ${r.last.text}` : r.last.text) : 'No messages yet';
           return (
             <li key={r.channelId} className="mb-2">
               <button

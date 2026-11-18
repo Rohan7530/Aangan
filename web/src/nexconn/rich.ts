@@ -7,6 +7,8 @@
 //               MessageHandler.onMessageMetadataUpdated / Deleted  (/platform-chat-api/message/expansion-about.md:
 //               "supported for direct, group and system channels")
 //   - history:  BaseChannel.createMessagesQuery; fetch by id: BaseChannel.getMessagesByIds
+//   - voice:    Helper.createSendHDVoiceMessageParams(file) + sendMediaMessage (RC:HQVCMsg, max 60 s);
+//               the speech-to-text transcript travels in the message content's `extra` (verified live)
 
 import {
   BaseChannel,
@@ -18,6 +20,7 @@ import {
   NCEngine,
   SendReferenceMessageParams,
   SendTextMessageParams,
+  type HDVoiceMessageContent,
   type ImageMessageContent,
   type Message,
   type ReferenceMessageContent,
@@ -25,7 +28,7 @@ import {
 } from '@nexconn/chat';
 import type { ChatMessage, Sender } from './types';
 
-export type RichKind = 'text' | 'image' | 'reply';
+export type RichKind = 'text' | 'image' | 'reply' | 'voice';
 
 export interface RichMessage extends ChatMessage {
   kind: RichKind;
@@ -35,6 +38,11 @@ export interface RichMessage extends ChatMessage {
   thumbnail?: string;
   /** Reply: the quoted message. */
   reply?: { messageId: string; senderId: string; senderName?: string; text: string };
+  /** Voice: audio URL and length in seconds. `text` holds the transcript. */
+  audioUrl?: string;
+  duration?: number;
+  /** Text that was spoken rather than typed (voice transcript, or spoken-text fallback). */
+  spoken?: boolean;
   /** Reactions: metadata key (one per member) -> emojis that member chose. */
   reactions: Record<string, string[]>;
 }
@@ -62,9 +70,19 @@ function asDataUrl(base64?: string): string | undefined {
   return base64.startsWith('data:') ? base64 : `data:image/jpeg;base64,${base64}`;
 }
 
+function readExtra(extra: unknown): { transcript?: string; spoken?: boolean; lang?: string } {
+  if (typeof extra !== 'string' || !extra) return {};
+  try {
+    return JSON.parse(extra) as { transcript?: string; spoken?: boolean; lang?: string };
+  } catch {
+    return {};
+  }
+}
+
 function quotedText(type: string, content: Record<string, unknown> | undefined): string {
   if (!content) return '';
   if (type === MessageType.IMAGE) return 'Photo';
+  if (type === MessageType.HD_VOICE) return readExtra(content.extra).transcript || 'Voice message';
   return String(content.text ?? content.content ?? '');
 }
 
@@ -77,9 +95,22 @@ export function toRich(msg: Message): RichMessage | null {
     reactions: reactionsFrom(msg.metadata ?? []),
   };
   if (msg.messageType === MessageType.TEXT) {
-    const c = msg.content as TextMessageContent;
+    const c = msg.content as TextMessageContent & { extra?: string };
     cache.set(msg.messageId, msg);
-    return { ...base, kind: 'text', text: c.text, senderName: c.senderUserInfo?.name };
+    return { ...base, kind: 'text', text: c.text, senderName: c.senderUserInfo?.name, spoken: readExtra(c.extra).spoken === true };
+  }
+  if (msg.messageType === MessageType.HD_VOICE) {
+    const c = msg.content as HDVoiceMessageContent & { extra?: string };
+    cache.set(msg.messageId, msg);
+    return {
+      ...base,
+      kind: 'voice',
+      text: readExtra(c.extra).transcript ?? '',
+      senderName: c.senderUserInfo?.name,
+      audioUrl: c.remoteUrl,
+      duration: c.duration,
+      spoken: true,
+    };
   }
   if (msg.messageType === MessageType.IMAGE) {
     const c = msg.content as ImageMessageContent;
@@ -267,4 +298,44 @@ export async function setMyReactions(channelId: string, messageId: string, userI
   const key = reactionKey(userId);
   const res = emojis.length ? await msg.setMetadata({ [key]: emojis.join(',') }) : await msg.deleteMetadata([key]);
   if (!res.isOk) throw new Error(`Reaction failed (code ${res.code})`);
+}
+
+// Voice message: the recorded audio plus its transcript (in content.extra), so
+// others can read it, play it, and have it translated like any text.
+export async function sendVoice(
+  channelId: string,
+  audio: File,
+  transcript: string,
+  lang: string,
+  sender: Sender,
+  onProgress?: (percent: number) => void,
+): Promise<RichMessage> {
+  const prepared = await Helper.createSendHDVoiceMessageParams(audio);
+  if (!prepared.isOk || !prepared.data) throw new Error(`This recording could not be prepared (code ${prepared.code}).`);
+  const params = prepared.data;
+  const content = params.content as HDVoiceMessageContent & { extra?: string };
+  content.extra = JSON.stringify({ transcript, lang });
+  content.senderUserInfo = { userId: sender.userId, name: sender.name };
+  params.needReceipt = true;
+  if (onProgress) params.onUploadProgress = (p) => onProgress(p);
+  const res = await new GroupChannel(channelId).sendMediaMessage(params);
+  if (!res.isOk || !res.data) throw sendFailed(res.code);
+  const rich = toRich(res.data);
+  if (!rich) throw new Error('Sent voice message could not be shown');
+  return rich;
+}
+
+// Fallback when audio cannot be recorded: the transcript as text, marked "spoken".
+export async function sendSpokenText(channelId: string, text: string, sender: Sender): Promise<RichMessage> {
+  const params = new SendTextMessageParams({
+    text,
+    senderUserInfo: { userId: sender.userId, name: sender.name },
+    extra: JSON.stringify({ spoken: true }),
+  } as TextMessageContent);
+  params.needReceipt = true;
+  const res = await new GroupChannel(channelId).sendMessage(params);
+  if (!res.isOk || !res.data) throw sendFailed(res.code);
+  const rich = toRich(res.data);
+  if (!rich) throw new Error('Sent message could not be shown');
+  return rich;
 }

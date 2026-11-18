@@ -1,40 +1,21 @@
-import { useId } from 'react';
 import { MicIcon } from '../../components/icons';
+import { UNSUPPORTED_REASON } from './useVoiceReply';
 
-// ============================================================================
-// SLOT: Voice reply — the "Speak" button (next feature).
-//
-// Sits beside Send in the Comfort composer. Until voice reply is built it is a
-// visible, clearly disabled placeholder so the layout is final. When built:
-// record speech and put the recognised text into the message field via onText
-// (see IDEA.md, feature 2).
-// ============================================================================
-
-export interface VoiceReplySlotProps {
-  /** Puts recognised speech into the composer's text field. */
-  onText?: (text: string) => void;
-  disabled?: boolean;
-}
-
-export function VoiceReplySlot(_props: VoiceReplySlotProps) {
-  const noteId = useId();
+// Comfort mode "Speak" button: large, labelled, beside Send. Where the browser
+// cannot turn speech into text, the button is replaced by a short reason.
+export function SpeakButton({ supported, disabled, onStart }: { supported: boolean; disabled?: boolean; onStart: () => void }) {
+  if (!supported) {
+    return <p className="flex min-h-[64px] max-w-[22rem] items-center text-[1.125rem] text-ink-muted">{UNSUPPORTED_REASON}</p>;
+  }
   return (
-    <>
-      <button
-        type="button"
-        disabled
-        aria-describedby={noteId}
-        className="inline-flex min-h-[64px] shrink-0 cursor-not-allowed flex-col items-center justify-center rounded-2xl border-2 border-dashed border-line-strong bg-sand px-5 font-semibold leading-tight text-ink-muted"
-      >
-        <span className="flex items-center gap-2 text-[1.25rem]">
-          <MicIcon />
-          Speak
-        </span>
-        <span className="text-[1rem] font-medium">soon</span>
-      </button>
-      <span id={noteId} className="sr-only">
-        Voice reply is coming soon.
-      </span>
-    </>
+    <button
+      type="button"
+      onClick={onStart}
+      disabled={disabled}
+      className="inline-flex min-h-[64px] shrink-0 items-center justify-center gap-2 rounded-2xl border-2 border-danger bg-surface px-5 text-[1.375rem] font-bold text-danger hover:bg-terracotta-soft disabled:opacity-60"
+    >
+      <MicIcon />
+      <span>Speak</span>
+    </button>
   );
 }

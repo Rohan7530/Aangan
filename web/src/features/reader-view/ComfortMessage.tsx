@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { Avatar } from '../../components/Avatar';
 import { CheckIcon } from '../../components/icons';
+import { VoiceAttachment } from '../voice-reply/VoiceAttachment';
 import { formatTime, senderLabel } from '../../components/messageModel';
 import { useTone } from '../../components/tones';
 import type { RichMessage } from '../../nexconn/rich';
@@ -73,6 +74,8 @@ export function ComfortMessage({ msg, mine, animate = false, speech, seenBy, as:
           <p className="line-clamp-3 text-ink">{msg.reply.text || 'Message'}</p>
         </div>
       )}
+
+      <VoiceAttachment msg={msg} size="comfort" />
 
       {isPhoto ? (
         <button
