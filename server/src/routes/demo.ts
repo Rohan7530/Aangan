@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import type { Config } from '../config.js';
 import { ensureDemoRoom } from '../demo/demoRoom.js';
-import { isPersonaKey, PERSONAS } from '../demo/personas.js';
+import { isPersonaKey, PERSONAS, personaUserId } from '../demo/personas.js';
 import type { NexconnClient } from '../nexconn.js';
+import { upsertUser } from '../store.js';
 
 // No-login sessions for the showcase. They only ever give access to the demo
-// room as one of the four demo personas, never to the real family room.
+// rooms as one of the four demo personas, never to the real family room.
 export function demoRouter(cfg: Config, nexconn: NexconnClient): Router {
   const router = Router();
 
@@ -22,11 +23,14 @@ export function demoRouter(cfg: Config, nexconn: NexconnClient): Router {
     try {
       await ensureDemoRoom(cfg, nexconn);
       const p = PERSONAS[key];
-      const { token } = await nexconn.issueToken(p.userId, p.name);
+      const userId = personaUserId(cfg.demo.channelId, key);
+      const { token } = await nexconn.issueToken(userId, p.name);
+      const authKey = await upsertUser(userId, p.name);
       res.json({
-        userId: p.userId,
+        userId,
         name: p.name,
         token,
+        authKey,
         appKey: cfg.nexconn.appKey,
         areaCode: cfg.nexconn.areaCode,
         channelId: cfg.demo.channelId,

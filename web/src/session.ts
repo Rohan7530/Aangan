@@ -12,6 +12,8 @@ export interface Session {
   userId: string;
   name: string;
   token: string;
+  /** Key for our own server's room/invite APIs (not a Nexconn credential). */
+  authKey: string;
   appKey: string;
   areaCode: NexconnAreaCode;
   channelId: string;
@@ -23,7 +25,7 @@ const TAB_KEY = 'aangan.tabUserId'; // sessionStorage: userId of this tab
 
 function isSession(s: unknown): s is Session {
   const v = s as Partial<Session> | null;
-  return !!(v && v.userId && v.token && v.appKey && v.areaCode && v.channelId && v.name);
+  return !!(v && v.userId && v.token && v.authKey && v.appKey && v.areaCode && v.channelId && v.name);
 }
 
 function readSaved(): Record<string, Session> {
@@ -89,5 +91,22 @@ export function clearSession(userId?: string): void {
     const all = readSaved();
     delete all[userId];
     writeSaved(all);
+  }
+}
+
+// The room a user had open last, so a refresh (or an invite) opens it again.
+const lastRoomKey = (userId: string) => `aangan.lastRoom.${userId}`;
+export function getLastRoom(userId: string): string | null {
+  try {
+    return localStorage.getItem(lastRoomKey(userId));
+  } catch {
+    return null;
+  }
+}
+export function setLastRoom(userId: string, channelId: string): void {
+  try {
+    localStorage.setItem(lastRoomKey(userId), channelId);
+  } catch {
+    // ignore
   }
 }

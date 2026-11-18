@@ -5,7 +5,7 @@ import { ArrowRightIcon, GlobeIcon, SpeakerIcon, TextSizeIcon } from '../compone
 import { StandardMessage } from '../components/StandardMessage';
 import { assignTones, ToneProvider } from '../components/tones';
 import { ComfortMessage, useSpeech } from '../features/reader-view';
-import type { ChatMessage } from '../nexconn/types';
+import type { RichMessage } from '../nexconn/rich';
 import type { Session } from '../session';
 
 interface Props {
@@ -20,7 +20,9 @@ const PROMISES = [
 ];
 
 // One real message, rendered by the real components in both reading modes.
-const SAMPLE: ChatMessage = {
+const SAMPLE: RichMessage = {
+  kind: 'text',
+  reactions: {},
   id: 'landing-sample',
   channelId: 'landing',
   senderId: 'landing-meera',
@@ -29,7 +31,9 @@ const SAMPLE: ChatMessage = {
   sentAt: new Date().setHours(10, 42, 0, 0),
 };
 
-const REPLY: ChatMessage = {
+const REPLY: RichMessage = {
+  kind: 'text',
+  reactions: {},
   id: 'landing-reply',
   channelId: 'landing',
   senderId: 'landing-arjun',

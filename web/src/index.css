@@ -325,6 +325,204 @@ textarea::placeholder {
   background: var(--color-cream);
 }
 
+/* ---------------- Standard messages: actions, reactions, replies, photos ---------------- */
+.msg-actions {
+  position: absolute;
+  top: -4px;
+  z-index: 5;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  background: var(--color-surface);
+  box-shadow: 0 8px 20px -10px rgb(42 37 34 / 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+.msg-row:hover .msg-actions,
+.msg-row:focus-within .msg-actions,
+.msg-row[data-selected] .msg-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (hover: none) {
+  .msg-row:hover:not([data-selected]):not(:focus-within) .msg-actions {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+.action-btn {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  color: var(--color-ink-muted);
+}
+.action-btn:hover {
+  background: var(--color-sand);
+  color: var(--color-ink);
+}
+/* Small on screen, 48px to the finger: the ::after extends the hit area. */
+.reaction-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+  padding: 2px 10px;
+  border: 1.5px solid var(--color-line-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.reaction-chip::after {
+  content: "";
+  position: absolute;
+  inset: -7px -2px;
+}
+.reaction-chip-mine {
+  border-color: var(--color-green);
+  background: var(--color-green-soft);
+  color: var(--color-green);
+}
+.reply-quote {
+  display: block;
+  width: 100%;
+  margin: 2px 0 6px;
+  padding: 6px 10px;
+  border-left: 4px solid var(--color-terracotta);
+  border-radius: 10px;
+  background: var(--color-sand);
+  color: var(--color-ink);
+  text-align: left;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+.reply-quote-mine {
+  border-left-color: #fff;
+  background: rgb(255 255 255 / 0.16);
+  color: #fff;
+}
+.bubble-photo {
+  padding: 4px;
+}
+.bubble-photo .bubble-time {
+  right: 10px;
+  bottom: 8px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgb(42 37 34 / 0.72);
+  color: #fff;
+}
+.photo-button {
+  display: block;
+  max-width: 100%;
+  min-width: 160px;
+  min-height: 120px;
+  border-radius: 16px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+}
+.photo-button img {
+  display: block;
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+}
+.msg-flash .bubble {
+  box-shadow: 0 0 0 3px var(--color-green);
+}
+.unread-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--color-terracotta);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.emoji-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  width: 336px;
+  max-width: calc(100vw - 24px);
+  border: 1px solid var(--color-line);
+  border-radius: 20px;
+  background: var(--color-surface);
+  box-shadow: 0 18px 40px -16px rgb(42 37 34 / 0.45);
+}
+@keyframes rec-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+.rec-dot {
+  animation: rec-pulse 1.2s ease-in-out infinite;
+}
+dialog.lightbox {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+dialog.lightbox::backdrop {
+  background: rgb(20 17 15 / 0.88);
+}
+
+/* ---------------- showcase: browser window frame ---------------- */
+.browser-frame {
+  width: 100%;
+  max-width: 1040px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #221d19;
+  box-shadow: 0 40px 80px -32px rgb(42 37 34 / 0.6);
+}
+.browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px;
+}
+.browser-bar span {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #5c534b;
+}
+.browser-bar p {
+  margin-left: 12px;
+  padding: 2px 14px;
+  border-radius: 999px;
+  background: #3a332d;
+  color: #e4d8c5;
+  font-size: 1rem;
+}
+.browser-screen {
+  display: block;
+  width: 100%;
+  height: min(780px, max(600px, calc(100dvh - 300px)));
+  border: 0;
+  background: var(--color-cream);
+}
+
 /* ---------------- motion (small, purposeful) ---------------- */
 @keyframes msg-in {
   from {

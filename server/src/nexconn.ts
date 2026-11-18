@@ -16,6 +16,10 @@ export interface IssueTokenResult {
   token: string;
 }
 
+// Per-attempt timeout before switching to the backup domain. The docs suggest
+// ~5 s, but on slow networks a TLS handshake alone can take 4 s, so we allow 10 s.
+const REQUEST_TIMEOUT_MS = 10_000;
+
 export class NexconnClient {
   private domain: string;
   private readonly backup: string;
@@ -39,7 +43,9 @@ export class NexconnClient {
       Signature: signature,
       'X-Request-ID': randomUUID().replace(/-/g, ''),
       'Content-Type': 'application/json',
-      Connection: 'close', // docs advise against long-lived keep-alive connections
+      // Keep-alive is on (Node's default). The docs allow it if idle connections
+      // close within 55 s; Node closes idle sockets after 4 s. Reusing the
+      // connection avoids a new TLS handshake per call, which matters on slow networks.
     };
   }
 
@@ -50,7 +56,7 @@ export class NexconnClient {
         method: 'POST',
         headers: this.signedHeaders(),
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
       const text = await res.text();
       let json: NexconnResponse;

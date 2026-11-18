@@ -44,3 +44,42 @@ export async function getDemoSession(persona: DemoPersona): Promise<DemoSession>
   if (!res.ok) throw new Error(body.error ?? `Demo failed (HTTP ${res.status})`);
   return body as DemoSession;
 }
+
+// ---- rooms + invites (our server; authKey identifies the caller) -----------------
+
+async function call<T>(path: string, init: RequestInit & { authKey?: string } = {}): Promise<T> {
+  const { authKey, ...rest } = init;
+  const res = await fetch(path, {
+    ...rest,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(authKey ? { Authorization: `Bearer ${authKey}` } : {}),
+    },
+  });
+  const body = (await res.json().catch(() => ({}))) as T & { error?: string };
+  if (!res.ok) throw new Error(body.error ?? `Request failed (HTTP ${res.status})`);
+  return body;
+}
+
+export function createRoom(authKey: string, name: string) {
+  return call<{ channelId: string; name: string; invitePath: string }>('/api/rooms', {
+    method: 'POST',
+    authKey,
+    body: JSON.stringify({ name }),
+  });
+}
+
+export function getRoomInvite(authKey: string, channelId: string) {
+  return call<{ name: string; invitePath: string }>(`/api/rooms/${encodeURIComponent(channelId)}/invite`, { authKey });
+}
+
+export function getInviteInfo(code: string) {
+  return call<{ name: string }>(`/api/invites/${encodeURIComponent(code)}`);
+}
+
+export function joinInvite(authKey: string, code: string) {
+  return call<{ channelId: string; name: string }>(`/api/invites/${encodeURIComponent(code)}/join`, {
+    method: 'POST',
+    authKey,
+  });
+}

@@ -3,9 +3,9 @@ import type { ChatMessage } from '../nexconn/types';
 // Turns a flat message list into render items: day separators plus messages
 // that know whether they start or end a run from the same sender.
 
-export type ListItem =
+export type ListItem<T extends ChatMessage = ChatMessage> =
   | { kind: 'day'; key: string; label: string }
-  | { kind: 'msg'; key: string; msg: ChatMessage; mine: boolean; first: boolean; last: boolean };
+  | { kind: 'msg'; key: string; msg: T; mine: boolean; first: boolean; last: boolean };
 
 const GROUP_GAP_MS = 5 * 60 * 1000;
 
@@ -38,8 +38,8 @@ function sameRun(a: ChatMessage, b: ChatMessage): boolean {
   return a.senderId === b.senderId && dayKey(a.sentAt) === dayKey(b.sentAt) && Math.abs(b.sentAt - a.sentAt) <= GROUP_GAP_MS;
 }
 
-export function buildItems(messages: ChatMessage[], myUserId: string): ListItem[] {
-  const items: ListItem[] = [];
+export function buildItems<T extends ChatMessage>(messages: T[], myUserId: string): ListItem<T>[] {
+  const items: ListItem<T>[] = [];
   messages.forEach((msg, i) => {
     const prev = messages[i - 1];
     const next = messages[i + 1];
@@ -56,4 +56,12 @@ export function buildItems(messages: ChatMessage[], myUserId: string): ListItem[
     });
   });
   return items;
+}
+
+// Room-list time: "4:05 pm" today, "Yesterday", otherwise "12 Nov".
+export function formatListTime(ms: number, now = Date.now()): string {
+  const key = dayKey(ms);
+  if (key === dayKey(now)) return formatTime(ms);
+  if (key === dayKey(now - 86_400_000)) return 'Yesterday';
+  return new Date(ms).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
 }

@@ -96,3 +96,119 @@ export function ArrowRightIcon() {
     </svg>
   );
 }
+
+export function PaperclipIcon() {
+  return (
+    <svg {...base}>
+      <path d="m21 11-8.5 8.5a5 5 0 0 1-7-7L14 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 7" />
+    </svg>
+  );
+}
+
+export function SmileIcon() {
+  return (
+    <svg {...base}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8.5 14.5a4.5 4.5 0 0 0 7 0" />
+      <path d="M9 9.5h.01M15 9.5h.01" strokeWidth={3} />
+    </svg>
+  );
+}
+
+export function ReplyIcon() {
+  return (
+    <svg {...base}>
+      <path d="M9 14 4 9l5-5" />
+      <path d="M4 9h10a6 6 0 0 1 6 6v5" />
+    </svg>
+  );
+}
+
+export function CopyIcon() {
+  return (
+    <svg {...base}>
+      <rect x="9" y="9" width="12" height="12" rx="2" />
+      <path d="M5 15V5a2 2 0 0 1 2-2h8" />
+    </svg>
+  );
+}
+
+export function InfoIcon() {
+  return (
+    <svg {...base}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v6M12 7.5h.01" strokeWidth={2.4} />
+    </svg>
+  );
+}
+
+export function PlusIcon() {
+  return (
+    <svg {...base}>
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+export function BackIcon() {
+  return (
+    <svg {...base}>
+      <path d="m15 18-6-6 6-6" />
+    </svg>
+  );
+}
+
+export function SidebarIcon() {
+  return (
+    <svg {...base}>
+      <rect x="3" y="4" width="18" height="16" rx="3" />
+      <path d="M9 4v16" />
+    </svg>
+  );
+}
+
+export function TrashIcon() {
+  return (
+    <svg {...base}>
+      <path d="M4 7h16M10 11v6M14 11v6" />
+      <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
+    </svg>
+  );
+}
+
+export function PhotoIcon() {
+  return (
+    <svg {...base}>
+      <rect x="3" y="5" width="18" height="14" rx="3" />
+      <circle cx="9" cy="10" r="2" />
+      <path d="m21 16-5-5-9 8" />
+    </svg>
+  );
+}
+
+export function RoomsIcon() {
+  return (
+    <svg {...base}>
+      <path d="M3 10.5 12 4l9 6.5" />
+      <path d="M5 9.5V20h14V9.5" />
+      <path d="M10 20v-5h4v5" />
+    </svg>
+  );
+}
+
+export function LinkIcon() {
+  return (
+    <svg {...base}>
+      <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" />
+      <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />
+    </svg>
+  );
+}
+
+export function CloseIcon() {
+  return (
+    <svg {...base}>
+      <path d="M6 6l12 12M18 6 6 18" />
+    </svg>
+  );
+}

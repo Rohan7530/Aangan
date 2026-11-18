@@ -1,12 +1,16 @@
 import { Router } from 'express';
 import { randomBytes } from 'node:crypto';
 import type { Config } from '../config.js';
+import { ensureDemoRoom } from '../demo/demoRoom.js';
 import type { NexconnClient } from '../nexconn.js';
+import { registerRoom, upsertUser } from '../store.js';
 
 export interface LoginResponse {
   userId: string;
   name: string;
   token: string;
+  /** App-level key for our own room/invite APIs. */
+  authKey: string;
   // Public client config, served from the same .env so the browser needs no env file.
   appKey: string;
   areaCode: Config['nexconn']['areaCode'];
@@ -65,10 +69,21 @@ export function loginRouter(cfg: Config, nexconn: NexconnClient): Router {
       const userId = makeUserId(name);
       const { token } = await nexconn.issueToken(userId, name);
       await ensureMemberOfFamily(userId);
+      await registerRoom(family.channelId, family.channelName, null);
+      // Default rooms: the family room and the demo room.
+      try {
+        await ensureDemoRoom(cfg, nexconn);
+        const code = await nexconn.joinGroup(cfg.demo.channelId, [userId]);
+        if (code !== 0) console.warn(`[login] could not add ${userId} to the demo room: code ${code}`);
+      } catch (err) {
+        console.warn('[login] demo room unavailable:', err);
+      }
+      const authKey = await upsertUser(userId, name);
       const body: LoginResponse = {
         userId,
         name,
         token,
+        authKey,
         appKey: cfg.nexconn.appKey,
         areaCode: cfg.nexconn.areaCode,
         channelId: family.channelId,

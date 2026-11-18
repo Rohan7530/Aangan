@@ -1,6 +1,6 @@
 import { Sheet } from '../../components/Sheet';
 import { StandardMessage } from '../../components/StandardMessage';
-import type { ChatMessage } from '../../nexconn/types';
+import type { RichMessage } from '../../nexconn/rich';
 import { ComfortMessage } from './ComfortMessage';
 import { TEXT_STEP_LABELS, type ReaderMode, type TextStep } from './prefs';
 import { useReaderPrefs } from './ReaderPrefsContext';
@@ -15,7 +15,9 @@ interface Props {
   myName: string;
 }
 
-const SAMPLE: ChatMessage = {
+const SAMPLE: RichMessage = {
+  kind: 'text',
+  reactions: {},
   id: 'preview-sample',
   channelId: 'preview',
   senderId: 'preview-meera',

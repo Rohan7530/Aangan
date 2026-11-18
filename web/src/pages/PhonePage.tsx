@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getDemoSession, type DemoPersona, type DemoSession } from '../api';
 import { BrandMark } from '../components/BrandMark';
+import { Workspace } from '../components/workspace/Workspace';
 import { memoryReaderPrefsStore, ReaderPrefsProvider } from '../features/reader-view';
-import { ChatPage } from './ChatPage';
 
 const PERSONAS: DemoPersona[] = ['arjun', 'dadi', 'papa', 'meera'];
 
-// Runs inside one showcase phone frame (an iframe). Each iframe is its own
-// page, so it gets its own Nexconn engine and its own live connection.
-export function PhonePage() {
+// Runs inside one showcase frame (an iframe). Each iframe is its own page, so
+// it gets its own Nexconn engine and its own live connection.
+//   /showcase/phone?persona=dadi  -> phone frame (opens in the persona's mode)
+//   /showcase/app?persona=arjun   -> full three-pane Standard app
+export function PhonePage({ forceMode }: { forceMode?: 'standard' | 'comfort' }) {
   const persona = useMemo(() => {
     const p = new URLSearchParams(window.location.search).get('persona');
     return PERSONAS.includes(p as DemoPersona) ? (p as DemoPersona) : 'arjun';
@@ -27,8 +29,8 @@ export function PhonePage() {
   }, [persona]);
 
   const store = useMemo(
-    () => (session ? memoryReaderPrefsStore({ mode: session.mode, textStep: 0 }) : null),
-    [session],
+    () => (session ? memoryReaderPrefsStore({ mode: forceMode ?? session.mode, textStep: 0 }) : null),
+    [session, forceMode],
   );
 
   if (error) {
@@ -47,10 +49,8 @@ export function PhonePage() {
     );
   }
   return (
-    <div className="flex h-dvh flex-col bg-cream">
-      <ReaderPrefsProvider userId={session.userId} store={store}>
-        <ChatPage session={session} embedded />
-      </ReaderPrefsProvider>
-    </div>
+    <ReaderPrefsProvider userId={session.userId} store={store}>
+      <Workspace session={session} embedded initialRoom={session.channelId} />
+    </ReaderPrefsProvider>
   );
 }

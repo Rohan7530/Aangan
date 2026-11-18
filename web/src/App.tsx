@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getRoomConfig } from './api';
-import { AppShell } from './components/AppShell';
 import { BrandMark } from './components/BrandMark';
+import { Workspace } from './components/workspace/Workspace';
 import { ReaderPrefsProvider } from './features/reader-view';
-import { ChatPage } from './pages/ChatPage';
+import { JoinPage } from './pages/JoinPage';
 import { PhonePage } from './pages/PhonePage';
 import { ShowcasePage } from './pages/ShowcasePage';
 import { WelcomePage } from './pages/WelcomePage';
@@ -11,11 +11,14 @@ import { clearSession, forgetOtherRooms, listSavedSessions, loadSession, saveSes
 
 type Boot = { status: 'loading' } | { status: 'ready' } | { status: 'error'; message: string };
 
-// Tiny path router: no login needed for the showcase routes.
+// Tiny path router.
 export default function App() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
   if (path === '/showcase') return <ShowcasePage />;
   if (path === '/showcase/phone') return <PhonePage />;
+  if (path === '/showcase/app') return <PhonePage forceMode="standard" />;
+  const join = path.match(/^\/join\/([a-z0-9]{4,32})$/i);
+  if (join) return <JoinPage code={join[1]} />;
   return <FamilyApp />;
 }
 
@@ -24,7 +27,7 @@ function FamilyApp() {
   const [session, setSession] = useState<Session | null>(null);
   const [saved, setSaved] = useState<Session[]>([]);
 
-  // Ask the server which room is current, and drop sessions saved for an older room.
+  // Ask the server which family room is current, and drop sessions saved for an older one.
   useEffect(() => {
     let cancelled = false;
     getRoomConfig()
@@ -72,10 +75,8 @@ function FamilyApp() {
   }
   if (!session) return <WelcomePage savedSessions={saved} onLoggedIn={handleLoggedIn} />;
   return (
-    <AppShell>
-      <ReaderPrefsProvider key={session.userId} userId={session.userId}>
-        <ChatPage session={session} onLogout={handleLogout} />
-      </ReaderPrefsProvider>
-    </AppShell>
+    <ReaderPrefsProvider key={session.userId} userId={session.userId}>
+      <Workspace session={session} onLogout={handleLogout} />
+    </ReaderPrefsProvider>
   );
 }

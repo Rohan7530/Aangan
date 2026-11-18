@@ -1,12 +1,12 @@
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import { ComfortMessage, type ReaderMode, type Speech } from '../features/reader-view';
-import type { ChatMessage } from '../nexconn/types';
+import type { RichMessage } from '../nexconn/rich';
 import { CourtyardIllustration } from './CourtyardIllustration';
 import { buildItems } from './messageModel';
-import { StandardMessage } from './StandardMessage';
+import { StandardMessage, type MessageHandlers } from './StandardMessage';
 
-interface Props {
-  messages: ChatMessage[];
+interface Props extends MessageHandlers {
+  messages: RichMessage[];
   myUserId: string;
   mode: ReaderMode;
   loading: boolean;
@@ -14,14 +14,27 @@ interface Props {
   speech: Speech;
   /** Read state shown under my latest message, e.g. "Seen by Dadi, Papa". */
   seenBy: { messageId: string; text: string } | null;
+  myReactionKey: string;
   onSuggest: (text: string) => void;
 }
 
 const NEAR_BOTTOM_PX = 160;
-
 const SUGGESTIONS = ['Namaste, everyone! 🙏', 'Good morning, family ☀️', 'Who is free this Sunday?'];
 
-export function MessageList({ messages, myUserId, mode, loading, animateIds, speech, seenBy, onSuggest }: Props) {
+export function MessageList({
+  messages,
+  myUserId,
+  mode,
+  loading,
+  animateIds,
+  speech,
+  seenBy,
+  myReactionKey,
+  onSuggest,
+  onReply,
+  onReact,
+  onOpenImage,
+}: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const nearBottom = useRef(true);
   const hasScrolledOnce = useRef(false);
@@ -48,6 +61,14 @@ export function MessageList({ messages, myUserId, mode, loading, animateIds, spe
     if (el) el.scrollTop = el.scrollHeight;
   }, [mode]);
 
+  const jumpTo = (id: string) => {
+    const el = document.getElementById(`msg-${id}`);
+    if (!el) return;
+    el.scrollIntoView({ block: 'center', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    el.classList.add('msg-flash');
+    window.setTimeout(() => el.classList.remove('msg-flash'), 1200);
+  };
+
   const comfort = mode === 'comfort';
 
   return (
@@ -71,9 +92,7 @@ export function MessageList({ messages, myUserId, mode, loading, animateIds, spe
         <div className="flex flex-col items-center px-6 py-10 text-center">
           <CourtyardIllustration width={210} />
           <p className="mt-6 text-[1.375rem] font-bold text-green">Your courtyard is ready</p>
-          <p className="mt-1 max-w-[20rem] text-ink-muted">
-            Start the conversation. Everyone will read it their own way.
-          </p>
+          <p className="mt-1 max-w-[20rem] text-ink-muted">Start the conversation. Everyone will read it their own way.</p>
           <p className="mt-6 font-semibold text-ink">Try saying</p>
           <ul className="mt-2 flex flex-wrap justify-center gap-2">
             {SUGGESTIONS.map((s) => (
@@ -91,7 +110,10 @@ export function MessageList({ messages, myUserId, mode, loading, animateIds, spe
           </ul>
         </div>
       ) : (
-        <ol aria-label="Messages" className={`list-none px-4 pb-4 ${comfort ? 'flex flex-col gap-4 pt-2' : 'pt-1'}`}>
+        <ol
+          aria-label="Messages"
+          className={`list-none pb-4 ${comfort ? 'mx-auto flex max-w-3xl flex-col gap-4 px-4 pt-2' : 'px-4 pt-1 sm:px-6'}`}
+        >
           {items.map((item) => {
             if (item.kind === 'day') {
               return (
@@ -103,7 +125,15 @@ export function MessageList({ messages, myUserId, mode, loading, animateIds, spe
             const animate = animateIds.has(item.msg.id);
             const seen = seenBy && seenBy.messageId === item.msg.id ? seenBy.text : null;
             return comfort ? (
-              <ComfortMessage key={item.key} msg={item.msg} mine={item.mine} animate={animate} speech={speech} seenBy={seen} />
+              <ComfortMessage
+                key={item.key}
+                msg={item.msg}
+                mine={item.mine}
+                animate={animate}
+                speech={speech}
+                seenBy={seen}
+                onOpenImage={onOpenImage}
+              />
             ) : (
               <StandardMessage
                 key={item.key}
@@ -113,6 +143,11 @@ export function MessageList({ messages, myUserId, mode, loading, animateIds, spe
                 last={item.last}
                 animate={animate}
                 seenBy={seen}
+                myReactionKey={myReactionKey}
+                onReply={onReply}
+                onReact={onReact}
+                onOpenImage={onOpenImage}
+                onJumpTo={jumpTo}
               />
             );
           })}

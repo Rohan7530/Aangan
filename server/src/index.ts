@@ -4,6 +4,7 @@ import { NexconnClient } from './nexconn.js';
 import { ensureDemoRoom } from './demo/demoRoom.js';
 import { demoRouter } from './routes/demo.js';
 import { loginRouter } from './routes/login.js';
+import { roomsRouter } from './routes/rooms.js';
 
 const cfg = loadConfig();
 const nexconn = new NexconnClient(cfg.nexconn);
@@ -21,6 +22,7 @@ app.get('/api/config', (_req, res) => {
 });
 app.use('/api', loginRouter(cfg, nexconn));
 app.use('/api', demoRouter(cfg, nexconn));
+app.use('/api', roomsRouter(cfg, nexconn));
 
 app.listen(cfg.port, () => {
   const room = cfg.family.isTestRoom ? `TEST room ${cfg.family.channelId}` : `room ${cfg.family.channelId}`;
