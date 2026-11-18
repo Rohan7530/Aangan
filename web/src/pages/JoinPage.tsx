@@ -56,8 +56,8 @@ export function JoinPage({ code }: { code: string }) {
         </div>
         {room ? (
           <>
-            <p className="mt-5 font-semibold text-terracotta-deep">You’re invited to</p>
-            <h1 className="mt-1 text-balance text-[2rem] font-bold leading-tight text-green">{room.name}</h1>
+            <p className="mt-5 font-semibold text-danger">You’re invited to</p>
+            <h1 className="mt-1 text-balance text-[2rem] font-bold leading-tight text-accent-ink">{room.name}</h1>
             <div className="mt-5 flex justify-center">
               <CourtyardIllustration width={180} />
             </div>
@@ -74,7 +74,7 @@ export function JoinPage({ code }: { code: string }) {
                     onChange={(e) => setName(e.target.value)}
                     maxLength={64}
                     autoComplete="given-name"
-                    className="mt-2 min-h-[56px] w-full rounded-2xl border-2 border-line-strong bg-white px-4 text-[1.25rem] focus:border-green focus-visible:outline-offset-1"
+                    className="mt-2 min-h-[56px] w-full rounded-2xl border border-line-strong bg-surface px-4 text-ink text-[1.25rem] focus:border-accent focus-visible:outline-offset-1"
                   />
                 </>
               ) : (
@@ -90,12 +90,12 @@ export function JoinPage({ code }: { code: string }) {
               <button
                 type="submit"
                 disabled={busy}
-                className="mt-4 min-h-[56px] w-full rounded-2xl bg-terracotta px-6 text-[1.25rem] font-bold text-white hover:bg-terracotta-deep disabled:opacity-80"
+                className="mt-4 min-h-[56px] w-full rounded-2xl bg-accent px-6 text-[1.25rem] font-bold text-white hover:bg-accent-deep disabled:opacity-80"
               >
                 {busy ? 'Joining…' : `Join ${room.name}`}
               </button>
               {session && !useNewName && (
-                <button type="button" onClick={() => setUseNewName(true)} className="mt-2 min-h-[48px] w-full font-semibold text-green underline underline-offset-4">
+                <button type="button" onClick={() => setUseNewName(true)} className="mt-2 min-h-[48px] w-full font-semibold text-accent-ink underline underline-offset-4">
                   Not {session.name}? Use a different name
                 </button>
               )}

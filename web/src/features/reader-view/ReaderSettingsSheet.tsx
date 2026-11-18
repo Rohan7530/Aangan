@@ -121,7 +121,7 @@ export function ReaderSettingsSheet({ open, onClose, speech, myName }: Props) {
       <section className="mt-7" aria-label="Preview">
         <h3 className="mb-3 text-[1.125rem] font-bold">Preview</h3>
         <div
-          className="reader-root rounded-3xl border border-line bg-cream p-4"
+          className="reader-root rounded-3xl border border-line bg-canvas p-4"
           data-reader-mode={prefs.mode}
           data-text-step={prefs.textStep}
         >

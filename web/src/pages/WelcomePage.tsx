@@ -17,7 +17,7 @@ interface Props {
 const PROMISES = [
   { icon: <TextSizeIcon />, title: 'Big, clear text', text: 'Comfort mode for anyone who needs it.' },
   { icon: <SpeakerIcon />, title: 'Read aloud', text: 'Any message, with one tap on Listen.' },
-  { icon: <GlobeIcon />, title: 'Your own language', text: 'Each person in theirs. Coming soon.' },
+  { icon: <GlobeIcon />, title: 'Your own language', text: 'Each person reads it in theirs: English, हिन्दी, मराठी, தமிழ், বাংলা.' },
 ];
 
 // One real message, rendered by the real components in both reading modes.
@@ -49,7 +49,7 @@ function ModesPreview() {
   return (
     <ToneProvider tones={tones}>
       <div className="grid gap-4 sm:grid-cols-[1fr_1.25fr]" aria-label="The same message in two reading modes">
-        <figure className="rounded-[28px] border border-line bg-cream p-4 shadow-[0_18px_40px_-24px_rgb(42_37_34/0.45)]">
+        <figure className="rounded-[28px] border border-line bg-canvas p-4 shadow-[0_18px_40px_-24px_rgb(42_37_34/0.45)]">
           <figcaption className="mb-2 font-semibold text-ink-muted">
             <span className="text-ink">Arjun</span> reads it in Standard
           </figcaption>
@@ -60,7 +60,7 @@ function ModesPreview() {
             </ul>
           </div>
         </figure>
-        <figure className="rounded-[28px] border border-line bg-cream p-4 shadow-[0_18px_40px_-24px_rgb(42_37_34/0.45)]">
+        <figure className="rounded-[28px] border border-line bg-canvas p-4 shadow-[0_18px_40px_-24px_rgb(42_37_34/0.45)]">
           <figcaption className="mb-2 font-semibold text-ink-muted">
             <span className="text-ink">Dadi</span> reads it in Comfort
           </figcaption>
@@ -114,11 +114,11 @@ export function WelcomePage({ known, onLoggedIn }: Props) {
       <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4" aria-label="Aangan">
         <span className="flex items-center gap-3">
           <BrandMark size={40} />
-          <span className="text-[1.5rem] font-bold text-green">Aangan</span>
+          <span className="text-[1.5rem] font-bold text-accent-ink">Aangan</span>
         </span>
         <a
           href="/showcase"
-          className="inline-flex min-h-[48px] items-center gap-2 rounded-2xl px-3 font-semibold text-green underline-offset-4 hover:underline"
+          className="inline-flex min-h-[48px] items-center gap-2 rounded-2xl px-3 font-semibold text-accent-ink underline-offset-4 hover:underline"
         >
           See it live
           <ArrowRightIcon />
@@ -127,7 +127,7 @@ export function WelcomePage({ known, onLoggedIn }: Props) {
 
       <main className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-14 pt-6 lg:grid-cols-[1fr_1.1fr] lg:gap-14 lg:pt-12">
         <div>
-          <p className="font-semibold text-terracotta-deep">
+          <p className="font-semibold text-danger">
             <span lang="hi">आँगन</span> · the family courtyard
           </p>
           <h1 className="mt-3 text-balance text-[2.5rem] font-bold leading-[1.1] tracking-tight text-ink sm:text-[3.25rem]">
@@ -135,7 +135,7 @@ export function WelcomePage({ known, onLoggedIn }: Props) {
           </h1>
           <p className="mt-4 max-w-xl text-[1.25rem] leading-relaxed text-ink-muted">
             One message, delivered to each person in the form they can use: large clear text, read aloud, and
-            soon in their own language. So Dadi stays in the conversation too.
+            in their own language. So Dadi stays in the conversation too.
           </p>
 
           <form
@@ -159,7 +159,7 @@ export function WelcomePage({ known, onLoggedIn }: Props) {
               disabled={busy}
               aria-describedby={`${helpId}${error ? ` ${errorId}` : ''}`}
               aria-invalid={error ? true : undefined}
-              className="mt-3 min-h-[56px] w-full rounded-2xl border-2 border-line-strong bg-white px-4 text-[1.25rem] focus:border-green focus-visible:outline-offset-1"
+              className="mt-3 min-h-[56px] w-full rounded-2xl border border-line-strong bg-surface px-4 text-ink text-[1.25rem] focus:border-accent focus-visible:outline-offset-1"
             />
             {error && (
               <p id={errorId} role="alert" className="mt-2 font-semibold text-danger">
@@ -169,13 +169,13 @@ export function WelcomePage({ known, onLoggedIn }: Props) {
             <button
               type="submit"
               disabled={busy}
-              className="mt-5 min-h-[56px] w-full rounded-2xl bg-terracotta px-6 text-[1.25rem] font-bold text-white hover:bg-terracotta-deep disabled:opacity-80"
+              className="mt-5 min-h-[56px] w-full rounded-2xl bg-accent px-6 text-[1.25rem] font-bold text-white hover:bg-accent-deep disabled:opacity-80"
             >
               {busy ? 'Joining…' : 'Join your family'}
             </button>
             <a
               href="/showcase"
-              className="mt-3 flex min-h-[56px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-green bg-transparent px-6 text-[1.125rem] font-semibold text-green hover:bg-green-soft"
+              className="mt-3 flex min-h-[56px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-accent bg-transparent px-6 text-[1.125rem] font-semibold text-accent-ink hover:bg-accent-soft"
             >
               Try the demo
               <ArrowRightIcon />
@@ -191,7 +191,7 @@ export function WelcomePage({ known, onLoggedIn }: Props) {
                         type="button"
                         disabled={busy}
                         onClick={() => void continueAs(s)}
-                        className="min-h-[52px] w-full rounded-2xl border-2 border-line bg-cream px-4 text-left text-[1.125rem] font-semibold hover:border-green"
+                        className="min-h-[52px] w-full rounded-2xl border-2 border-line bg-canvas px-4 text-left text-[1.125rem] font-semibold hover:border-accent"
                       >
                         {s.name}
                       </button>
@@ -206,11 +206,11 @@ export function WelcomePage({ known, onLoggedIn }: Props) {
         <ModesPreview />
       </main>
 
-      <section aria-label="What Aangan does" className="border-t border-line bg-cream/70">
+      <section aria-label="What Aangan does" className="border-t border-line bg-canvas/70">
         <ul className="mx-auto grid max-w-6xl gap-6 px-5 py-10 sm:grid-cols-3">
           {PROMISES.map((p) => (
             <li key={p.title} className="flex items-start gap-3">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-green-soft text-green">{p.icon}</span>
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-accent-soft text-accent-ink">{p.icon}</span>
               <span>
                 <span className="block font-bold text-ink">{p.title}</span>
                 <span className="block text-ink-muted">{p.text}</span>

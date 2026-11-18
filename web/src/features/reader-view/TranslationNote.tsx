@@ -20,7 +20,7 @@ export function TranslationNote({ state, original, size, trailing }: Props) {
   const comfort = size === 'comfort';
   const meta = comfort ? 'mt-3 text-[1.125rem] text-ink-muted' : 'mt-1 text-[1rem] leading-snug text-ink-muted';
   const originalBox = comfort
-    ? 'mt-3 rounded-2xl border-2 border-line bg-cream px-4 py-3 text-[1.25rem] leading-snug text-ink'
+    ? 'mt-3 rounded-2xl border-2 border-line bg-canvas px-4 py-3 text-[1.25rem] leading-snug text-ink'
     : 'mt-1 border-l-2 border-line-strong pl-2 text-[1rem] leading-snug text-ink-muted';
 
   if (state.status === 'pending') return <p className={meta}>Translating…{trailing}</p>;
@@ -52,8 +52,8 @@ export function TranslationNote({ state, original, size, trailing }: Props) {
           }}
           className={
             comfort
-              ? 'inline-flex min-h-[56px] items-center rounded-2xl px-2 text-[1.125rem] font-bold text-green underline underline-offset-4'
-              : 'hit-48 font-semibold text-green underline underline-offset-2'
+              ? 'inline-flex min-h-[56px] items-center rounded-2xl px-2 text-[1.125rem] font-bold text-accent-ink underline underline-offset-4'
+              : 'hit-48 font-semibold text-accent-ink underline underline-offset-2'
           }
         >
           {open ? 'Hide original' : 'Show original'}

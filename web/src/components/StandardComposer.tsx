@@ -3,7 +3,7 @@ import { useVoiceReply, voiceSupport, UNSUPPORTED_REASON } from '../features/voi
 import { VoicePanel } from '../features/voice-reply/VoicePanel';
 import type { RichMessage } from '../nexconn/rich';
 import { EmojiPicker } from './EmojiPicker';
-import { CloseIcon, MicIcon, PaperclipIcon, SendIcon, SmileIcon } from './icons';
+import { CloseIcon, MicIcon, PhotoIcon, SendIcon, SmileIcon } from './icons';
 import { senderLabel } from './messageModel';
 
 export const COMPOSER_INPUT_ID = 'composer-input';
@@ -102,14 +102,14 @@ export function StandardComposer({ disabled, onSend, onPickPhoto, replyTo, onCan
   }
 
   const iconBtn =
-    'grid h-12 w-12 shrink-0 place-items-center rounded-full text-ink-muted hover:bg-sand hover:text-ink disabled:opacity-50';
+    'grid h-12 w-12 shrink-0 place-items-center rounded-full text-ink-muted hover:bg-fill hover:text-ink disabled:opacity-50';
 
   return (
-    <form onSubmit={submit} className="relative shrink-0 border-t border-line bg-cream px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-2" aria-label="Write a message">
+    <form onSubmit={submit} className="relative shrink-0 border-t border-line bg-surface px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-2" aria-label="Write a message">
       {replyTo && (
-        <div className="mb-2 flex items-center gap-3 rounded-2xl border-l-4 border-terracotta bg-surface px-3 py-2">
+        <div className="mb-2 flex items-center gap-3 rounded-[var(--radius-card)] border-l-4 border-accent bg-canvas px-3 py-2">
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-terracotta-deep">Replying to {senderLabel(replyTo)}</p>
+            <p className="font-semibold text-accent-ink">Replying to {senderLabel(replyTo)}</p>
             <p className="truncate text-ink-muted">{replyTo.kind === 'image' ? 'Photo' : replyTo.text}</p>
           </div>
           <button type="button" className={iconBtn} aria-label="Cancel reply" onClick={onCancelReply}>
@@ -125,7 +125,7 @@ export function StandardComposer({ disabled, onSend, onPickPhoto, replyTo, onCan
       {voice.state.phase !== 'idle' ? (
         <VoicePanel voice={voice} size="standard" onSend={onSendVoice} />
       ) : (
-        <div className="flex items-end gap-1">
+        <div className="flex items-end gap-1.5">
           <input
             ref={fileRef}
             type="file"
@@ -139,50 +139,10 @@ export function StandardComposer({ disabled, onSend, onPickPhoto, replyTo, onCan
               e.target.value = '';
             }}
           />
+          {/* One row: Photo, Speak, the message box (emoji inside it), Send. */}
           <button type="button" className={iconBtn} aria-label="Attach a photo" title="Attach a photo" disabled={disabled} onClick={() => fileRef.current?.click()}>
-            <PaperclipIcon />
+            <PhotoIcon />
           </button>
-          <div className="relative">
-            <button
-              ref={emojiBtn}
-              type="button"
-              className={iconBtn}
-              aria-label="Emoji"
-              title="Emoji"
-              aria-expanded={emojiOpen}
-              aria-haspopup="dialog"
-              disabled={disabled}
-              onClick={() => setEmojiOpen((o) => !o)}
-            >
-              <SmileIcon />
-            </button>
-            {emojiOpen && (
-              <EmojiPicker
-                onPick={(e) => insertEmoji(e)}
-                onClose={() => {
-                  setEmojiOpen(false);
-                  emojiBtn.current?.focus();
-                }}
-              />
-            )}
-          </div>
-          <label htmlFor={COMPOSER_INPUT_ID} className="sr-only">
-            Your message
-          </label>
-          <textarea
-            ref={inputRef}
-            id={COMPOSER_INPUT_ID}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={onKeyDown}
-            rows={1}
-            placeholder={disabled ? 'Waiting for connection…' : 'Write a message'}
-            disabled={disabled}
-            aria-describedby={error ? errorId : undefined}
-            autoComplete="off"
-            className="min-h-[48px] w-full flex-1 resize-none overflow-y-auto rounded-3xl border-2 border-line-strong bg-surface px-4 py-[9px] leading-normal text-ink placeholder:text-ink-muted focus:border-green focus-visible:outline-offset-1 disabled:bg-sand"
-            style={{ fontSize: 'var(--input-size)' }}
-          />
           {canSpeak && (
             <button
               type="button"
@@ -195,12 +155,55 @@ export function StandardComposer({ disabled, onSend, onPickPhoto, replyTo, onCan
               <MicIcon />
             </button>
           )}
+          <label htmlFor={COMPOSER_INPUT_ID} className="sr-only">
+            Your message
+          </label>
+          <div className="relative min-w-0 flex-1">
+            <textarea
+              ref={inputRef}
+              id={COMPOSER_INPUT_ID}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={onKeyDown}
+              rows={1}
+              placeholder={disabled ? 'Waiting for connection…' : 'Write a message'}
+              disabled={disabled}
+              aria-describedby={error ? errorId : undefined}
+              autoComplete="off"
+              className="block min-h-[48px] w-full resize-none overflow-y-auto rounded-3xl border border-line-strong bg-surface py-[10px] pl-4 pr-12 leading-normal text-ink placeholder:text-ink-muted focus:border-accent focus-visible:outline-offset-1 disabled:bg-fill"
+              style={{ fontSize: 'var(--input-size)' }}
+            />
+            <div className="absolute bottom-0 right-0">
+              <button
+                ref={emojiBtn}
+                type="button"
+                className={iconBtn}
+                aria-label="Emoji"
+                title="Emoji"
+                aria-expanded={emojiOpen}
+                aria-haspopup="dialog"
+                disabled={disabled}
+                onClick={() => setEmojiOpen((o) => !o)}
+              >
+                <SmileIcon />
+              </button>
+            </div>
+            {emojiOpen && (
+              <EmojiPicker
+                onPick={(e) => insertEmoji(e)}
+                onClose={() => {
+                  setEmojiOpen(false);
+                  emojiBtn.current?.focus();
+                }}
+              />
+            )}
+          </div>
           <button
             type="submit"
             disabled={!canSend}
             aria-label={sending ? 'Sending' : 'Send'}
             title="Send"
-            className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-terracotta text-white hover:bg-terracotta-deep disabled:bg-line disabled:text-ink-muted"
+            className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-accent text-white hover:bg-accent-deep disabled:bg-line disabled:text-ink-muted"
           >
             <SendIcon />
           </button>

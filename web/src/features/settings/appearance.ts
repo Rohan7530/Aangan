@@ -1,41 +1,61 @@
 import { useSyncExternalStore } from 'react';
 
-// Light / Dark, per browser. Applied as <html data-theme="..."> so every page,
-// sheet and dialog picks up the dark tokens in index.css.
+// Appearance: Light, Dark or System (follows the device), per browser.
+// The resolved theme is applied as <html data-theme="light|dark"> so every page,
+// sheet and pop-up picks up the dark tokens in index.css.
+export type ThemePref = 'light' | 'dark' | 'system';
 export type Theme = 'light' | 'dark';
+
 const KEY = 'aangan.theme';
 const listeners = new Set<() => void>();
+const media = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 
-export function getTheme(): Theme {
+export function getThemePref(): ThemePref {
   try {
-    return localStorage.getItem(KEY) === 'dark' ? 'dark' : 'light';
+    const v = localStorage.getItem(KEY);
+    return v === 'dark' || v === 'light' ? v : 'system';
   } catch {
-    return 'light';
+    return 'system';
   }
 }
 
-export function applyTheme(theme: Theme = getTheme()): void {
+export function resolveTheme(pref: ThemePref = getThemePref()): Theme {
+  if (pref === 'system') return media?.matches ? 'dark' : 'light';
+  return pref;
+}
+
+export function applyTheme(): void {
+  const theme = resolveTheme();
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
 }
 
-export function setTheme(theme: Theme): void {
+// Follow the device while on "System".
+media?.addEventListener?.('change', () => {
+  if (getThemePref() === 'system') {
+    applyTheme();
+    listeners.forEach((l) => l());
+  }
+});
+
+export function setThemePref(pref: ThemePref): void {
   try {
-    localStorage.setItem(KEY, theme);
+    if (pref === 'system') localStorage.removeItem(KEY);
+    else localStorage.setItem(KEY, pref);
   } catch {
     // storage blocked: still applies for this visit
   }
-  applyTheme(theme);
+  applyTheme();
   listeners.forEach((l) => l());
 }
 
-export function useTheme(): [Theme, (t: Theme) => void] {
-  const theme = useSyncExternalStore(
+export function useThemePref(): [ThemePref, (t: ThemePref) => void] {
+  const pref = useSyncExternalStore(
     (l) => {
       listeners.add(l);
       return () => listeners.delete(l);
     },
-    getTheme,
+    getThemePref,
   );
-  return [theme, setTheme];
+  return [pref, setThemePref];
 }

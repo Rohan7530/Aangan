@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { senderLabel } from '../components/messageModel';
 import { assignTones } from '../components/tones';
-import { getColors } from '../api';
-import { setProfileColors } from '../features/settings/profileColors';
+import { getProfiles } from '../api';
+import { setProfileColors, setProfilePhotos, useProfilePhoto } from '../features/settings/profileColors';
 import { getMemberCount, listMembers, onMembersChanged, type Member } from '../nexconn/group';
 import { watchPresence, type PresenceMap } from '../nexconn/presence';
 import { getReaders, markRead, onReadReceipts } from '../nexconn/receipts';
@@ -138,7 +138,12 @@ export function useRoom(session: Session, channelId: string, connection: Connect
   // ---- avatar colours members picked in Settings ------------------------------
   useEffect(() => {
     if (!memberKey) return;
-    getColors(session.authKey, memberKey.split(',')).then(setProfileColors).catch(() => undefined);
+    getProfiles(session.authKey, memberKey.split(','))
+      .then((p) => {
+        setProfileColors(p.colors);
+        setProfilePhotos(p.photos);
+      })
+      .catch(() => undefined);
   }, [memberKey, session.authKey]);
   useEffect(() => {
     if (!connected || !memberKey) return;
@@ -216,7 +221,12 @@ export function useRoom(session: Session, channelId: string, connection: Connect
   const onlineCount = presence ? members.filter((m) => m.userId === myId || presence[m.userId]).length : null;
 
   // ---- actions --------------------------------------------------------------------
-  const me = useMemo(() => ({ userId: myId, name: session.name }), [myId, session.name]);
+  // My photo travels with each message (senderUserInfo.avatarUrl), as a full URL.
+  const myPhoto = useProfilePhoto(myId);
+  const me = useMemo(
+    () => ({ userId: myId, name: session.name, avatarUrl: myPhoto ? new URL(myPhoto, window.location.origin).href : undefined }),
+    [myId, session.name, myPhoto],
+  );
 
   const addSent = (sent: RichMessage) => {
     setMessages((prev) => merge(prev, [sent]));

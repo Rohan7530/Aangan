@@ -3,12 +3,12 @@ import { ReaderSettingsSheet, useReaderPrefs, useSpeech } from '../../features/r
 import { useConnection } from '../../hooks/useConnection';
 import { useMediaQuery, useStoredFlag } from '../../hooks/useMediaQuery';
 import { useRooms } from '../../hooks/useRooms';
-import { getColors, updateProfile } from '../../api';
-import { useProfileColor, setProfileColors } from '../../features/settings/profileColors';
+import { getProfiles, getRoomPhotos, updateProfile, uploadMyPhoto } from '../../api';
+import { MY_DEFAULT_COLOR, setProfileColors, setProfilePhotos, setRoomPhotos, useProfileColor, useProfilePhoto } from '../../features/settings/profileColors';
 import { SettingsPanel } from '../../features/settings/SettingsPanel';
 import { isSoundOn, playChime } from '../../features/settings/sound';
 import * as nexconn from '../../nexconn/client';
-import { setMyNickname, updateMyName } from '../../nexconn/profile';
+import { setMyNickname, updateMyName, updateMyPhoto } from '../../nexconn/profile';
 import { onRichMessages } from '../../nexconn/rich';
 import { getLastRoom, setLastRoom, type Session } from '../../session';
 import { ComfortRoom } from '../comfort/ComfortRoom';
@@ -46,20 +46,30 @@ export function Workspace({ session, onLogout, onSessionChange, embedded = false
   // is open the sidebar shows as its 64px icon rail.
   const cramped = useMediaQuery('(max-width: 1099px)');
   const [collapsed, setCollapsed] = useStoredFlag(embedded ? 'aangan.showcase.sidebar' : 'aangan.sidebarCollapsed', false);
-  const [infoOpenWide, setInfoOpenWide] = useStoredFlag(embedded ? 'aangan.showcase.info' : 'aangan.infoOpen', true);
+  const [infoOpenWide, setInfoOpenWide] = useStoredFlag(embedded ? 'aangan.showcase.info' : 'aangan.infoOpen', embedded || window.innerWidth > 1200);
   const [infoOpenNarrow, setInfoOpenNarrow] = useState(false);
   const [mobileView, setMobileView] = useState<'list' | 'chat'>(initialRoom ? 'chat' : 'list');
   const [readerOpen, setReaderOpen] = useState(false);
   const [newRoomOpen, setNewRoomOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const myColor = useProfileColor(session.userId) ?? '#a9461f';
+  const myColor = useProfileColor(session.userId) ?? MY_DEFAULT_COLOR;
 
-  // My avatar colour (if I picked one) for the sidebar before any room loads.
+  // My avatar colour and photo (if set) for the sidebar before any room loads.
   useEffect(() => {
-    getColors(session.authKey, [session.userId])
-      .then(setProfileColors)
+    getProfiles(session.authKey, [session.userId])
+      .then((p) => {
+        setProfileColors(p.colors);
+        setProfilePhotos(p.photos);
+      })
       .catch(() => undefined);
   }, [session.authKey, session.userId]);
+
+  // Family photos for the families in my list.
+  const roomKey = rooms.map((r) => r.channelId).sort().join(',');
+  useEffect(() => {
+    if (!roomKey) return;
+    getRoomPhotos(session.authKey, roomKey.split(',')).then(setRoomPhotos).catch(() => undefined);
+  }, [roomKey, session.authKey]);
 
   // A soft chime for new messages from others (Settings > Notifications).
   useEffect(
@@ -81,6 +91,15 @@ export function Workspace({ session, onLogout, onSessionChange, embedded = false
       name,
     ); // member lists in every room
     onSessionChange?.({ ...session, name });
+  }
+
+  const myPhoto = useProfilePhoto(session.userId);
+  // Photo file on our server; its URL in my Nexconn profile (and on each message I send).
+  async function changePhoto(image: string | null) {
+    const path = await uploadMyPhoto(session.authKey, image);
+    setProfilePhotos({ [session.userId]: path });
+    const r = await updateMyPhoto(path ? new URL(path, window.location.origin).href : '').catch(() => ({ ok: false, code: -1 }));
+    if (!r.ok) console.warn('[settings] Nexconn profile photo not updated:', r.code);
   }
 
   async function changeColor(color: string) {
@@ -125,9 +144,11 @@ export function Workspace({ session, onLogout, onSessionChange, embedded = false
       comfort={comfort}
       me={me}
       myColor={myColor}
+      myPhoto={myPhoto}
       profileEditable={!embedded}
       onRename={rename}
       onColor={changeColor}
+      onPhoto={changePhoto}
       onOpenReader={() => {
         setSettingsOpen(false);
         setReaderOpen(true);
@@ -244,7 +265,7 @@ export function Workspace({ session, onLogout, onSessionChange, embedded = false
   }
 
   return (
-    <div className="reader-root flex h-dvh w-full overflow-hidden bg-cream" data-reader-mode={prefs.mode} data-text-step={prefs.textStep}>
+    <div className="reader-root flex h-dvh w-full overflow-hidden bg-canvas" data-reader-mode={prefs.mode} data-text-step={prefs.textStep}>
       {body}
       <ReaderSettingsSheet open={readerOpen} onClose={() => setReaderOpen(false)} speech={speech} myName={session.name} />
 

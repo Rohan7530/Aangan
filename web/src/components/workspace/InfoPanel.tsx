@@ -1,9 +1,13 @@
-import { useEffect, useState, type Ref } from 'react';
-import { getRoomInvite } from '../../api';
+import { useEffect, useRef, useState, type Ref } from 'react';
+import { getRoomInvite, uploadRoomPhoto } from '../../api';
+import { setRoomPhotos } from '../../features/settings/profileColors';
+import { resizeToSquare } from '../../lib/resizeImage';
 import type { Member } from '../../nexconn/group';
 import type { PresenceMap } from '../../nexconn/presence';
+import { setGroupPhoto } from '../../nexconn/profile';
 import { Avatar } from '../Avatar';
-import { CheckIcon, CloseIcon, CopyIcon, HeartIcon, LinkIcon } from '../icons';
+import { CheckIcon, CloseIcon, CopyIcon, HeartIcon, LinkIcon, PhotoIcon } from '../icons';
+import { RoomAvatar } from './RoomAvatar';
 
 interface Props {
   channelId: string;
@@ -16,19 +20,21 @@ interface Props {
   fullWidth?: boolean;
   /** Comfort: larger text and rows, and a big labelled Close button at the top. */
   size?: 'standard' | 'comfort';
-  /** Comfort moves focus here when the panel opens. */
+  /** Moves focus here when the panel is opened by the person. */
   closeRef?: Ref<HTMLButtonElement>;
   id?: string;
 }
 
-// Room info: who is here (with online dots), the invite link, and a reserved
-// "Family check-in" section for the next feature. One component for both modes;
-// Comfort only changes the sizing.
+// The family: its photo (tap to change) and name, who is here (online dots),
+// the invite link, and the reserved "Family check-in" section. One component
+// for both modes; Comfort only changes the sizing.
 export function InfoPanel({ channelId, roomName, members, presence, myId, authKey, onClose, fullWidth, size = 'standard', closeRef, id }: Props) {
   const comfort = size === 'comfort';
   const [invite, setInvite] = useState<string | null>(null);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [photoStatus, setPhotoStatus] = useState<{ kind: 'ok' | 'error' | 'busy'; text: string } | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -42,7 +48,7 @@ export function InfoPanel({ channelId, roomName, members, presence, myId, authKe
     };
   }, [authKey, channelId]);
 
-  const online = (id: string) => id === myId || presence?.[id] === true;
+  const online = (uid: string) => uid === myId || presence?.[uid] === true;
   const sorted = [...members].sort((a, b) => Number(online(b.userId)) - Number(online(a.userId)) || a.name.localeCompare(b.name));
   const onlineCount = presence ? members.filter((m) => online(m.userId)).length : null;
 
@@ -57,72 +63,115 @@ export function InfoPanel({ channelId, roomName, members, presence, myId, authKe
     }
   }
 
+  // Family photo: the file on our server for everyone; also on the Nexconn group
+  // when this person owns it (other members get 25405 from Nexconn).
+  async function changePhoto(file: File | undefined) {
+    if (!file) return;
+    setPhotoStatus({ kind: 'busy', text: 'Saving photo…' });
+    try {
+      const path = await uploadRoomPhoto(authKey, channelId, await resizeToSquare(file));
+      setRoomPhotos({ [channelId]: path });
+      void setGroupPhoto(channelId, new URL(path, window.location.origin).href);
+      setPhotoStatus({ kind: 'ok', text: 'Family photo saved.' });
+    } catch (err) {
+      setPhotoStatus({ kind: 'error', text: err instanceof Error ? err.message : 'Could not save the photo.' });
+    }
+  }
+
+  const h3 = comfort ? 'px-1 text-[1.5rem] font-bold' : 'px-1 text-[1rem] font-semibold uppercase tracking-wide text-ink-muted';
+
   return (
     <aside
       id={id}
       aria-label={`About ${roomName}`}
-      className={`flex h-full shrink-0 flex-col bg-cream ${comfort ? 'comfort-info border-l-2 border-line' : 'border-l border-line'} ${
-        fullWidth ? 'w-full' : comfort ? 'w-[400px]' : 'w-[272px] xl:w-[300px]'
+      className={`flex h-full shrink-0 flex-col border-l border-line bg-canvas ${comfort ? 'comfort-info' : ''} ${
+        fullWidth ? 'w-full' : comfort ? 'w-[360px]' : 'w-[272px] xl:w-[300px]'
       }`}
     >
       {comfort ? (
-        <header className="flex flex-col gap-3 border-b-2 border-line px-5 pb-4 pt-4">
+        <header className="px-4 pt-4">
           <button
             ref={closeRef}
             type="button"
             onClick={onClose}
-            className="inline-flex min-h-[64px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-green bg-surface text-[1.375rem] font-bold text-green hover:bg-green-soft"
+            className="inline-flex min-h-[64px] w-full items-center justify-center gap-2 rounded-full bg-surface text-[1.375rem] font-bold text-accent-ink shadow-[var(--shadow-1)] hover:bg-accent-soft"
           >
             <CloseIcon />
             <span>Close</span>
           </button>
-          <h2 className="text-[1.5rem] font-bold leading-tight text-green">About {roomName}</h2>
         </header>
       ) : (
-        <header className="flex items-center gap-2 border-b border-line px-4 py-3">
-          <h2 className="min-w-0 flex-1 truncate text-[1.25rem] font-bold text-green">Room info</h2>
+        <header className="flex items-center gap-2 px-3 pt-2">
+          <h2 className="min-w-0 flex-1 truncate px-1 text-[1.125rem] font-semibold">Family info</h2>
           <button
             ref={closeRef}
             type="button"
             onClick={onClose}
-            aria-label="Close room info"
-            className="grid h-12 w-12 place-items-center rounded-2xl text-ink-muted hover:bg-sand hover:text-ink"
+            aria-label="Close family info"
+            className="grid h-12 w-12 place-items-center rounded-full text-ink-muted hover:bg-fill hover:text-ink"
           >
             <CloseIcon />
           </button>
         </header>
       )}
 
-      <div className={`min-h-0 flex-1 overflow-y-auto ${comfort ? 'px-5 py-5 text-[1.25rem]' : 'px-4 py-4'}`}>
-        <section aria-labelledby="info-members">
-          <h3 id="info-members" className={comfort ? 'text-[1.5rem] font-bold' : 'font-bold'}>
-            Members{' '}
-            <span className="font-semibold text-ink-muted">
-              · {members.length}
-              {onlineCount !== null && `, ${onlineCount} online`}
+      <div className={`min-h-0 flex-1 overflow-y-auto px-4 pb-6 ${comfort ? 'pt-4 text-[1.25rem]' : 'pt-2'}`}>
+        {/* The family: photo (tap to change) + name */}
+        <section className="flex flex-col items-center gap-2 pb-5 text-center">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden="true"
+            onChange={(e) => {
+              void changePhoto(e.target.files?.[0]);
+              e.target.value = '';
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="group relative rounded-[28px]"
+            aria-label={`Change the photo of ${roomName}`}
+            title="Change family photo"
+          >
+            <RoomAvatar id={channelId} name={roomName} size={comfort ? 112 : 96} />
+            <span className="absolute -bottom-1 -right-1 grid h-10 w-10 place-items-center rounded-full border-2 border-canvas bg-accent text-white shadow-[var(--shadow-1)]">
+              <PhotoIcon />
             </span>
+          </button>
+          <h2 className={`font-bold leading-tight ${comfort ? 'text-[1.75rem]' : 'text-[1.375rem]'}`}>{roomName}</h2>
+          <p className="text-ink-muted">
+            {members.length} {members.length === 1 ? 'member' : 'members'}
+            {onlineCount !== null && `, ${onlineCount} online`}
+          </p>
+          <p role="status" className={`font-semibold empty:hidden ${photoStatus?.kind === 'error' ? 'text-danger' : 'text-ink-muted'}`}>
+            {photoStatus?.text}
+          </p>
+        </section>
+
+        <section aria-labelledby="info-members">
+          <h3 id="info-members" className={h3}>
+            Members <span className="font-semibold normal-case tracking-normal">· {members.length}{onlineCount !== null && `, ${onlineCount} online`}</span>
           </h3>
-          <ul className="mt-2 flex flex-col gap-1">
+          <ul className="group-card mt-2 overflow-hidden">
             {sorted.map((m) => {
               const on = online(m.userId);
               return (
-                <li key={m.userId} className={`flex items-center gap-3 rounded-2xl px-2 ${comfort ? 'min-h-[72px]' : 'min-h-[52px]'}`}>
+                <li key={m.userId} className={`flex items-center gap-3 border-b border-line px-3 last:border-b-0 ${comfort ? 'min-h-[76px]' : 'min-h-[56px]'}`}>
                   <span className="relative">
-                    <Avatar id={m.userId} name={m.name || '?'} size={comfort ? 56 : 40} mine={m.userId === myId} />
-                    {presence && (
-                      <span
-                        aria-hidden="true"
-                        className={`absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-cream ${comfort ? 'h-5 w-5' : 'h-3.5 w-3.5'} ${on ? 'bg-green' : 'bg-line-strong'}`}
-                      />
-                    )}
+                    <Avatar id={m.userId} name={m.name || '?'} size={comfort ? 52 : 40} mine={m.userId === myId} />
+                    {presence && <span aria-hidden="true" className={`status-dot !border-surface ${comfort ? '!h-[18px] !w-[18px]' : ''} ${on ? 'bg-success' : 'bg-line-strong'}`} />}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className={`block truncate ${comfort ? 'text-[1.375rem] font-bold' : 'font-semibold'}`}>
                       {m.name || 'Family member'}
-                      {m.userId === myId && <span className="text-ink-muted"> (you)</span>}
+                      {m.userId === myId && <span className="font-normal text-ink-muted"> (you)</span>}
                     </span>
                     {presence && (
-                      <span className={`block ${comfort ? 'text-[1.25rem] font-semibold' : 'text-[1rem]'} ${on ? 'text-green' : 'text-ink-muted'}`}>
+                      <span className={`block ${comfort ? 'text-[1.25rem] font-semibold' : 'text-[1rem]'} ${on ? 'text-success-ink' : 'text-ink-muted'}`}>
                         {on ? (comfort ? 'Online now' : 'Online') : 'Offline'}
                       </span>
                     )}
@@ -134,34 +183,38 @@ export function InfoPanel({ channelId, roomName, members, presence, myId, authKe
         </section>
 
         <section aria-labelledby="info-invite" className="mt-6">
-          <h3 id="info-invite" className={`flex items-center gap-2 font-bold ${comfort ? 'text-[1.5rem]' : ''}`}>
+          <h3 id="info-invite" className={`flex items-center gap-2 ${h3}`}>
             <LinkIcon /> Invite link
           </h3>
-          <p className="mt-1 text-ink-muted">Anyone with this link can join {roomName}.</p>
-          {invite ? (
-            <>
-              <p className={`mt-2 break-all rounded-xl border border-line bg-surface px-3 py-2 text-ink ${comfort ? 'text-[1.125rem]' : 'text-[1rem]'}`}>
-                {invite}
-              </p>
-              <button
-                type="button"
-                onClick={copy}
-                className={`mt-2 inline-flex ${comfort ? 'min-h-[64px] text-[1.25rem] font-bold' : 'min-h-[48px]'} w-full items-center justify-center gap-2 rounded-2xl bg-green px-4 font-semibold text-white hover:bg-[#173a2c]`}
-              >
-                {copied ? <CheckIcon /> : <CopyIcon />}
-                {copied ? 'Copied' : 'Copy invite link'}
-              </button>
-            </>
-          ) : (
-            <p className="mt-2 text-ink-muted">{inviteError ?? 'Loading…'}</p>
-          )}
+          <div className="group-card mt-2 p-4">
+            <p className="text-ink-muted">Anyone with this link can join {roomName}.</p>
+            {invite ? (
+              <>
+                <p className={`mt-2 break-all rounded-[10px] bg-canvas px-3 py-2 text-ink ${comfort ? 'text-[1.125rem]' : 'text-[1rem]'}`}>{invite}</p>
+                <button
+                  type="button"
+                  onClick={copy}
+                  className={`mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-4 text-white hover:bg-accent-deep ${
+                    comfort ? 'min-h-[64px] text-[1.25rem] font-bold' : 'min-h-[48px] font-semibold'
+                  }`}
+                >
+                  {copied ? <CheckIcon /> : <CopyIcon />}
+                  {copied ? 'Copied' : 'Copy invite link'}
+                </button>
+              </>
+            ) : (
+              <p className="mt-2 text-ink-muted">{inviteError ?? 'Loading…'}</p>
+            )}
+          </div>
         </section>
 
-        <section aria-labelledby="info-checkin" className="mt-6 rounded-2xl border-2 border-dashed border-line-strong p-4">
-          <h3 id="info-checkin" className={`flex items-center gap-2 font-bold ${comfort ? 'text-[1.5rem]' : ''}`}>
+        <section aria-labelledby="info-checkin" className="mt-6">
+          <h3 id="info-checkin" className={`flex items-center gap-2 ${h3}`}>
             <HeartIcon /> Family check-in
           </h3>
-          <p className="mt-1 text-ink-muted">Coming soon: one tap a day for “I’m fine”, and a gentle alert if someone misses it.</p>
+          <div className="group-card mt-2 p-4">
+            <p className="text-ink-muted">Coming soon: one tap a day for “I’m fine”, and a gentle alert if someone misses it.</p>
+          </div>
         </section>
       </div>
     </aside>

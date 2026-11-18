@@ -6,6 +6,12 @@
 //   GroupChannel#setMemberInfo({ userId, nickname })   -> ok; member lists show the nickname
 // Docs: /chatsdk-web/user/user-profile.md, /chatsdk-web/group-channel/group-member-manager.md
 
+//   NCEngine.userModule.updateMyUserProfile({ avatarUrl }) -> ok; getUserProfiles returns it
+//   GroupChannel#updateInfo({ avatarUrl })              -> owner only (25405 RC_GROUP_AUTHORITY_ERROR
+//                                                          for other members), so family photos are
+//                                                          also kept on our server for everyone
+// The picture files themselves live on our server: the Web SDK has no standalone upload.
+
 import { GroupChannel, NCEngine } from '@nexconn/chat';
 
 export async function updateMyName(name: string): Promise<{ ok: boolean; code: number }> {
@@ -27,4 +33,20 @@ export async function setMyNickname(channelIds: string[], userId: string, nickna
     }),
   );
   return { failed };
+}
+
+// My profile photo URL in Nexconn (empty string removes it).
+export async function updateMyPhoto(avatarUrl: string): Promise<{ ok: boolean; code: number }> {
+  const r = await NCEngine.userModule.updateMyUserProfile({ avatarUrl });
+  return { ok: r.isOk, code: r.code };
+}
+
+// The family's photo on the Nexconn group. Works for the group owner; others get 25405.
+export async function setGroupPhoto(channelId: string, avatarUrl: string): Promise<{ ok: boolean; code: number }> {
+  try {
+    const r = await new GroupChannel(channelId).updateInfo({ avatarUrl });
+    return { ok: r.isOk, code: r.code };
+  } catch {
+    return { ok: false, code: -1 };
+  }
 }

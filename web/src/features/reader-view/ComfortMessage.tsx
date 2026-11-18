@@ -30,10 +30,9 @@ function reactionSummary(reactions: Record<string, string[]>): string[] {
   return [...counts.entries()].map(([e, n]) => `${e} ${n}`);
 }
 
-// Comfort mode: one message per row on a light card with charcoal text (AAA).
-// Others: white card, sender's colour as a thick left border.
-// Mine: soft terracotta tint, terracotta left border, labelled "You".
-// The solid green Listen button is the clearest thing on the card.
+// Comfort mode: the same bubbles as Standard, larger and simpler.
+// Others on the left with avatar and name, grey bubble, and a big Listen button
+// inside it. Mine on the right, blue, no name. Time and "Seen by" under the bubble.
 export function ComfortMessage({ msg, mine, animate = false, speech, seenBy, as: Tag = 'li', onOpenImage, translation, readerLang = 'en' }: Props) {
   const tone = useTone(msg.senderId);
   const name = mine ? 'You' : senderLabel(msg);
@@ -53,61 +52,74 @@ export function ComfortMessage({ msg, mine, animate = false, speech, seenBy, as:
   const alt = `Photo from ${mine ? 'you' : name}`;
 
   return (
-    <Tag
-      id={`msg-${msg.id}`}
-      className={`comfort-card ${mine ? 'comfort-mine' : ''} ${animate ? 'msg-enter' : ''}`}
-      style={mine ? undefined : ({ '--card-accent': tone } as CSSProperties)}
-    >
-      <div className="flex items-center gap-3">
-        <Avatar id={msg.senderId} name={mine ? (msg.senderName ?? 'You') : name} size={48} mine={mine} />
-        <div className="min-w-0">
-          <p className="comfort-name truncate">{name}</p>
-          <p className="text-[1.125rem] text-ink-muted">
-            <time dateTime={new Date(msg.sentAt).toISOString()}>{formatTime(msg.sentAt)}</time>
-          </p>
-        </div>
-      </div>
-
-      {msg.reply && (
-        <div className="mt-4 rounded-2xl border-l-8 border-line-strong bg-cream px-4 py-3 text-[1.25rem]">
-          <p className="font-bold">Replying to {msg.reply.senderName ?? 'a message'}</p>
-          <p className="line-clamp-3 text-ink">{msg.reply.text || 'Message'}</p>
-        </div>
+    <Tag id={`msg-${msg.id}`} className={`comfort-card c-row ${mine ? 'comfort-mine is-mine' : ''} ${animate ? 'msg-enter' : ''}`}>
+      {!mine && (
+        <span className="mb-9 self-end">
+          <Avatar id={msg.senderId} name={name} size={48} photo={msg.senderPhoto} />
+        </span>
       )}
-
-      <VoiceAttachment msg={msg} size="comfort" />
-
-      {isPhoto ? (
-        <button
-          type="button"
-          className="mt-4 block w-full overflow-hidden rounded-2xl border-2 border-line"
-          onClick={() => msg.imageUrl && onOpenImage?.(msg.imageUrl, alt)}
-          aria-label={`${alt}. Open larger`}
-        >
-          {msg.imageUrl && <img src={msg.imageUrl} alt="" className="max-h-[60dvh] w-full object-contain" style={msg.thumbnail ? { backgroundImage: `url(${msg.thumbnail})`, backgroundSize: 'cover' } : undefined} />}
-        </button>
-      ) : (
-        <>
-          <p className="comfort-text mt-4">{body}</p>
-          {translation && <TranslationNote state={translation} original={msg.text} size="comfort" />}
-        </>
-      )}
-
-      {reactions.length > 0 && (
-        <p className="mt-3 text-[1.25rem] text-ink">
-          <span className="sr-only">Reactions: </span>
-          {reactions.join('   ')}
-        </p>
-      )}
-
-      <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <ListenButton messageId={msg.id} spokenText={spoken} sender={name} speech={speech} lang={translated ? speechLang(readerLang) : undefined} />
-        {mine && seenBy && (
-          <p className="flex items-center gap-1.5 text-[1.125rem] font-semibold text-ink-muted">
-            <CheckIcon />
-            <span>{seenBy}</span>
+      <div className="c-col">
+        {!mine && (
+          <p className="comfort-name tone-name px-1" style={{ '--tone': tone } as CSSProperties}>
+            {name}
           </p>
         )}
+        <div className="c-bubble">
+          <span className="sr-only">{mine ? 'You' : name}: </span>
+          {msg.reply && (
+            <div className={`reply-quote ${mine ? 'reply-quote-mine' : ''} mb-3 text-[1.25rem]`}>
+              <p className="font-bold">Replying to {msg.reply.senderName ?? 'a message'}</p>
+              <p className="line-clamp-3">{msg.reply.text || 'Message'}</p>
+            </div>
+          )}
+
+          <VoiceAttachment msg={msg} size="comfort" />
+
+          {isPhoto ? (
+            <button
+              type="button"
+              className="block w-full overflow-hidden rounded-2xl"
+              onClick={() => msg.imageUrl && onOpenImage?.(msg.imageUrl, alt)}
+              aria-label={`${alt}. Open larger`}
+            >
+              {msg.imageUrl && (
+                <img
+                  src={msg.imageUrl}
+                  alt=""
+                  className="max-h-[60dvh] w-full object-contain"
+                  style={msg.thumbnail ? { backgroundImage: `url(${msg.thumbnail})`, backgroundSize: 'cover' } : undefined}
+                />
+              )}
+            </button>
+          ) : (
+            <>
+              <p className="comfort-text">{body}</p>
+              {translation && <TranslationNote state={translation} original={msg.text} size="comfort" />}
+            </>
+          )}
+
+          {reactions.length > 0 && (
+            <p className="mt-3 text-[1.25rem]">
+              <span className="sr-only">Reactions: </span>
+              {reactions.join('   ')}
+            </p>
+          )}
+
+          {!mine && (
+            <div className="mt-4">
+              <ListenButton messageId={msg.id} spokenText={spoken} sender={name} speech={speech} lang={translated ? speechLang(readerLang) : undefined} />
+            </div>
+          )}
+        </div>
+        <p className="flex flex-wrap items-center gap-x-2 px-1 text-[1.125rem] text-ink-muted">
+          <time dateTime={new Date(msg.sentAt).toISOString()}>{formatTime(msg.sentAt)}</time>
+          {mine && seenBy && (
+            <span className="inline-flex items-center gap-1.5 font-semibold">
+              <CheckIcon />
+              {seenBy}
+            </span>
+          )}
+        </p>
       </div>
     </Tag>
   );

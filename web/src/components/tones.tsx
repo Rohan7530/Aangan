@@ -1,10 +1,10 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import { useProfileColor } from '../features/settings/profileColors';
 
-// A distinct warm colour per member. Every tone carries white initials at
-// >= 6.9:1 and works as a name colour on cream at >= 6.3:1. Terracotta is kept
-// out on purpose: it is reserved for "my" messages.
-export const TONES = ['#7a5212', '#5b3a5e', '#1f4a39', '#8a2846', '#1f5a5a', '#2e4a6b'];
+// A distinct colour per member (iOS-style hues, deepened for contrast): white
+// initials at >= 5.3:1, and readable as a name colour on #F2F2F7 at >= 4.7:1.
+// Blue is kept out on purpose: it is reserved for my own messages.
+export const TONES = ['#4a3fc4', '#8a35b0', '#c0175a', '#b04a00', '#1e7b34', '#00707a'];
 
 function hashTone(id: string): string {
   let h = 0;

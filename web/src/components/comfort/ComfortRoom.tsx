@@ -6,7 +6,7 @@ import type { RichMessage } from '../../nexconn/rich';
 import type { ConnectionState } from '../../nexconn/types';
 import type { Session } from '../../session';
 import { ConnectionChip } from '../ConnectionChip';
-import { BackIcon, TextSizeIcon } from '../icons';
+import { BackIcon, InfoIcon, TextSizeIcon } from '../icons';
 import { Lightbox } from '../Lightbox';
 import { MessageList } from '../MessageList';
 import { PhotoSendSheet } from '../PhotoSendSheet';
@@ -39,16 +39,22 @@ export function ComfortRoom(props: Props) {
   // Room info (members, invite link, check-in): the same right-side panel as
   // Standard, in Comfort sizing. Beside the chat when there is room for both,
   // otherwise in place of the chat, so neither gets squeezed.
-  const [infoOpen, setInfoOpen] = useState(false);
+  // Open by default on desktop (beside the chat from 1200px), like Standard.
   const sideBySide = useMediaQuery('(min-width: 1200px)') && !onBack;
+  const [infoOpen, setInfoOpenState] = useState(() => !onBack && window.matchMedia('(min-width: 1200px)').matches);
   const infoId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const wasOpen = useRef(false);
+  const toggled = useRef(false);
+  const setInfoOpen = (next: boolean | ((o: boolean) => boolean)) => {
+    toggled.current = true;
+    setInfoOpenState(next);
+  };
+  // Focus follows the person's own open/close (not the default-open on load).
   useEffect(() => {
+    if (!toggled.current) return;
     if (infoOpen) closeRef.current?.focus();
-    else if (wasOpen.current) triggerRef.current?.focus();
-    wasOpen.current = infoOpen;
+    else triggerRef.current?.focus();
   }, [infoOpen]);
   const [photo, setPhoto] = useState<File | null>(null);
   const [lightbox, setLightbox] = useState<{ url: string; alt: string } | null>(null);
@@ -56,7 +62,7 @@ export function ComfortRoom(props: Props) {
 
   const membersLine = room.memberCount === null ? null : `${room.memberCount} ${room.memberCount === 1 ? 'member' : 'members'}`;
   const bigButton =
-    'inline-flex min-h-[56px] shrink-0 items-center justify-center gap-2 rounded-2xl border-2 border-green bg-surface px-4 text-[1.125rem] font-bold text-green hover:bg-green-soft';
+    'inline-flex min-h-[56px] shrink-0 items-center justify-center gap-2 rounded-full border border-line-strong bg-surface px-4 text-[1.125rem] font-bold text-accent-ink hover:bg-accent-soft';
 
   const info = (
     <InfoPanel
@@ -77,18 +83,18 @@ export function ComfortRoom(props: Props) {
   return (
     <ToneProvider tones={room.tones}>
       {(sideBySide || !infoOpen) && (
-        <section aria-label={`${roomName} conversation`} className="flex min-w-0 flex-1 flex-col bg-cream">
+        <section aria-label={`${roomName} conversation`} className="flex min-w-0 flex-1 flex-col bg-chat">
           <a href="#composer-input" className="skip-link">
             Skip to message box
           </a>
-          <header className="shrink-0 border-b-2 border-line bg-cream px-4 py-3">
+          <header className="shrink-0 border-b border-line bg-surface px-4 py-3">
             <div className="mx-auto flex max-w-4xl flex-wrap items-center gap-3">
               {onBack && (
                 <button type="button" onClick={onBack} className={bigButton}>
                   <BackIcon />
-                  <span className="whitespace-nowrap">My rooms</span>
+                  <span className="whitespace-nowrap">My families</span>
                   {otherUnread > 0 && (
-                    <span className="rounded-xl bg-terracotta px-2 text-white">
+                    <span className="rounded-xl bg-accent px-2 text-white">
                       {otherUnread} new<span className="sr-only"> in other rooms</span>
                     </span>
                   )}
@@ -96,45 +102,60 @@ export function ComfortRoom(props: Props) {
               )}
               {/* The room: tap to see who is here. Takes its own full row on phones. */}
               <button
+                type="button"
+                onClick={() => setInfoOpen((o) => !o)}
+                aria-expanded={infoOpen}
+                aria-controls={infoId}
+                className={`flex min-w-0 items-center gap-3 rounded-2xl px-2 py-1 text-left hover:bg-fill ${onBack ? 'order-last w-full' : 'flex-1'}`}
+                style={{ minHeight: 64 }}
+              >
+                <RoomAvatar id={channelId} name={roomName} size={56} />
+                <span className="min-w-0">
+                  <span className="line-clamp-2 block font-bold leading-tight text-ink" style={{ fontSize: 'var(--title-size)' }}>
+                    {roomName}
+                  </span>
+                  <span className="flex flex-wrap items-center gap-x-3 text-[1.125rem] text-ink-muted">
+                    {membersLine && (
+                      <span>
+                        {membersLine}
+                        {room.onlineCount ? `, ${room.onlineCount} online` : ''}
+                      </span>
+                    )}
+                    <span className={connection === 'connected' ? 'sr-only' : ''}>
+                      <ConnectionChip state={connection} />
+                    </span>
+                    <span className="sr-only">Show who is here</span>
+                  </span>
+                </span>
+              </button>
+              {/* Phones: back + Info on one row, the family below; How I read lives in Settings. */}
+              {!onBack && (
+                <button type="button" onClick={onOpenReader} aria-haspopup="dialog" className={bigButton}>
+                  <TextSizeIcon />
+                  <span className="whitespace-nowrap">How I read</span>
+                </button>
+              )}
+              <button
                 ref={triggerRef}
                 type="button"
                 onClick={() => setInfoOpen((o) => !o)}
                 aria-expanded={infoOpen}
                 aria-controls={infoId}
-                className={`flex min-w-0 items-center gap-3 rounded-2xl px-2 py-1 text-left hover:bg-sand ${onBack ? 'order-last w-full' : 'flex-1'}`}
-                style={{ minHeight: 64 }}
+                className={`${bigButton} ${infoOpen ? 'bg-accent-soft' : ''} ${onBack ? 'ml-auto' : ''}`}
               >
-                <RoomAvatar id={channelId} name={roomName} size={56} />
-                <span className="min-w-0">
-                  <span className="line-clamp-2 block font-bold leading-tight text-green" style={{ fontSize: 'var(--title-size)' }}>
-                    {roomName}
-                  </span>
-                  <span className="flex flex-wrap items-center gap-x-3 text-[1.125rem] text-ink-muted">
-                    {membersLine && (
-                      <span className="underline decoration-dotted underline-offset-4">
-                        {membersLine}
-                        {room.onlineCount ? `, ${room.onlineCount} online` : ''}
-                      </span>
-                    )}
-                    <ConnectionChip state={connection} />
-                    <span className="sr-only">Show who is here</span>
-                  </span>
-                </span>
-              </button>
-              <button type="button" onClick={onOpenReader} aria-haspopup="dialog" className={`${bigButton} ${onBack ? 'ml-auto' : ''}`}>
-                <TextSizeIcon />
-                <span className="whitespace-nowrap">How I read</span>
+                <InfoIcon />
+                <span>Info</span>
               </button>
             </div>
           </header>
 
           {fatal ? (
-            <p role="alert" className="border-b border-line bg-terracotta-soft px-4 py-3 font-semibold text-terracotta-deep">
+            <p role="alert" className="border-b border-line bg-danger-soft px-4 py-3 font-semibold text-danger">
               {fatal}
             </p>
           ) : (
             connection === 'offline' &&
-            !room.loading && <p className="border-b border-line bg-sand px-4 py-3 text-ink">You are offline. Aangan will reconnect by itself.</p>
+            !room.loading && <p className="border-b border-line bg-fill px-4 py-3 text-ink">You are offline. Aangan will reconnect by itself.</p>
           )}
 
           <MessageList

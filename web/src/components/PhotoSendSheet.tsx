@@ -41,8 +41,8 @@ export function PhotoSendSheet({ file, onCancel, onSend }: Props) {
       )}
       {sending && (
         <div className="mt-4" role="status">
-          <div className="h-3 w-full overflow-hidden rounded-full bg-sand">
-            <div className="h-full bg-green transition-[width]" style={{ width: `${progress}%` }} />
+          <div className="h-3 w-full overflow-hidden rounded-full bg-fill">
+            <div className="h-full bg-accent transition-[width]" style={{ width: `${progress}%` }} />
           </div>
           <p className="mt-1 text-ink-muted">Uploading… {progress}%</p>
         </div>
@@ -65,7 +65,7 @@ export function PhotoSendSheet({ file, onCancel, onSend }: Props) {
           type="button"
           onClick={send}
           disabled={sending}
-          className="min-h-[52px] flex-1 rounded-2xl bg-terracotta font-bold text-white hover:bg-terracotta-deep disabled:opacity-80"
+          className="min-h-[52px] flex-1 rounded-2xl bg-accent font-bold text-white hover:bg-accent-deep disabled:opacity-80"
         >
           {sending ? 'Sending…' : 'Send photo'}
         </button>

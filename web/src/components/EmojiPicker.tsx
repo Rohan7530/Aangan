@@ -72,7 +72,7 @@ export function EmojiPicker({ onPick, onClose }: Props) {
             title={s.label}
             onClick={() => setTab(i)}
             className={`grid h-12 w-12 place-items-center rounded-t-xl text-[1.375rem] ${
-              tab === i ? 'bg-green-soft shadow-[inset_0_-3px_0_var(--color-green)]' : 'hover:bg-sand'
+              tab === i ? 'bg-accent-soft shadow-[inset_0_-3px_0_var(--color-accent)]' : 'hover:bg-fill'
             }`}
           >
             {s.icon}
@@ -85,7 +85,7 @@ export function EmojiPicker({ onPick, onClose }: Props) {
             key={e}
             type="button"
             onClick={() => onPick(e)}
-            className="grid h-12 w-12 place-items-center rounded-xl text-[1.5rem] hover:bg-sand"
+            className="grid h-12 w-12 place-items-center rounded-xl text-[1.5rem] hover:bg-fill"
           >
             {e}
           </button>

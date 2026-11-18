@@ -66,10 +66,12 @@ export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill, speech
     }
   }
 
-  const big = 'inline-flex min-h-[64px] items-center justify-center gap-2 rounded-2xl px-4 text-[1.375rem] font-bold';
+  // Photo / Speak: white buttons, dark labels (AAA), coloured icons. Icon over label on phones.
+  const big =
+    'inline-flex min-h-[64px] min-w-[64px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl border border-line-strong bg-surface px-2 text-[1.1875rem] font-bold leading-none hover:bg-accent-soft @3xl:flex-row @3xl:gap-2 @3xl:px-4 @3xl:text-[1.25rem]';
 
   return (
-    <form onSubmit={submit} className="shrink-0 border-t border-line bg-cream px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3" aria-label="Write a message">
+    <form onSubmit={submit} className="@container shrink-0 border-t border-line bg-surface px-3 sm:px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3" aria-label="Write a message">
       <div className="mx-auto flex max-w-5xl flex-col gap-3">
         {voice.state.phase !== 'idle' ? (
           <VoicePanel voice={voice} size="comfort" onSend={onSendVoice} />
@@ -96,8 +98,15 @@ export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill, speech
             e.target.value = '';
           }}
         />
-        {/* One line: message box, Photo, Speak, Send (buttons wrap below on phones). */}
-        <div className="flex flex-wrap items-end gap-3">
+        {/* One row: Photo, Speak, the message box, Send. On phones the labels sit under the icons. */}
+        <div className="flex items-end gap-2 @3xl:gap-3">
+          <button type="button" disabled={disabled} onClick={() => fileRef.current?.click()} className={`${big} text-ink disabled:opacity-60`}>
+            <span className="text-accent-ink">
+              <PhotoIcon />
+            </span>
+            <span>Photo</span>
+          </button>
+          {canSpeak && <SpeakButton supported disabled={disabled} onStart={() => void voice.start()} />}
           <textarea
             ref={inputRef}
             id={COMFORT_INPUT_ID}
@@ -105,32 +114,22 @@ export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill, speech
             onChange={(e) => setText(e.target.value)}
             onKeyDown={onKeyDown}
             rows={1}
-            placeholder={disabled ? 'Waiting for connection…' : 'Type your message here'}
+            placeholder={disabled ? 'Waiting for connection…' : 'Type a message'}
             disabled={disabled}
             aria-describedby={error ? errorId : undefined}
-            className="min-w-0 flex-[1_1_16rem] resize-none rounded-2xl border-2 border-line-strong bg-surface px-5 py-[14px] leading-snug text-ink placeholder:text-ink-muted focus:border-green focus-visible:outline-offset-1 disabled:bg-sand"
+            className="min-w-0 flex-1 resize-none rounded-[24px] border border-line-strong bg-surface px-5 py-[14px] leading-snug text-ink placeholder:text-ink-muted focus:border-accent focus-visible:outline-offset-1 disabled:bg-fill"
             style={{ fontSize: 'var(--input-size)', minHeight: 64, maxHeight: 200 }}
           />
-          <div className="flex shrink-0 gap-3">
-            <button
-              type="button"
-              disabled={disabled}
-              onClick={() => fileRef.current?.click()}
-              className={`${big} border-2 border-green bg-surface text-green hover:bg-green-soft disabled:opacity-60`}
-            >
-              <PhotoIcon />
-              <span>Photo</span>
-            </button>
-            {canSpeak && <SpeakButton supported disabled={disabled} onStart={() => void voice.start()} />}
-            <button
-              type="submit"
-              disabled={!canSend}
-              className={`${big} bg-terracotta text-white hover:bg-terracotta-deep disabled:bg-line disabled:text-ink-muted`}
-            >
-              <span>{sending ? 'Sending…' : 'Send'}</span>
+          <button
+            type="submit"
+            disabled={!canSend}
+            className="inline-flex min-h-[64px] shrink-0 items-center justify-center gap-2 rounded-full bg-accent px-5 text-[1.25rem] font-bold text-white hover:bg-accent-deep disabled:bg-fill disabled:text-ink-muted @3xl:px-7 @3xl:text-[1.375rem]"
+          >
+            <span>{sending ? 'Sending…' : 'Send'}</span>
+            <span className="hidden @3xl:inline">
               <SendIcon />
-            </button>
-          </div>
+            </span>
+          </button>
         </div>
         {!canSpeak && <p className="text-[1.125rem] text-ink-muted">{UNSUPPORTED_REASON}</p>}
         </>

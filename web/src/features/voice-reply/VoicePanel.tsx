@@ -47,7 +47,7 @@ export function VoicePanel({ voice, size, onSend }: Props) {
     const secs = (now - state.startedAt) / 1000;
     if (comfort) {
       return (
-        <div className="rounded-3xl bg-[#7f1d12] p-5 text-white" role="group" aria-label="Listening">
+        <div className="rounded-3xl bg-rec p-5 text-white" role="group" aria-label="Listening">
           <p className="flex items-center gap-3 text-[2rem] font-bold leading-tight">
             <span className="rec-dot h-5 w-5 rounded-full bg-white" aria-hidden="true" />
             Listening…
@@ -55,14 +55,14 @@ export function VoicePanel({ voice, size, onSend }: Props) {
           </p>
           <p className="mt-3 min-h-[3.5rem] text-[1.5rem] leading-snug" aria-live="polite">
             {state.transcript}
-            {state.interim && <span className="text-[#fde3dc]"> {state.interim}</span>}
-            {!state.transcript && !state.interim && <span className="text-[#fde3dc]">Speak now. Your words will appear here.</span>}
+            {state.interim && <span className="text-rec-soft"> {state.interim}</span>}
+            {!state.transcript && !state.interim && <span className="text-rec-soft">Speak now. Your words will appear here.</span>}
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <button
               type="button"
               onClick={() => void voice.stop()}
-              className="on-dark inline-flex min-h-[72px] flex-1 items-center justify-center gap-3 rounded-2xl bg-white px-6 text-[1.5rem] font-bold text-[#7f1d12]"
+              className="on-dark inline-flex min-h-[72px] flex-1 items-center justify-center gap-3 rounded-2xl bg-white px-6 text-[1.5rem] font-bold text-rec"
             >
               <StopIcon />
               Stop
@@ -80,11 +80,11 @@ export function VoicePanel({ voice, size, onSend }: Props) {
     }
     return (
       <div className="flex items-center gap-2" role="group" aria-label="Listening">
-        <button type="button" className="grid h-12 w-12 shrink-0 place-items-center rounded-full text-ink-muted hover:bg-sand" aria-label="Cancel voice message" onClick={voice.cancel}>
+        <button type="button" className="grid h-12 w-12 shrink-0 place-items-center rounded-full text-ink-muted hover:bg-fill" aria-label="Cancel voice message" onClick={voice.cancel}>
           <TrashIcon />
         </button>
-        <div className="flex min-h-[48px] min-w-0 flex-1 items-center gap-3 rounded-3xl border-2 border-danger bg-terracotta-soft px-4 py-2">
-          <span className="rec-dot h-3 w-3 shrink-0 rounded-full bg-danger" aria-hidden="true" />
+        <div className="flex min-h-[48px] min-w-0 flex-1 items-center gap-3 rounded-3xl border-2 border-danger bg-danger-soft px-4 py-2">
+          <span className="rec-dot h-3 w-3 shrink-0 rounded-full bg-danger-fill" aria-hidden="true" />
           <span className="shrink-0 font-semibold text-danger">Listening…</span>
           <span className="min-w-0 flex-1 truncate text-ink" aria-live="polite">
             {state.transcript} <span className="text-ink-muted">{state.interim}</span>
@@ -93,7 +93,7 @@ export function VoicePanel({ voice, size, onSend }: Props) {
         </div>
         <button
           type="button"
-          className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-danger text-white hover:bg-[#7f1d12]"
+          className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-danger-fill text-white hover:bg-rec"
           aria-label="Stop recording"
           title="Stop"
           onClick={() => void voice.stop()}
@@ -117,7 +117,7 @@ export function VoicePanel({ voice, size, onSend }: Props) {
           value={state.transcript}
           onChange={(e) => voice.setTranscript(e.target.value)}
           rows={comfort ? 3 : 2}
-          className={`mt-2 w-full resize-none rounded-2xl border-2 border-line-strong bg-white px-4 py-3 text-ink focus:border-green focus-visible:outline-offset-1 ${
+          className={`mt-2 w-full resize-none rounded-2xl border border-line-strong bg-surface px-4 text-ink py-3 text-ink focus:border-accent focus-visible:outline-offset-1 ${
             comfort ? 'text-[1.5rem] leading-snug' : 'text-[1.125rem]'
           }`}
         />
@@ -134,7 +134,7 @@ export function VoicePanel({ voice, size, onSend }: Props) {
             type="button"
             onClick={() => void voice.redo()}
             disabled={sending}
-            className={`inline-flex items-center justify-center rounded-2xl border-2 border-green bg-surface px-5 font-bold text-green hover:bg-green-soft ${
+            className={`inline-flex items-center justify-center rounded-2xl border-2 border-accent bg-surface px-5 font-bold text-accent-ink hover:bg-accent-soft ${
               comfort ? 'min-h-[64px] text-[1.375rem]' : 'min-h-[48px]'
             }`}
           >
@@ -144,7 +144,7 @@ export function VoicePanel({ voice, size, onSend }: Props) {
             type="button"
             onClick={() => void send()}
             disabled={sending || !state.transcript.trim()}
-            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-terracotta px-6 font-bold text-white hover:bg-terracotta-deep disabled:opacity-70 ${
+            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-accent px-6 font-bold text-white hover:bg-accent-deep disabled:opacity-70 ${
               comfort ? 'min-h-[64px] text-[1.5rem]' : 'min-h-[48px]'
             }`}
           >
@@ -167,13 +167,13 @@ export function VoicePanel({ voice, size, onSend }: Props) {
   // ---- error -------------------------------------------------------------------------------
   if (state.phase === 'error') {
     return (
-      <div className={`rounded-3xl border-2 border-danger bg-terracotta-soft ${comfort ? 'p-5' : 'p-3'}`} role="alert">
+      <div className={`rounded-3xl border-2 border-danger bg-danger-soft ${comfort ? 'p-5' : 'p-3'}`} role="alert">
         <p className={comfort ? 'text-[1.375rem] font-bold text-ink' : 'font-semibold text-ink'}>{state.message}</p>
         <div className="mt-3 flex flex-wrap gap-3">
           <button
             type="button"
             onClick={() => void voice.start()}
-            className={`rounded-2xl bg-green px-5 font-bold text-white ${comfort ? 'min-h-[64px] text-[1.25rem]' : 'min-h-[48px]'}`}
+            className={`rounded-2xl bg-accent px-5 font-bold text-white ${comfort ? 'min-h-[64px] text-[1.25rem]' : 'min-h-[48px]'}`}
           >
             Try again
           </button>

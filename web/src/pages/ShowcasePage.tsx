@@ -18,16 +18,16 @@ export function ShowcasePage() {
       <nav className="mx-auto flex max-w-[1400px] items-center justify-between gap-4 px-5 py-4" aria-label="Aangan">
         <a href="/" className="flex items-center gap-3 rounded-2xl" aria-label="Aangan home">
           <BrandMark size={40} />
-          <span className="text-[1.5rem] font-bold text-green">Aangan</span>
+          <span className="text-[1.5rem] font-bold text-accent-ink">Aangan</span>
         </a>
-        <a href="/" className="inline-flex min-h-[48px] items-center rounded-2xl border-2 border-green bg-surface px-4 font-semibold text-green hover:bg-green-soft">
+        <a href="/" className="inline-flex min-h-[48px] items-center rounded-2xl border-2 border-accent bg-surface px-4 font-semibold text-accent-ink hover:bg-accent-soft">
           Join your family
         </a>
       </nav>
 
       <header className="mx-auto max-w-3xl px-5 pb-6 pt-2 text-center">
-        <p className="inline-flex items-center gap-2 rounded-full bg-green-soft px-4 py-1 font-semibold text-green">
-          <span className="h-2.5 w-2.5 rounded-full bg-green" aria-hidden="true" />
+        <p className="inline-flex items-center gap-2 rounded-full bg-accent-soft px-4 py-1 font-semibold text-accent-ink">
+          <span className="h-2.5 w-2.5 rounded-full bg-accent" aria-hidden="true" />
           Live: two real people, one family room
         </p>
         <h1 className="mt-4 text-balance text-[2.5rem] font-bold leading-tight tracking-tight text-ink sm:text-[3.25rem]">
@@ -48,7 +48,7 @@ export function ShowcasePage() {
             aria-pressed={active === v.key}
             onClick={() => setActive(v.key)}
             className={`min-h-[52px] flex-1 rounded-2xl border-2 px-3 font-semibold ${
-              active === v.key ? 'border-green bg-green text-white' : 'border-line-strong bg-surface text-ink'
+              active === v.key ? 'border-accent bg-accent text-white' : 'border-line-strong bg-surface text-ink'
             }`}
           >
             {v.name.split(',')[0]} · {v.mode}
@@ -90,7 +90,7 @@ function Caption({ name, mode, note }: { name: string; mode: string; note: strin
     <div className="mb-3 text-center">
       <p className="text-[1.375rem] font-bold text-ink">{name}</p>
       <p className="text-ink-muted">
-        <span className="font-semibold text-terracotta-deep">{mode}</span> · {note}
+        <span className="font-semibold text-danger">{mode}</span> · {note}
       </p>
     </div>
   );

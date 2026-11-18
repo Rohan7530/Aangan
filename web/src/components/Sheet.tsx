@@ -38,7 +38,7 @@ export function Sheet({ open, onClose, title, subtitle, children }: Props) {
       <div className="flex max-h-[90dvh] flex-col">
         <header className="flex items-center justify-between gap-4 border-b border-line px-6 pb-4 pt-6">
           <div className="min-w-0">
-            <h2 id={titleId} className="text-[1.5rem] font-bold text-green">
+            <h2 id={titleId} className="text-[1.5rem] font-bold text-accent-ink">
               {title}
             </h2>
             {subtitle && <p className="text-ink-muted">{subtitle}</p>}
@@ -46,7 +46,7 @@ export function Sheet({ open, onClose, title, subtitle, children }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 rounded-2xl bg-green px-6 font-semibold text-white hover:bg-[#173a2c]"
+            className="shrink-0 rounded-2xl bg-accent px-6 font-semibold text-white hover:bg-accent-deep"
             style={{ minHeight: 'var(--tap, 48px)' }}
           >
             Done

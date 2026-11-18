@@ -31,7 +31,7 @@ export function NewRoomSheet({ open, authKey, onClose, onCreated }: Props) {
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) {
-      setError('Please give the room a name.');
+      setError('Please give the family a name.');
       return;
     }
     setBusy(true);
@@ -40,14 +40,14 @@ export function NewRoomSheet({ open, authKey, onClose, onCreated }: Props) {
       const r = await createRoom(authKey, trimmed);
       setCreated({ channelId: r.channelId, name: r.name, link: `${window.location.origin}${r.invitePath}` });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not create the room.');
+      setError(err instanceof Error ? err.message : 'Could not create the family.');
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <Sheet open={open} onClose={onClose} title="New room" subtitle={created ? 'Share the link with your family.' : 'A room for part of the family.'}>
+    <Sheet open={open} onClose={onClose} title="New family" subtitle={created ? 'Share the link so they can join.' : 'A group for your family, or part of it.'}>
       {created ? (
         <div>
           <p className="font-semibold">“{created.name}” is ready.</p>
@@ -66,7 +66,7 @@ export function NewRoomSheet({ open, authKey, onClose, onCreated }: Props) {
                   // clipboard blocked
                 }
               }}
-              className="inline-flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-green font-semibold text-green hover:bg-green-soft"
+              className="inline-flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-accent font-semibold text-accent-ink hover:bg-accent-soft"
             >
               {copied ? <CheckIcon /> : <CopyIcon />}
               {copied ? 'Copied' : 'Copy link'}
@@ -77,16 +77,16 @@ export function NewRoomSheet({ open, authKey, onClose, onCreated }: Props) {
                 onCreated(created.channelId);
                 onClose();
               }}
-              className="min-h-[52px] flex-1 rounded-2xl bg-terracotta font-bold text-white hover:bg-terracotta-deep"
+              className="min-h-[52px] flex-1 rounded-2xl bg-accent font-bold text-white hover:bg-accent-deep"
             >
-              Open room
+              Open family
             </button>
           </div>
         </div>
       ) : (
         <form onSubmit={submit} noValidate>
           <label htmlFor="new-room-name" className="block font-bold">
-            Room name
+            Family name
           </label>
           <input
             id="new-room-name"
@@ -95,7 +95,7 @@ export function NewRoomSheet({ open, authKey, onClose, onCreated }: Props) {
             maxLength={64}
             placeholder="e.g. Cousins, Diwali plans"
             aria-invalid={error ? true : undefined}
-            className="mt-2 min-h-[56px] w-full rounded-2xl border-2 border-line-strong bg-white px-4 text-[1.125rem] focus:border-green focus-visible:outline-offset-1"
+            className="mt-2 min-h-[56px] w-full rounded-2xl border border-line-strong bg-surface px-4 text-ink text-[1.125rem] focus:border-accent focus-visible:outline-offset-1"
           />
           {error && (
             <p role="alert" className="mt-2 font-semibold text-danger">
@@ -105,9 +105,9 @@ export function NewRoomSheet({ open, authKey, onClose, onCreated }: Props) {
           <button
             type="submit"
             disabled={busy}
-            className="mt-4 min-h-[56px] w-full rounded-2xl bg-terracotta text-[1.125rem] font-bold text-white hover:bg-terracotta-deep disabled:opacity-80"
+            className="mt-4 min-h-[56px] w-full rounded-2xl bg-accent text-[1.125rem] font-bold text-white hover:bg-accent-deep disabled:opacity-80"
           >
-            {busy ? 'Creating…' : 'Create room'}
+            {busy ? 'Creating…' : 'Create family'}
           </button>
         </form>
       )}

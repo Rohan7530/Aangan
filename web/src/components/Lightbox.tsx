@@ -35,7 +35,7 @@ export function Lightbox({ image, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="absolute right-4 top-4 inline-flex min-h-[48px] items-center gap-2 rounded-2xl bg-white/95 px-4 font-semibold text-ink"
+            className="absolute right-4 top-4 inline-flex min-h-[48px] items-center gap-2 rounded-full bg-white/95 px-4 font-semibold text-[#1c1c1e]"
           >
             <CloseIcon />
             Close

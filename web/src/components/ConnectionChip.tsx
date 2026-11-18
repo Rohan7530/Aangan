@@ -1,9 +1,9 @@
 import type { ConnectionState } from '../nexconn/types';
 
 const META: Record<ConnectionState, { label: string; dot: string }> = {
-  connected: { label: 'Connected', dot: 'bg-green' },
-  connecting: { label: 'Connecting…', dot: 'bg-ochre' },
-  offline: { label: 'Offline', dot: 'bg-danger' },
+  connected: { label: 'Connected', dot: 'bg-success' },
+  connecting: { label: 'Connecting…', dot: 'bg-warning' },
+  offline: { label: 'Offline', dot: 'bg-danger-fill' },
 };
 
 // Always a word, never colour alone.

@@ -5,7 +5,8 @@ import type { ConnectionState } from '../../nexconn/types';
 import { useReaderPrefs } from '../reader-view';
 import { TEXT_STEP_LABELS } from '../reader-view/prefs';
 import { LANGUAGES } from '../reader-view/translation';
-import { useTheme } from './appearance';
+import { resizeToSquare } from '../../lib/resizeImage';
+import { useThemePref, type ThemePref } from './appearance';
 import { AVATAR_COLORS } from './profileColors';
 import { isSoundOn, playChime, setSoundOn } from './sound';
 
@@ -19,10 +20,19 @@ interface Props {
   profileEditable?: boolean;
   onRename: (name: string) => Promise<void>;
   onColor: (color: string) => Promise<void>;
+  /** A resized picture (data URL), or null to remove my photo. */
+  onPhoto: (image: string | null) => Promise<void>;
+  myPhoto?: string;
   onOpenReader: () => void;
   /** Omit to hide "Sign out" (e.g. in the showcase). */
   onSignOut?: () => void;
 }
+
+const THEMES: { value: ThemePref; label: string }[] = [
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+  { value: 'system', label: 'System' },
+];
 
 const CONNECTION_TEXT: Record<ConnectionState, string> = { connected: 'Connected', connecting: 'Connecting…', offline: 'Offline' };
 
@@ -30,9 +40,11 @@ const CONNECTION_TEXT: Record<ConnectionState, string> = { connected: 'Connected
 // A panel that pops up from the Settings button (not a full-screen dialog):
 // Escape or a click outside closes it and focus goes back to the button.
 // Mount it only while open. Same panel in both modes; Comfort is larger.
-export function SettingsPanel({ onClose, connection, comfort, me, myColor, profileEditable = true, onRename, onColor, onOpenReader, onSignOut }: Props) {
+export function SettingsPanel({ onClose, connection, comfort, me, myColor, myPhoto, profileEditable = true, onRename, onColor, onPhoto, onOpenReader, onSignOut }: Props) {
   const { prefs } = useReaderPrefs();
-  const [theme, setTheme] = useTheme();
+  const [theme, setTheme] = useThemePref();
+  const [photoStatus, setPhotoStatus] = useState<{ kind: 'ok' | 'error' | 'busy'; text: string } | null>(null);
+  const photoInput = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(me.name);
   const [nameStatus, setNameStatus] = useState<{
     kind: 'ok' | 'error' | 'busy';
@@ -98,6 +110,27 @@ export function SettingsPanel({ onClose, connection, comfort, me, myColor, profi
     }
   }
 
+  async function pickPhoto(file: File | undefined) {
+    if (!file) return;
+    setPhotoStatus({ kind: 'busy', text: 'Saving photo…' });
+    try {
+      await onPhoto(await resizeToSquare(file));
+      setPhotoStatus({ kind: 'ok', text: 'Photo saved.' });
+    } catch (err) {
+      setPhotoStatus({ kind: 'error', text: err instanceof Error ? err.message : 'Could not save the photo.' });
+    }
+  }
+
+  async function removePhoto() {
+    setPhotoStatus({ kind: 'busy', text: 'Removing…' });
+    try {
+      await onPhoto(null);
+      setPhotoStatus({ kind: 'ok', text: 'Photo removed.' });
+    } catch (err) {
+      setPhotoStatus({ kind: 'error', text: err instanceof Error ? err.message : 'Could not remove the photo.' });
+    }
+  }
+
   async function pickColor(color: string) {
     setColorStatus(null);
     try {
@@ -108,17 +141,21 @@ export function SettingsPanel({ onClose, connection, comfort, me, myColor, profi
     }
   }
 
-  const h = comfort ? 'text-[1.5rem] font-bold' : 'text-[1.125rem] font-bold';
+  // iOS-style grouped sections: a small heading over a white rounded card.
+  const h = comfort ? 'px-1 text-[1.5rem] font-bold' : 'px-1 text-[1rem] font-semibold uppercase tracking-wide text-ink-muted';
   const text = comfort ? 'text-[1.25rem]' : '';
   const tap = comfort ? 'min-h-[64px] text-[1.25rem]' : 'min-h-[48px]';
+  const card = 'group-card mt-2 p-4';
+  const btnPrimary = `rounded-full bg-accent px-5 ${comfort ? 'font-bold' : 'font-semibold'} text-white hover:bg-accent-deep disabled:opacity-70 ${tap}`;
+  const btnSecondary = `rounded-full border border-line-strong bg-surface px-5 ${comfort ? 'font-bold' : 'font-semibold'} text-accent-ink hover:bg-accent-soft ${tap}`;
   const langName = LANGUAGES.find((l) => l.code === prefs.language)?.english ?? 'English';
 
   return (
     <div ref={panelRef} role="dialog" aria-modal="false" aria-labelledby={titleId} tabIndex={-1} className={`settings-pop ${comfort ? 'is-comfort' : ''}`}>
-      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-line bg-cream px-5 py-4">
-        <Avatar id={me.userId} name={me.name} size={comfort ? 56 : 44} mine />
+      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-line bg-canvas px-5 py-4">
+        <Avatar id={me.userId} name={me.name} size={comfort ? 56 : 44} mine photo={myPhoto} />
         <div className="min-w-0 flex-1">
-          <h2 id={titleId} className={`font-bold leading-tight text-green ${comfort ? 'text-[1.5rem]' : 'text-[1.25rem]'}`}>
+          <h2 id={titleId} className={`font-bold leading-tight text-ink ${comfort ? 'text-[1.5rem]' : 'text-[1.25rem]'}`}>
             Settings
           </h2>
           <p className={`truncate text-ink-muted ${comfort ? 'text-[1.125rem]' : 'text-[1rem]'}`}>
@@ -133,8 +170,8 @@ export function SettingsPanel({ onClose, connection, comfort, me, myColor, profi
           }}
           className={
             comfort
-              ? 'inline-flex min-h-[64px] items-center gap-2 rounded-2xl border-2 border-green bg-surface px-4 text-[1.25rem] font-bold text-green hover:bg-green-soft'
-              : 'grid h-12 w-12 place-items-center rounded-2xl text-ink-muted hover:bg-sand hover:text-ink'
+              ? 'inline-flex min-h-[64px] items-center gap-2 rounded-full bg-surface px-5 text-[1.25rem] font-bold text-accent-ink shadow-[var(--shadow-1)] hover:bg-accent-soft'
+              : 'grid h-12 w-12 place-items-center rounded-full text-ink-muted hover:bg-fill hover:text-ink'
           }
           aria-label={comfort ? undefined : 'Close settings'}
         >
@@ -142,14 +179,43 @@ export function SettingsPanel({ onClose, connection, comfort, me, myColor, profi
           {comfort && <span>Close</span>}
         </button>
       </header>
-      <div className={`flex flex-col gap-8 px-5 pb-6 pt-5 ${text}`}>
+      <div className={`flex flex-col gap-6 px-4 pb-6 pt-4 ${text}`}>
         {/* ---- Profile ---- */}
         {profileEditable && (
           <section aria-labelledby={`${nameId}-h`}>
             <h3 id={`${nameId}-h`} className={h}>
               Profile
             </h3>
-            <form onSubmit={saveName} className="mt-3">
+            <div className={card}>
+            <div className="mb-4 flex flex-wrap items-center gap-4">
+              <Avatar id={me.userId} name={me.name} size={comfort ? 80 : 64} mine photo={myPhoto} />
+              <div className="flex flex-wrap gap-2">
+                <input
+                  ref={photoInput}
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  onChange={(e) => {
+                    void pickPhoto(e.target.files?.[0]);
+                    e.target.value = '';
+                  }}
+                />
+                <button type="button" onClick={() => photoInput.current?.click()} disabled={photoStatus?.kind === 'busy'} className={btnPrimary}>
+                  {myPhoto ? 'Change photo' : 'Add photo'}
+                </button>
+                {myPhoto && (
+                  <button type="button" onClick={() => void removePhoto()} disabled={photoStatus?.kind === 'busy'} className={btnSecondary}>
+                    Remove
+                  </button>
+                )}
+              </div>
+              <p role="status" className={`w-full font-semibold empty:hidden ${photoStatus?.kind === 'error' ? 'text-danger' : 'text-ink-muted'}`}>
+                {photoStatus?.text}
+              </p>
+            </div>
+            <form onSubmit={saveName}>
               <label htmlFor={nameId} className="block font-semibold">
                 Display name
               </label>
@@ -161,17 +227,17 @@ export function SettingsPanel({ onClose, connection, comfort, me, myColor, profi
                   maxLength={64}
                   autoComplete="name"
                   aria-describedby={nameStatus ? nameMsgId : undefined}
-                  className={`min-w-0 flex-1 rounded-2xl border-2 border-line-strong bg-surface px-4 text-ink focus:border-green ${tap}`}
+                  className={`min-w-0 flex-1 rounded-[10px] border border-line-strong bg-surface px-4 text-ink focus:border-accent ${tap}`}
                 />
                 <button
                   type="submit"
                   disabled={nameStatus?.kind === 'busy'}
-                  className={`rounded-2xl bg-green px-5 font-bold text-white hover:bg-[#173a2c] disabled:opacity-70 ${tap}`}
+                  className={btnPrimary}
                 >
                   Save name
                 </button>
               </div>
-              <p id={nameMsgId} role="status" className={`mt-2 min-h-[1.5em] font-semibold ${nameStatus?.kind === 'error' ? 'text-danger' : 'text-ink-muted'}`}>
+              <p id={nameMsgId} role="status" className={`mt-2 font-semibold empty:hidden ${nameStatus?.kind === 'error' ? 'text-danger' : 'text-ink-muted'}`}>
                 {nameStatus?.text}
               </p>
             </form>
@@ -196,10 +262,11 @@ export function SettingsPanel({ onClose, connection, comfort, me, myColor, profi
                   </label>
                 ))}
               </div>
-              <p role="status" className="mt-2 min-h-[1.5em] font-semibold text-ink-muted">
+              <p role="status" className="mt-2 font-semibold text-ink-muted empty:hidden">
                 {colorStatus}
               </p>
             </fieldset>
+            </div>
           </section>
         )}
 
@@ -208,28 +275,25 @@ export function SettingsPanel({ onClose, connection, comfort, me, myColor, profi
           <h3 id={`${nameId}-r`} className={h}>
             How I read
           </h3>
-          <p className="mt-1 text-ink-muted">
-            {prefs.mode === 'comfort' ? 'Comfort' : 'Standard'} · {langName} · {TEXT_STEP_LABELS[prefs.textStep]} text
-          </p>
-          <button
-            type="button"
-            onClick={onOpenReader}
-            aria-haspopup="dialog"
-            className={`mt-3 rounded-2xl border-2 border-green bg-surface px-5 font-bold text-green hover:bg-green-soft ${tap}`}
-          >
-            Change how I read
-          </button>
+          <div className={`${card} flex flex-wrap items-center justify-between gap-3`}>
+            <p>
+              {prefs.mode === 'comfort' ? 'Comfort' : 'Standard'} · {langName} · {TEXT_STEP_LABELS[prefs.textStep]} text
+            </p>
+            <button type="button" onClick={onOpenReader} aria-haspopup="dialog" className={btnSecondary}>
+              Change how I read
+            </button>
+          </div>
         </section>
 
         {/* ---- Appearance ---- */}
         <fieldset>
-          <legend className={`mb-3 ${h}`}>Appearance</legend>
-          <div className="grid grid-cols-2 gap-3">
-            {(['light', 'dark'] as const).map((t) => (
-              <label key={t} className="option-card items-center">
-                <input type="radio" name="theme" value={t} checked={theme === t} onChange={() => setTheme(t)} className="sr-only" />
+          <legend className={`mb-2 ${h}`}>Appearance</legend>
+          <div className={`grid gap-2 ${comfort ? 'grid-cols-1' : 'grid-cols-3'}`}>
+            {THEMES.map((t) => (
+              <label key={t.value} className="option-card items-center">
+                <input type="radio" name="theme" value={t.value} checked={theme === t.value} onChange={() => setTheme(t.value)} className="sr-only" />
                 <span className="radio-dot" aria-hidden="true" />
-                <span className="font-bold">{t === 'light' ? 'Light' : 'Dark'}</span>
+                <span className="font-semibold">{t.label}</span>
               </label>
             ))}
           </div>
@@ -237,7 +301,7 @@ export function SettingsPanel({ onClose, connection, comfort, me, myColor, profi
 
         {/* ---- Notifications ---- */}
         <fieldset>
-          <legend className={`mb-3 ${h}`}>Notifications</legend>
+          <legend className={`mb-2 ${h}`}>Notifications</legend>
           <label className="option-card items-center">
             <input
               type="checkbox"
@@ -250,7 +314,7 @@ export function SettingsPanel({ onClose, connection, comfort, me, myColor, profi
               className="check-box"
             />
             <span>
-              <span className="block font-bold">Play a sound for new messages</span>
+              <span className="block font-semibold">Play a sound for new messages</span>
               <span className="block text-ink-muted">A soft chime when someone else writes.</span>
             </span>
           </label>
@@ -258,15 +322,15 @@ export function SettingsPanel({ onClose, connection, comfort, me, myColor, profi
 
         {/* ---- Sign out ---- */}
         {onSignOut && (
-          <section className="border-t border-line pt-5">
+          <section>
             <button
               type="button"
               onClick={onSignOut}
-              className={`rounded-2xl border-2 border-danger bg-surface px-5 font-bold text-danger hover:bg-terracotta-soft ${tap}`}
+              className={`w-full rounded-[var(--radius-card)] bg-surface px-5 font-semibold text-danger hover:bg-danger-soft ${tap}`}
             >
               Sign out
             </button>
-            <p className="mt-2 text-ink-muted">Next time, type the same name to come back as {me.name}.</p>
+            <p className="mt-2 px-1 text-ink-muted">Next time, type the same name to come back as {me.name}.</p>
           </section>
         )}
       </div>

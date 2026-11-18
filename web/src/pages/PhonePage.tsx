@@ -35,7 +35,7 @@ export function PhonePage({ forceMode }: { forceMode?: 'standard' | 'comfort' })
 
   if (error) {
     return (
-      <div className="flex h-dvh flex-col items-center justify-center gap-3 bg-cream px-8 text-center" role="alert">
+      <div className="flex h-dvh flex-col items-center justify-center gap-3 bg-canvas px-8 text-center" role="alert">
         <BrandMark size={56} />
         <p className="font-semibold">{error}</p>
       </div>
@@ -43,7 +43,7 @@ export function PhonePage({ forceMode }: { forceMode?: 'standard' | 'comfort' })
   }
   if (!session || !store) {
     return (
-      <div className="flex h-dvh items-center justify-center bg-cream" role="status" aria-label="Opening the family room">
+      <div className="flex h-dvh items-center justify-center bg-canvas" role="status" aria-label="Opening the family room">
         <BrandMark size={56} />
       </div>
     );

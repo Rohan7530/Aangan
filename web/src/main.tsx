@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-// Self-hosted fonts: Noto Sans (Latin) + Noto Sans Devanagari, one design family.
-import '@fontsource-variable/noto-sans';
+// Self-hosted fonts: Inter (Latin; Apple devices use the system SF font first) + Noto Sans Devanagari.
+import '@fontsource-variable/inter';
 import '@fontsource-variable/noto-sans-devanagari';
 import App from './App';
 import { applyTheme } from './features/settings/appearance';

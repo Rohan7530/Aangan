@@ -1,38 +1,53 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------
-   Aangan design tokens. Light mode only (for now).
-   Every text/background pair below was checked for WCAG contrast:
-   ink on cream 13.9, white on terracotta 5.9, white on terracotta-deep
-   8.3 (AAA), ink on surface 14.9 (AAA), green on green-soft 8.3.
+   Aangan design tokens: clean, iOS-like, one accent.
+   Light values below; dark values and Comfort (AAA) overrides further down.
+   Spec colours are used as given wherever they are decorative (unread dot
+   #007AFF, online dot #34C759, focus ring). Where text sits on or in a colour,
+   it is deepened just enough for WCAG:
+     white on #007AFF is 4.02:1 (fails AA)  -> fills #0062CC, white 5.80:1
+     #007AFF text on #F2F2F7 is 3.60:1      -> accent text #0062CC, 5.20:1
+     #6E6E73 on the other bubble is 4.18:1  -> secondary text #636366, 4.94:1
+     #FF3B30 text is 3.55:1                 -> danger #D70015, 5.38:1
    ------------------------------------------------------------------ */
 @theme {
   --font-sans:
-    "Noto Sans Variable", "Noto Sans Devanagari Variable", "Noto Sans",
-    "Noto Sans Devanagari", system-ui, sans-serif;
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter Variable", Inter,
+    "Noto Sans Devanagari Variable", "Noto Sans Devanagari", system-ui, sans-serif;
 
-  /* courtyard neutrals */
-  --color-cream: #faf4ea; /* app background */
-  --color-courtyard: #efe4d2; /* around the phone column on desktop */
-  --color-sand: #f3e9da; /* day separators, quiet fills */
-  --color-surface: #fffdf8; /* cards, others' messages */
-  --color-line: #e4d8c5; /* hairlines */
-  --color-line-strong: #8a7a66; /* input borders (3:1+) */
+  --color-canvas: #f2f2f7; /* grouped background: sidebar, info panel */
+  --color-chat: #ffffff; /* the conversation */
+  --color-surface: #ffffff; /* cards, rows, inputs */
+  --color-elevated: #ffffff; /* popovers, sheets */
+  --color-fill: #e5e5ea; /* quiet fills: hover, day pill, chips */
+  --color-line: #e5e5ea; /* hairlines */
+  --color-line-strong: #8e8e93; /* input borders, 3.3:1 on white */
 
-  /* text */
-  --color-ink: #2a2522; /* soft charcoal */
-  --color-ink-muted: #4f4740; /* AAA: 8.3 on cream, 7.5 on green-soft, 7.3 on terracotta-soft */
+  --color-ink: #1c1c1e;
+  --color-ink-muted: #636366;
 
-  /* accent + brand */
-  --color-terracotta: #a9461f;
-  --color-terracotta-deep: #86351a;
-  --color-terracotta-soft: #f6e3d9;
-  --color-green: #1f4a39;
-  --color-green-soft: #e3ece5;
+  --color-accent: #0062cc; /* fills with white text */
+  --color-accent-deep: #004fa8; /* pressed / hover */
+  --color-accent-ink: #0062cc; /* blue text and links */
+  --color-accent-soft: #e3eeff; /* selected rows */
+  --color-accent-dot: #007aff; /* unread dot, focus ring (decorative) */
 
-  /* status */
-  --color-ochre: #7a5212;
-  --color-danger: #9b2c1f;
+  --color-bubble-mine: #0062cc;
+  --color-bubble-other: #e9e9eb;
+
+  --color-success: #34c759; /* online dot */
+  --color-success-ink: #1e7b34;
+  --color-warning: #ff9500;
+  --color-danger: #d70015;
+  --color-danger-fill: #d70015;
+  --color-danger-soft: #ffe9e8;
+  --color-rec: #b00012; /* "Listening..." panel, white text 7.4:1 */
+  --color-rec-deep: #8e000e;
+  --color-rec-soft: #ffe0e0;
+
+  --radius-card: 12px;
+  --radius-bubble: 18px;
 
   /* Nothing in Aangan is ever smaller than 16px. */
   --text-xs: 1rem;
@@ -43,6 +58,47 @@
   --text-base--line-height: 1.75rem;
 }
 
+/* ---------------- dark ---------------- */
+:root[data-theme="dark"] {
+  --color-canvas: #000000;
+  --color-chat: #000000;
+  --color-surface: #1c1c1e;
+  --color-elevated: #2c2c2e;
+  --color-fill: #2c2c2e;
+  --color-line: #38383a;
+  --color-line-strong: #8e8e93;
+  --color-ink: #ffffff;
+  --color-ink-muted: #a1a1a6; /* spec #8E8E93 is 4.3:1 on #2C2C2E */
+  --color-accent: #0062cc;
+  --color-accent-deep: #1a73e0;
+  --color-accent-ink: #409cff; /* spec #0A84FF is 4.1:1 on the other bubble */
+  --color-accent-soft: #0b2a4a;
+  --color-accent-dot: #0a84ff;
+  --color-bubble-mine: #0062cc; /* spec #0A84FF carries white at only 3.65:1 */
+  --color-bubble-other: #262629;
+  --color-success: #30d158;
+  --color-success-ink: #30d158;
+  --color-warning: #ff9f0a;
+  --color-danger: #ff6961;
+  --color-danger-fill: #d70015;
+  --color-danger-soft: #3a1414;
+  color-scheme: dark;
+}
+
+/* ---------------- Comfort: same palette, AAA text (7:1, 4.5:1 for large) ---------------- */
+.reader-root[data-reader-mode="comfort"] {
+  --color-ink-muted: #48484a; /* 7.5:1 on the other bubble */
+  --color-accent-ink: #0047a0; /* 7.2:1 on the other bubble */
+  --color-danger: #b00012;
+  --color-success-ink: #14632a;
+}
+:root[data-theme="dark"] .reader-root[data-reader-mode="comfort"] {
+  --color-ink-muted: #c7c7cc;
+  --color-accent-ink: #7cc2ff;
+  --color-danger: #ff9f99;
+  --color-success-ink: #5be584;
+}
+
 /* ---------------- base ---------------- */
 html,
 body,
@@ -50,51 +106,40 @@ body,
   height: 100%;
   margin: 0;
 }
-
 html {
   -webkit-text-size-adjust: 100%;
 }
-
 body {
   font-family: var(--font-sans);
   font-size: 1.125rem; /* 18px base */
-  line-height: 1.55;
+  line-height: 1.5;
   color: var(--color-ink);
-  background-color: var(--color-courtyard);
-  /* a quiet rangoli-like dot grid around the column */
-  background-image: radial-gradient(
-    circle at 1px 1px,
-    rgb(169 70 31 / 0.12) 1.2px,
-    transparent 0
-  );
-  background-size: 22px 22px;
+  background-color: var(--color-canvas);
   -webkit-font-smoothing: antialiased;
 }
-
 :focus-visible {
-  outline: 3px solid var(--color-green);
-  outline-offset: 3px;
+  outline: 3px solid var(--color-accent-dot);
+  outline-offset: 2px;
 }
 .on-dark :focus-visible,
 .on-dark:focus-visible {
   outline-color: #fff;
 }
-
 .skip-link {
   position: absolute;
   left: 12px;
   top: -100px;
   z-index: 50;
   padding: 12px 16px;
-  border-radius: 12px;
-  background: var(--color-green);
+  border-radius: var(--radius-card);
+  background: var(--color-accent);
   color: #fff;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 .skip-link:focus {
   top: 12px;
 }
-
 /* Placeholders never wrap inside a one-line box. */
 textarea::placeholder {
   white-space: nowrap;
@@ -107,514 +152,50 @@ textarea::placeholder {
    Components read these variables, so a mode switch restyles everything. */
 .reader-root {
   --msg-size: 1.125rem; /* 18px */
-  --msg-leading: 1.55;
+  --msg-leading: 1.45;
   --name-size: 1rem;
   --title-size: 1.25rem;
   --input-size: 1.125rem;
   --tap: 48px;
 }
 .reader-root[data-text-step="1"] {
-  --msg-size: 1.3125rem; /* 21px */
+  --msg-size: 1.3125rem;
   --input-size: 1.25rem;
 }
 .reader-root[data-text-step="2"] {
-  --msg-size: 1.5rem; /* 24px */
+  --msg-size: 1.5rem;
   --input-size: 1.375rem;
 }
 .reader-root[data-reader-mode="comfort"] {
   --msg-size: 1.75rem; /* 28px */
-  --msg-leading: 1.45;
+  --msg-leading: 1.4;
   --name-size: 1.375rem;
   --title-size: 1.5rem;
   --input-size: 1.5rem;
   --tap: 56px;
 }
 .reader-root[data-reader-mode="comfort"][data-text-step="1"] {
-  --msg-size: 2rem; /* 32px */
+  --msg-size: 2rem;
   --name-size: 1.5rem;
 }
 .reader-root[data-reader-mode="comfort"][data-text-step="2"] {
-  --msg-size: 2.25rem; /* 36px */
+  --msg-size: 2.25rem;
   --name-size: 1.625rem;
   --input-size: 1.75rem;
 }
 
-/* Component classes live in a layer so Tailwind utilities can still override them. */
-@layer components {
-  /* ---------------- Standard messages: grouped bubbles ---------------- */
-  .msg-text {
-    font-size: var(--msg-size);
-    line-height: var(--msg-leading);
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-  }
-
-  .bubble {
-    position: relative;
-    min-width: 96px;
-    border-radius: 20px;
-    padding: 9px 14px 9px;
-  }
-  /* Invisible copy of the time at the end of the text reserves room, so the
-     real time can sit in the bottom-right corner without covering words. */
-  .time-spacer {
-    display: inline-block;
-    visibility: hidden;
-    padding-left: 10px;
-    font-size: 1rem;
-    line-height: 1;
-  }
-  .bubble-time {
-    position: absolute;
-    right: 12px;
-    bottom: 7px;
-    font-size: 1rem;
-    line-height: 1.2;
-    font-variant-numeric: tabular-nums;
-  }
-  .bubble-mine .bubble-time {
-    color: #fbe9e1; /* 4.98:1 on terracotta */
-  }
-  .bubble-theirs .bubble-time {
-    color: var(--color-ink-muted);
-  }
-  .bubble-theirs {
-    background: var(--color-surface);
-    color: var(--color-ink);
-    border: 1px solid var(--color-line);
-  }
-  .bubble-theirs:not(.is-first) {
-    border-top-left-radius: 6px;
-  }
-  .bubble-theirs:not(.is-last) {
-    border-bottom-left-radius: 6px;
-  }
-  .bubble-mine {
-    background: var(--color-terracotta);
-    color: #fff;
-  }
-  .bubble-mine:not(.is-first) {
-    border-top-right-radius: 6px;
-  }
-  .bubble-mine:not(.is-last) {
-    border-bottom-right-radius: 6px;
-  }
-
-  /* ---------------- Comfort messages: one card per row ----------------
-     Light surfaces with charcoal text (AAA). Others: white with the sender's
-     colour as a thick left border. Mine: soft terracotta tint + terracotta border. */
-  /* Others on the left (their colour on the left edge), mine on the right
-     (terracotta on the right edge), like any chat. */
-  .comfort-card {
-    align-self: flex-start;
-    width: fit-content;
-    max-width: min(85%, 46rem);
-    min-width: min(85%, 18rem);
-    border-radius: 20px;
-    padding: 18px 20px 20px;
-    border: 2px solid var(--color-line);
-    border-left: 10px solid var(--card-accent, var(--color-line-strong));
-    background: #fff;
-    color: var(--color-ink);
-  }
-  .comfort-card.comfort-mine {
-    align-self: flex-end;
-    background: var(--color-terracotta-soft);
-    border-color: #ecc9b8;
-    border-left-width: 2px;
-    border-right: 10px solid var(--color-terracotta);
-  }
-  .comfort-name {
-    font-size: var(--name-size);
-    font-weight: 700;
-    line-height: 1.25;
-  }
-  .comfort-text {
-    font-size: var(--msg-size);
-    line-height: var(--msg-leading);
-    font-weight: 500;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-  }
-
-  /* ---------------- choice cards in the settings sheet ---------------- */
-  .option-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    min-height: 56px;
-    padding: 14px 16px;
-    border: 2px solid var(--color-line);
-    border-radius: 18px;
-    background: var(--color-surface);
-    cursor: pointer;
-  }
-  .option-card:hover {
-    border-color: var(--color-line-strong);
-  }
-  .option-card:has(input:checked) {
-    border-color: var(--color-green);
-    background: var(--color-green-soft);
-  }
-  .option-card:has(input:focus-visible) {
-    outline: 3px solid var(--color-green);
-    outline-offset: 3px;
-  }
-  .radio-dot {
-    flex-shrink: 0;
-    width: 24px;
-    height: 24px;
-    margin-top: 2px;
-    border-radius: 999px;
-    border: 2px solid var(--color-line-strong);
-    background: #fff;
-    display: grid;
-    place-items: center;
-  }
-  .option-card:has(input:checked) .radio-dot {
-    border-color: var(--color-green);
-  }
-  .option-card:has(input:checked) .radio-dot::after {
-    content: "";
-    width: 12px;
-    height: 12px;
-    border-radius: 999px;
-    background: var(--color-green);
-  }
-
-  /* ---------------- settings sheet (native <dialog>) ---------------- */
-  dialog.sheet {
-    margin: auto auto 0;
-    width: 100%;
-    max-width: 480px;
-    max-height: 90dvh;
-    padding: 0;
-    border: 0;
-    border-radius: 28px 28px 0 0;
-    background: var(--color-cream);
-    color: var(--color-ink);
-    box-shadow: 0 -12px 40px rgb(42 37 34 / 0.25);
-  }
-  dialog.sheet::backdrop {
-    background: rgb(42 37 34 / 0.5);
-  }
-  @media (min-width: 640px) {
-    dialog.sheet {
-      margin: auto;
-      border-radius: 28px;
-    }
-  }
-}
-
-/* ---------------- showcase phone frames ---------------- */
-.phone-frame {
-  position: relative;
-  width: min(390px, calc(100vw - 40px));
-  height: min(820px, max(640px, calc(100dvh - 300px)));
-  padding: 12px;
-  border-radius: 54px;
-  background: #221d19;
-  box-shadow:
-    0 40px 80px -32px rgb(42 37 34 / 0.6),
-    inset 0 0 0 2px #3a332d;
-}
-.phone-frame::before {
-  content: "";
-  position: absolute;
-  top: 4px;
-  left: 50%;
-  width: 64px;
-  height: 4px;
-  margin-left: -32px;
-  border-radius: 4px;
-  background: #3a332d;
-}
-.phone-screen {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  border-radius: 42px;
-  background: var(--color-cream);
-}
-
-/* ---------------- Standard messages: actions, reactions, replies, photos ---------------- */
-.msg-actions {
-  position: absolute;
-  top: -4px;
-  z-index: 5;
-  display: flex;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid var(--color-line);
-  border-radius: 16px;
-  background: var(--color-surface);
-  box-shadow: 0 8px 20px -10px rgb(42 37 34 / 0.4);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 120ms ease;
-}
-.msg-row:hover .msg-actions,
-.msg-row:focus-within .msg-actions,
-.msg-row[data-selected] .msg-actions {
-  opacity: 1;
-  pointer-events: auto;
-}
-@media (hover: none) {
-  .msg-row:hover:not([data-selected]):not(:focus-within) .msg-actions {
-    opacity: 0;
-    pointer-events: none;
-  }
-}
-.action-btn {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  color: var(--color-ink-muted);
-}
-.action-btn:hover {
-  background: var(--color-sand);
-  color: var(--color-ink);
-}
-/* Small on screen, 48px to the finger: the ::after extends the hit area. */
-.reaction-chip {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 34px;
-  padding: 2px 10px;
-  border: 1.5px solid var(--color-line-strong);
-  border-radius: 999px;
-  background: var(--color-surface);
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-ink);
-}
-.reaction-chip::after {
-  content: "";
-  position: absolute;
-  inset: -7px -2px;
-}
-.reaction-chip-mine {
-  border-color: var(--color-green);
-  background: var(--color-green-soft);
-  color: var(--color-green);
-}
-.reply-quote {
-  display: block;
-  width: 100%;
-  margin: 2px 0 6px;
-  padding: 6px 10px;
-  border-left: 4px solid var(--color-terracotta);
-  border-radius: 10px;
-  background: var(--color-sand);
-  color: var(--color-ink);
-  text-align: left;
-  font-size: 1rem;
-  line-height: 1.35;
-}
-.reply-quote-mine {
-  border-left-color: #fff;
-  background: rgb(255 255 255 / 0.16);
-  color: #fff;
-}
-.bubble-photo {
-  padding: 4px;
-}
-.bubble-photo .bubble-time {
-  right: 10px;
-  bottom: 8px;
-  padding: 0 8px;
-  border-radius: 999px;
-  background: rgb(42 37 34 / 0.72);
-  color: #fff;
-}
-.photo-button {
-  display: block;
-  max-width: 100%;
-  min-width: 160px;
-  min-height: 120px;
-  border-radius: 16px;
-  overflow: hidden;
-  background-size: cover;
-  background-position: center;
-}
-.photo-button img {
-  display: block;
-  max-width: 100%;
-  max-height: 320px;
-  object-fit: cover;
-}
-.msg-flash .bubble {
-  box-shadow: 0 0 0 3px var(--color-green);
-}
-.unread-badge {
-  display: inline-grid;
-  place-items: center;
-  min-width: 24px;
-  height: 24px;
-  padding: 0 7px;
-  border-radius: 999px;
-  background: var(--color-terracotta);
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1;
-}
-.emoji-popover {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 0;
-  z-index: 20;
-  width: 336px;
-  max-width: calc(100vw - 24px);
-  border: 1px solid var(--color-line);
-  border-radius: 20px;
-  background: var(--color-surface);
-  box-shadow: 0 18px 40px -16px rgb(42 37 34 / 0.45);
-}
-@keyframes rec-pulse {
-  50% {
-    opacity: 0.35;
-  }
-}
-.rec-dot {
-  animation: rec-pulse 1.2s ease-in-out infinite;
-}
-dialog.lightbox {
-  width: 100vw;
-  height: 100dvh;
-  max-width: none;
-  max-height: none;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-dialog.lightbox::backdrop {
-  background: rgb(20 17 15 / 0.88);
-}
-
-/* Small on screen, 48px to the finger (WCAG target size). */
-.hit-48 {
-  position: relative;
-}
-.hit-48::after {
-  content: "";
-  position: absolute;
-  inset: -14px -6px;
-}
-
-/* ---------------- showcase: browser window frame ---------------- */
-.browser-frame {
-  width: 100%;
-  max-width: 1040px;
-  border-radius: 18px;
-  overflow: hidden;
-  background: #221d19;
-  box-shadow: 0 40px 80px -32px rgb(42 37 34 / 0.6);
-}
-.browser-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 14px;
-}
-.browser-bar span {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background: #5c534b;
-}
-.browser-bar p {
-  margin-left: 12px;
-  padding: 2px 14px;
-  border-radius: 999px;
-  background: #3a332d;
-  color: #e4d8c5;
-  font-size: 1rem;
-}
-.browser-screen {
-  display: block;
-  width: 100%;
-  height: min(780px, max(600px, calc(100dvh - 300px)));
-  border: 0;
-  background: var(--color-cream);
-}
-
-/* ---------------- motion (small, purposeful) ---------------- */
-@keyframes msg-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.msg-enter {
-  animation: msg-in 240ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
-}
-
-@keyframes sheet-in {
-  from {
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-dialog.sheet[open] {
-  animation: sheet-in 220ms ease-out;
-}
-
-@keyframes speak-bar {
-  0%,
-  100% {
-    transform: scaleY(0.35);
-  }
-  50% {
-    transform: scaleY(1);
-  }
-}
-.speaking-bars span {
-  display: block;
-  width: 4px;
-  height: 18px;
-  border-radius: 2px;
-  background: currentColor;
-  transform-origin: center;
-  animation: speak-bar 900ms ease-in-out infinite;
-}
-.speaking-bars span:nth-child(2) {
-  animation-delay: 150ms;
-}
-.speaking-bars span:nth-child(3) {
-  animation-delay: 300ms;
-}
-
-/* ==================================================================
-   Standard mode polish: frosted header/composer, layered shadows,
-   spring motion. Unlayered on purpose (wins over utilities).
-   Comfort mode is untouched: everything is scoped to Standard or to
-   Standard-only components, and stays opaque there.
-   ================================================================== */
+/* ---------------- shadows + motion ---------------- */
 :root {
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.06);
+  --shadow-2: 0 1px 2px rgb(0 0 0 / 0.06), 0 6px 16px -4px rgb(0 0 0 / 0.1);
+  --shadow-3: 0 2px 6px rgb(0 0 0 / 0.08), 0 18px 40px -12px rgb(0 0 0 / 0.22);
   --spring: cubic-bezier(0.2, 0.9, 0.3, 1.04);
   --spring-dur: 540ms;
-  --shadow-1: 0 1px 1px rgb(42 37 34 / 0.04), 0 1px 3px rgb(42 37 34 / 0.06);
-  --shadow-2:
-    0 1px 2px rgb(42 37 34 / 0.05), 0 4px 10px -2px rgb(42 37 34 / 0.08),
-    0 12px 24px -8px rgb(42 37 34 / 0.12);
-  --shadow-3:
-    0 2px 4px rgb(42 37 34 / 0.05), 0 12px 24px -6px rgb(42 37 34 / 0.12),
-    0 32px 64px -16px rgb(42 37 34 / 0.24);
+}
+:root[data-theme="dark"] {
+  --shadow-1: 0 0 0 1px rgb(255 255 255 / 0.04);
+  --shadow-2: 0 0 0 1px rgb(255 255 255 / 0.06), 0 8px 20px -6px rgb(0 0 0 / 0.6);
+  --shadow-3: 0 0 0 1px rgb(255 255 255 / 0.08), 0 20px 48px -12px rgb(0 0 0 / 0.7);
 }
 @supports (animation-timing-function: linear(0, 1)) {
   :root {
@@ -655,43 +236,246 @@ dialog.sheet[open] {
   }
 }
 
-/* Frosted chat header and composer (Standard room only). */
+@keyframes pop-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pop-in {
+  from {
+    transform: translateY(8px) scale(0.96);
+  }
+}
+@keyframes sheet-rise {
+  from {
+    transform: translateY(28px);
+  }
+}
+@keyframes msg-rise {
+  from {
+    transform: translateY(12px) scale(0.98);
+  }
+}
+.msg-enter {
+  animation:
+    pop-fade 180ms ease-out both,
+    msg-rise var(--spring-dur) var(--spring) both;
+}
+
+/* Component classes live in a layer so Tailwind utilities can still override them. */
+@layer components {
+  /* ---------------- messages: shared ---------------- */
+  .msg-text {
+    font-size: var(--msg-size);
+    line-height: var(--msg-leading);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .bubble {
+    position: relative;
+    min-width: 72px;
+    border-radius: var(--radius-bubble);
+    padding: 8px 14px;
+  }
+  /* Invisible copy of the time at the end of the text reserves room, so the
+     real time can sit in the bottom-right corner without covering words. */
+  .time-spacer {
+    display: inline-block;
+    visibility: hidden;
+    padding-left: 10px;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .bubble-time {
+    position: absolute;
+    right: 12px;
+    bottom: 6px;
+    font-size: 1rem;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+  }
+  .bubble-mine .bubble-time {
+    color: rgb(255 255 255 / 0.92); /* 5.2:1 on the blue */
+  }
+  .bubble-theirs .bubble-time {
+    color: var(--color-ink-muted);
+  }
+  .bubble-theirs {
+    background: var(--color-bubble-other);
+    color: var(--color-ink);
+  }
+  .bubble-theirs:not(.is-first) {
+    border-top-left-radius: 6px;
+  }
+  .bubble-theirs:not(.is-last) {
+    border-bottom-left-radius: 6px;
+  }
+  .bubble-mine {
+    background: var(--color-bubble-mine);
+    color: #fff;
+  }
+  .bubble-mine:not(.is-first) {
+    border-top-right-radius: 6px;
+  }
+  .bubble-mine:not(.is-last) {
+    border-bottom-right-radius: 6px;
+  }
+  .bubble-mine a,
+  .bubble-mine button.link {
+    color: #fff;
+  }
+
+  /* ---------------- Comfort messages: big bubbles ----------------
+     Others on the left with avatar + name, mine on the right, no name. */
+  .c-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    max-width: 100%;
+  }
+  .c-row.is-mine {
+    justify-content: flex-end;
+  }
+  .c-col {
+    display: flex;
+    min-width: 0;
+    max-width: min(80%, 44rem);
+    flex-direction: column;
+    gap: 6px;
+  }
+  .c-row.is-mine .c-col {
+    align-items: flex-end;
+  }
+  .c-bubble {
+    min-width: 0;
+    max-width: 100%;
+    border-radius: 22px;
+    padding: 16px 20px 18px;
+    background: var(--color-bubble-other);
+    color: var(--color-ink);
+  }
+  .c-row:not(.is-mine) .c-bubble {
+    border-bottom-left-radius: 8px;
+  }
+  .c-row.is-mine .c-bubble {
+    background: var(--color-bubble-mine);
+    color: #fff;
+    border-bottom-right-radius: 8px;
+  }
+  .comfort-name {
+    font-size: var(--name-size);
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .comfort-text {
+    font-size: var(--msg-size);
+    line-height: var(--msg-leading);
+    font-weight: 500;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  /* ---------------- choice cards (settings) ---------------- */
+  .option-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    min-height: 56px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    cursor: pointer;
+  }
+  .option-card:hover {
+    border-color: var(--color-line-strong);
+  }
+  .option-card:has(input:checked) {
+    border-color: var(--color-accent);
+    background: var(--color-accent-soft);
+  }
+  .option-card:has(input:focus-visible) {
+    outline: 3px solid var(--color-accent-dot);
+    outline-offset: 2px;
+  }
+  .radio-dot {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    margin-top: 2px;
+    border: 2px solid var(--color-line-strong);
+    border-radius: 999px;
+    background: var(--color-surface);
+  }
+  .option-card:has(input:checked) .radio-dot {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+  }
+  .option-card:has(input:checked) .radio-dot::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: #fff;
+  }
+
+  /* ---------------- sheets (native <dialog>) ---------------- */
+  dialog.sheet {
+    margin: auto auto 0;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90dvh;
+    padding: 0;
+    border: 0;
+    border-radius: 16px 16px 0 0;
+    background: var(--color-elevated);
+    color: var(--color-ink);
+    box-shadow: var(--shadow-3);
+  }
+  dialog.sheet::backdrop {
+    background: rgb(0 0 0 / 0.4);
+  }
+  @media (min-width: 640px) {
+    dialog.sheet {
+      margin: auto;
+      border-radius: 16px;
+    }
+  }
+}
+
+dialog.sheet[open] {
+  animation:
+    pop-fade 180ms ease-out both,
+    sheet-rise var(--spring-dur) var(--spring) both;
+}
+dialog.sheet[open]::backdrop {
+  animation: pop-fade 200ms ease-out both;
+}
+
+/* ---------------- chat chrome: opaque header + composer over the list ---------------- */
 .chat-glass {
   position: absolute;
   left: 0;
   right: 0;
   z-index: 10;
-  background: rgb(250 244 234 / 0.8);
-  -webkit-backdrop-filter: blur(18px) saturate(1.6);
-  backdrop-filter: blur(18px) saturate(1.6);
+  background: var(--color-surface);
+}
+:root[data-theme="dark"] .chat-glass {
+  background: var(--color-surface);
 }
 .chat-glass-top {
   top: 0;
-  border-bottom: 1px solid rgb(228 216 197 / 0.9);
-  box-shadow: 0 8px 20px -18px rgb(42 37 34 / 0.45);
+  border-bottom: 1px solid var(--color-line);
 }
 .chat-glass-bottom {
   bottom: 0;
-  border-top: 1px solid rgb(228 216 197 / 0.9);
-  box-shadow: 0 -8px 20px -18px rgb(42 37 34 / 0.45);
+  border-top: 1px solid var(--color-line);
 }
 .chat-glass-bottom > form {
   background: transparent;
   border-top-color: transparent;
-}
-@supports not (
-  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
-) {
-  .chat-glass {
-    background: var(--color-cream);
-  }
-}
-@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
-  .chat-glass {
-    background: var(--color-cream);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
 }
 .chat-scroll {
   padding-top: var(--chat-top, 0px);
@@ -700,17 +484,20 @@ dialog.sheet[open] {
   scroll-padding-bottom: calc(var(--chat-bottom, 0px) + 8px);
 }
 
-/* Layered shadows */
-[data-reader-mode="standard"] .bubble-theirs {
-  box-shadow: var(--shadow-1);
-}
-[data-reader-mode="standard"] .bubble-mine {
-  box-shadow:
-    0 1px 1px rgb(134 53 26 / 0.12),
-    0 2px 6px -2px rgb(134 53 26 / 0.2);
-}
+/* ---------------- Standard messages: actions, reactions, replies, photos ---------------- */
 .msg-actions {
+  position: absolute;
+  top: -4px;
+  z-index: 5;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  background: var(--color-elevated);
   box-shadow: var(--shadow-2);
+  opacity: 0;
+  pointer-events: none;
   transform: translateY(4px);
   transition:
     opacity 140ms ease,
@@ -719,60 +506,285 @@ dialog.sheet[open] {
 .msg-row:hover .msg-actions,
 .msg-row:focus-within .msg-actions,
 .msg-row[data-selected] .msg-actions {
+  opacity: 1;
+  pointer-events: auto;
   transform: none;
 }
+@media (hover: none) {
+  .msg-row:hover:not([data-selected]):not(:focus-within) .msg-actions {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+.action-btn {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  color: var(--color-ink-muted);
+}
+.action-btn:hover {
+  background: var(--color-fill);
+  color: var(--color-ink);
+}
+/* Small on screen, 48px to the finger: the ::after extends the hit area. */
+.reaction-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+  padding: 2px 10px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-1);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.reaction-chip::after {
+  content: "";
+  position: absolute;
+  inset: -7px -2px;
+}
+.reaction-chip-mine {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-ink);
+}
+.reply-quote {
+  display: block;
+  width: 100%;
+  margin: 2px 0 6px;
+  padding: 6px 10px;
+  border-left: 3px solid var(--color-accent);
+  border-radius: 10px;
+  background: rgb(0 0 0 / 0.06);
+  color: var(--color-ink);
+  text-align: left;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+:root[data-theme="dark"] .reply-quote {
+  background: rgb(255 255 255 / 0.08);
+}
+.reply-quote-mine,
+:root[data-theme="dark"] .reply-quote-mine {
+  border-left-color: #fff;
+  background: rgb(0 0 0 / 0.22); /* keeps white text >= 7:1 */
+  color: #fff;
+}
+.bubble-photo {
+  padding: 4px;
+}
+.bubble-photo .bubble-time {
+  right: 10px;
+  bottom: 8px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.66);
+  color: #fff;
+}
+.photo-button {
+  display: block;
+  max-width: 100%;
+  min-width: 160px;
+  min-height: 120px;
+  border-radius: 14px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+}
+.photo-button img {
+  display: block;
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+}
+.msg-flash :is(.bubble, .c-bubble) {
+  box-shadow: 0 0 0 3px var(--color-accent-dot);
+}
+.unread-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+/* Blue dot on a family's avatar when it has unread messages. */
+.unread-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-canvas);
+  border-radius: 999px;
+  background: var(--color-accent-dot);
+}
+.status-dot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-canvas);
+  border-radius: 999px;
+}
 .emoji-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  width: 336px;
+  max-width: calc(100vw - 24px);
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  background: var(--color-elevated);
   box-shadow: var(--shadow-3);
   transform-origin: bottom left;
   animation:
     pop-fade 160ms ease-out both,
     pop-in var(--spring-dur) var(--spring) both;
 }
-@keyframes pop-fade {
-  from {
-    opacity: 0;
+@keyframes rec-pulse {
+  50% {
+    opacity: 0.35;
   }
 }
-@keyframes pop-in {
-  from {
-    transform: translateY(8px) scale(0.94);
-  }
+.rec-dot {
+  animation: rec-pulse 1.2s ease-in-out infinite;
+}
+dialog.lightbox {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+dialog.lightbox::backdrop {
+  background: rgb(0 0 0 / 0.9);
+}
+/* Small on screen, 48px to the finger (WCAG target size). */
+.hit-48 {
+  position: relative;
+}
+.hit-48::after {
+  content: "";
+  position: absolute;
+  inset: -14px -6px;
 }
 
-/* Sheets in Standard: spring up, soft blurred backdrop */
-[data-reader-mode="standard"] dialog.sheet {
-  box-shadow: var(--shadow-3);
+/* ---------------- showcase frames ---------------- */
+.phone-frame {
+  position: relative;
+  width: min(390px, calc(100vw - 40px));
+  height: min(820px, max(640px, calc(100dvh - 300px)));
+  padding: 12px;
+  border-radius: 54px;
+  background: #1c1c1e;
+  box-shadow:
+    0 40px 80px -32px rgb(0 0 0 / 0.45),
+    inset 0 0 0 2px #3a3a3c;
 }
-[data-reader-mode="standard"] dialog.sheet[open] {
-  animation:
-    pop-fade 180ms ease-out both,
-    sheet-rise var(--spring-dur) var(--spring) both;
+.phone-frame::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  width: 64px;
+  height: 4px;
+  margin-left: -32px;
+  border-radius: 4px;
+  background: #3a3a3c;
 }
-[data-reader-mode="standard"] dialog.sheet[open]::backdrop {
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
-  animation: pop-fade 200ms ease-out both;
+.phone-screen {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 42px;
+  background: var(--color-chat);
 }
-@keyframes sheet-rise {
-  from {
-    transform: translateY(36px) scale(0.98);
-  }
+.browser-frame {
+  width: 100%;
+  max-width: 1040px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #e5e5ea;
+  box-shadow: 0 30px 70px -30px rgb(0 0 0 / 0.35);
+}
+:root[data-theme="dark"] .browser-frame {
+  background: #2c2c2e;
+}
+.browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px;
+}
+.browser-bar span {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #aeaeb2;
+}
+.browser-bar p {
+  margin-left: 12px;
+  padding: 2px 14px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  font-size: 1rem;
+}
+.browser-screen {
+  display: block;
+  width: 100%;
+  height: min(780px, max(600px, calc(100dvh - 300px)));
+  border: 0;
+  background: var(--color-chat);
 }
 
-/* New messages in Standard: fade + spring rise */
-[data-reader-mode="standard"] .msg-enter {
-  animation:
-    pop-fade 180ms ease-out both,
-    msg-rise var(--spring-dur) var(--spring) both;
-}
-@keyframes msg-rise {
-  from {
-    transform: translateY(14px) scale(0.98);
+/* ---------------- read-aloud bars ---------------- */
+@keyframes speak-bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
   }
 }
+.speaking-bars span {
+  display: block;
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  background: currentColor;
+  transform-origin: center;
+  animation: speak-bar 900ms ease-in-out infinite;
+}
+.speaking-bars span:nth-child(2) {
+  animation-delay: 150ms;
+}
+.speaking-bars span:nth-child(3) {
+  animation-delay: 300ms;
+}
 
-/* Hover and press feedback in Standard */
-[data-reader-mode="standard"] :is(button, a, label.option-card) {
+/* ---------------- press feedback ---------------- */
+:is(button, a, label.option-card) {
   transition:
     background-color 150ms ease,
     color 150ms ease,
@@ -784,18 +796,7 @@ dialog.sheet[open] {
   transform: scale(0.97);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .msg-actions {
-    transform: none;
-  }
-  [data-reader-mode="standard"] button:not(:disabled):active {
-    transform: none;
-  }
-}
-
-/* ==================================================================
-   Settings: avatar colour swatches and checkbox
-   ================================================================== */
+/* ---------------- settings: colour swatches, checkbox, pop-up panel ---------------- */
 .color-swatch {
   display: inline-flex;
   flex-direction: column;
@@ -803,8 +804,8 @@ dialog.sheet[open] {
   gap: 4px;
   min-width: 72px;
   padding: 6px 4px;
-  border: 2px solid transparent;
-  border-radius: 16px;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-card);
   font-weight: 600;
   cursor: pointer;
 }
@@ -830,8 +831,8 @@ dialog.sheet[open] {
   border-color: var(--color-line-strong);
 }
 .color-swatch:has(input:checked) {
-  border-color: var(--color-green);
-  background: var(--color-green-soft);
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
 }
 .color-swatch:has(input:checked) .swatch-dot {
   box-shadow:
@@ -839,20 +840,21 @@ dialog.sheet[open] {
     0 0 0 5px var(--color-ink);
 }
 .color-swatch:has(input:focus-visible) {
-  outline: 3px solid var(--color-green);
+  outline: 3px solid var(--color-accent-dot);
   outline-offset: 2px;
 }
 .check-box {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  accent-color: var(--color-green);
+  width: 26px;
+  height: 26px;
+  accent-color: var(--color-accent);
 }
 .tone-name {
   color: var(--tone);
 }
-
-/* Settings: a panel that pops up from the Settings button (both modes). */
+:root[data-theme="dark"] .tone-name {
+  color: color-mix(in oklab, var(--tone) 30%, white);
+}
 .settings-pop {
   position: absolute;
   bottom: calc(100% + 8px);
@@ -863,8 +865,8 @@ dialog.sheet[open] {
   overflow-y: auto;
   overscroll-behavior: contain;
   border: 1px solid var(--color-line);
-  border-radius: 22px;
-  background: var(--color-cream);
+  border-radius: 16px;
+  background: var(--color-canvas);
   color: var(--color-ink);
   box-shadow: var(--shadow-3);
   transform-origin: bottom left;
@@ -874,107 +876,18 @@ dialog.sheet[open] {
 }
 .settings-pop.is-comfort {
   width: min(460px, calc(100vw - 24px));
-  border-width: 2px;
 }
 .settings-pop:focus {
   outline: none;
 }
 .settings-pop:focus-visible {
-  outline: 3px solid var(--color-green);
+  outline: 3px solid var(--color-accent-dot);
   outline-offset: 2px;
 }
-
-/* ==================================================================
-   Dark mode. Neutrals are redefined; accent fills (green, terracotta,
-   danger) stay, so white text on them keeps its contrast; accent TEXT and
-   borders switch to light tints. Checked pairs (on surface #1f1b18):
-   ink 15.6:1, ink-muted 9.3:1, green text 11:1, terracotta text 7.9:1,
-   danger text 7.6:1: AAA, so Comfort mode stays AAA in both themes.
-   ================================================================== */
-:root[data-theme="dark"] {
-  --color-cream: #171412;
-  --color-courtyard: #110f0d;
-  --color-sand: #24201c;
-  --color-surface: #1f1b18;
-  --color-line: #3b342e;
-  --color-line-strong: #8c7f72;
-  --color-ink: #f4eee6;
-  --color-ink-muted: #cbbfb2;
-  --color-terracotta-soft: #3a2219;
-  --color-green-soft: #1d3329;
-  --dark-green-text: #a3d9bf;
-  --dark-terracotta-text: #f4a98a;
-  --dark-danger-text: #ff9f8f;
-}
-:root[data-theme="dark"] body {
-  background-image: radial-gradient(circle at 1px 1px, rgb(244 169 138 / 0.08) 1.2px, transparent 0);
-}
-[data-theme="dark"] .text-green {
-  color: var(--dark-green-text);
-}
-[data-theme="dark"] :is(.text-terracotta, .text-terracotta-deep) {
-  color: var(--dark-terracotta-text);
-}
-[data-theme="dark"] .text-danger {
-  color: var(--dark-danger-text);
-}
-[data-theme="dark"] .border-green {
-  border-color: #7fbf9f;
-}
-[data-theme="dark"] .border-danger {
-  border-color: #e0705f;
-}
-[data-theme="dark"] .bg-white:not(.on-dark) {
+/* An inset grouped card, as in iOS Settings. */
+.group-card {
+  border-radius: var(--radius-card);
   background: var(--color-surface);
-}
-[data-theme="dark"] :focus-visible {
-  outline-color: var(--dark-green-text);
-}
-[data-theme="dark"] .on-dark :focus-visible,
-[data-theme="dark"] .on-dark:focus-visible {
-  outline-color: #fff;
-}
-[data-theme="dark"] .tone-name {
-  color: color-mix(in oklab, var(--tone) 32%, white);
-}
-[data-theme="dark"] .comfort-card {
-  background: var(--color-surface);
-}
-[data-theme="dark"] .comfort-card.comfort-mine {
-  background: var(--color-terracotta-soft);
-  border-color: #6b3a26;
-  border-right-color: var(--color-terracotta);
-}
-[data-theme="dark"] .radio-dot {
-  background: var(--color-surface);
-}
-[data-theme="dark"] :is(.option-card, .color-swatch):has(input:checked) {
-  border-color: #7fbf9f;
-}
-[data-theme="dark"] .option-card:has(input:checked) .radio-dot {
-  border-color: var(--dark-green-text);
-}
-[data-theme="dark"] .option-card:has(input:checked) .radio-dot::after {
-  background: var(--dark-green-text);
-}
-[data-theme="dark"] .check-box {
-  accent-color: var(--dark-green-text);
-}
-[data-theme="dark"] .chat-glass {
-  background: rgb(23 20 18 / 0.78);
-}
-[data-theme="dark"] :is(.chat-glass-top, .chat-glass-bottom) {
-  border-color: rgb(59 52 46 / 0.9);
-}
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  [data-theme="dark"] .chat-glass {
-    background: var(--color-cream);
-  }
-}
-@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
-  [data-theme="dark"] .chat-glass {
-    background: var(--color-cream);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -984,5 +897,9 @@ dialog.sheet[open] {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
+  }
+  .msg-actions,
+  [data-reader-mode="standard"] button:not(:disabled):active {
+    transform: none;
   }
 }

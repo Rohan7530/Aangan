@@ -85,7 +85,7 @@ export function StandardRoom(props: Props) {
   return (
     <ToneProvider tones={room.tones}>
       {!showInfoOnly && (
-        <section ref={sectionRef} aria-label={`${roomName} conversation`} className="chat-stage relative flex min-w-0 flex-1 flex-col bg-cream">
+        <section ref={sectionRef} aria-label={`${roomName} conversation`} className="chat-stage relative flex min-w-0 flex-1 flex-col bg-chat">
           <a href={`#${COMPOSER_INPUT_ID}`} className="skip-link">
             Skip to message box
           </a>
@@ -96,18 +96,23 @@ export function StandardRoom(props: Props) {
                   type="button"
                   onClick={onBack}
                   aria-label="Back to rooms"
-                  className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-ink hover:bg-sand"
+                  className="grid h-12 w-12 shrink-0 place-items-center rounded-full text-accent-ink hover:bg-fill"
                 >
                   <BackIcon />
                 </button>
               )}
               <RoomAvatar id={channelId} name={roomName} size={40} />
               <div className="min-w-0 flex-1 px-1">
-                <h1 className="truncate text-[1.25rem] font-bold leading-tight text-green">{roomName}</h1>
+                <h1 className="truncate text-[1.25rem] font-bold leading-tight">{roomName}</h1>
                 <p className="flex flex-wrap items-center gap-x-2 text-[1rem] leading-snug text-ink-muted">
-                  {membersLine && <span className="whitespace-nowrap">{membersLine}</span>}
-                  {room.onlineCount !== null && <span className="whitespace-nowrap">· {room.onlineCount} online</span>}
-                  <span className="whitespace-nowrap">
+                  {membersLine && (
+                    <span className="whitespace-nowrap">
+                      {membersLine}
+                      {room.onlineCount !== null && `, ${room.onlineCount} online`}
+                    </span>
+                  )}
+                  {/* Connection is shown in the profile row; here only when it is not connected. */}
+                  <span className={connection === 'connected' ? 'sr-only' : 'whitespace-nowrap'}>
                     <ConnectionChip state={connection} />
                   </span>
                 </p>
@@ -116,7 +121,7 @@ export function StandardRoom(props: Props) {
                 type="button"
                 onClick={onOpenReader}
                 aria-haspopup="dialog"
-                className="inline-flex min-h-[48px] shrink-0 items-center gap-2 rounded-2xl border-2 border-green bg-surface px-3 font-semibold text-green hover:bg-green-soft"
+                className="inline-flex min-h-[48px] shrink-0 items-center gap-2 rounded-full px-3 font-semibold text-accent-ink hover:bg-accent-soft"
               >
                 <TextSizeIcon />
                 <span className={narrow ? 'sr-only' : ''}>How I read</span>
@@ -125,21 +130,21 @@ export function StandardRoom(props: Props) {
                 type="button"
                 onClick={() => onToggleInfo(!infoOpen)}
                 aria-pressed={infoOpen}
-                aria-label="Room info"
-                title="Room info"
-                className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${infoOpen ? 'bg-green-soft text-green' : 'text-ink-muted hover:bg-sand hover:text-ink'}`}
+                aria-label="Family info"
+                title="Family info"
+                className={`grid h-12 w-12 shrink-0 place-items-center rounded-full ${infoOpen ? 'bg-accent-soft text-accent-ink' : 'text-accent-ink hover:bg-fill'}`}
               >
                 <InfoIcon />
               </button>
             </header>
 
             {fatal ? (
-              <p role="alert" className="border-b border-line bg-terracotta-soft px-4 py-3 font-semibold text-terracotta-deep">
+              <p role="alert" className="border-b border-line bg-danger-soft px-4 py-3 font-semibold text-danger">
                 {fatal}
               </p>
             ) : (
               connection === 'offline' &&
-              !room.loading && <p className="border-b border-line bg-sand px-4 py-3 text-ink">You are offline. Aangan will reconnect by itself.</p>
+              !room.loading && <p className="border-b border-line bg-fill px-4 py-3 text-ink">You are offline. Aangan will reconnect by itself.</p>
             )}
           </div>
 

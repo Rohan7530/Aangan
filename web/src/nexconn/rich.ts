@@ -28,6 +28,10 @@ import {
 } from '@nexconn/chat';
 import type { ChatMessage, Sender } from './types';
 
+/** Sender with an optional profile photo URL (sent as senderUserInfo.avatarUrl). */
+export type RichSender = Sender & { avatarUrl?: string };
+const senderInfo = (s: RichSender) => (s.avatarUrl ? { userId: s.userId, name: s.name, avatarUrl: s.avatarUrl } : { userId: s.userId, name: s.name });
+
 export type RichKind = 'text' | 'image' | 'reply' | 'voice';
 
 export interface RichMessage extends ChatMessage {
@@ -45,6 +49,8 @@ export interface RichMessage extends ChatMessage {
   spoken?: boolean;
   /** Reactions: metadata key (one per member) -> emojis that member chose. */
   reactions: Record<string, string[]>;
+  /** Sender's profile photo URL, if they had one when they sent it. */
+  senderPhoto?: string;
 }
 
 // ---- reactions encoding --------------------------------------------------------
@@ -93,6 +99,7 @@ export function toRich(msg: Message): RichMessage | null {
     senderId: msg.senderUserId,
     sentAt: msg.sentTime,
     reactions: reactionsFrom(msg.metadata ?? []),
+    senderPhoto: (msg.content as { senderUserInfo?: { avatarUrl?: string } } | undefined)?.senderUserInfo?.avatarUrl || undefined,
   };
   if (msg.messageType === MessageType.TEXT) {
     const c = msg.content as TextMessageContent & { extra?: string };
@@ -241,11 +248,11 @@ function sendFailed(code: number): Error {
 export async function sendRichText(
   channelId: string,
   text: string,
-  sender: Sender,
+  sender: RichSender,
   replyTo?: RichMessage | null,
 ): Promise<RichMessage> {
   const channel = new GroupChannel(channelId);
-  const senderUserInfo = { userId: sender.userId, name: sender.name };
+  const senderUserInfo = senderInfo(sender);
   let res;
   if (replyTo) {
     const original = await sdkMessage(channelId, replyTo.id);
@@ -275,13 +282,13 @@ export async function sendRichText(
 export async function sendImage(
   channelId: string,
   file: File,
-  sender: Sender,
+  sender: RichSender,
   onProgress?: (percent: number) => void,
 ): Promise<RichMessage> {
   const prepared = await Helper.createSendImageMessageParams(file);
   if (!prepared.isOk || !prepared.data) throw new Error(`This photo could not be prepared (code ${prepared.code}).`);
   const params = prepared.data;
-  (params.content as ImageMessageContent).senderUserInfo = { userId: sender.userId, name: sender.name };
+  (params.content as ImageMessageContent).senderUserInfo = senderInfo(sender);
   params.needReceipt = true;
   if (onProgress) params.onUploadProgress = (p) => onProgress(p);
   const res = await new GroupChannel(channelId).sendMediaMessage(params);
@@ -307,7 +314,7 @@ export async function sendVoice(
   audio: File,
   transcript: string,
   lang: string,
-  sender: Sender,
+  sender: RichSender,
   onProgress?: (percent: number) => void,
 ): Promise<RichMessage> {
   const prepared = await Helper.createSendHDVoiceMessageParams(audio);
@@ -315,7 +322,7 @@ export async function sendVoice(
   const params = prepared.data;
   const content = params.content as HDVoiceMessageContent & { extra?: string };
   content.extra = JSON.stringify({ transcript, lang });
-  content.senderUserInfo = { userId: sender.userId, name: sender.name };
+  content.senderUserInfo = senderInfo(sender);
   params.needReceipt = true;
   if (onProgress) params.onUploadProgress = (p) => onProgress(p);
   const res = await new GroupChannel(channelId).sendMediaMessage(params);
@@ -326,10 +333,10 @@ export async function sendVoice(
 }
 
 // Fallback when audio cannot be recorded: the transcript as text, marked "spoken".
-export async function sendSpokenText(channelId: string, text: string, sender: Sender): Promise<RichMessage> {
+export async function sendSpokenText(channelId: string, text: string, sender: RichSender): Promise<RichMessage> {
   const params = new SendTextMessageParams({
     text,
-    senderUserInfo: { userId: sender.userId, name: sender.name },
+    senderUserInfo: senderInfo(sender),
     extra: JSON.stringify({ spoken: true }),
   } as TextMessageContent);
   params.needReceipt = true;

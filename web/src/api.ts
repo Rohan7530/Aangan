@@ -93,9 +93,26 @@ export function updateProfile(authKey: string, patch: { name?: string; color?: s
   return call('/api/profile', { method: 'POST', authKey, body: JSON.stringify(patch) });
 }
 
-// Avatar colours chosen by members (only those who picked one).
-export async function getColors(authKey: string, userIds: string[]): Promise<Record<string, string>> {
-  if (!userIds.length) return {};
-  const r = await call<{ colors: Record<string, string> }>(`/api/profiles?ids=${encodeURIComponent(userIds.join(','))}`, { authKey });
-  return r.colors ?? {};
+// Avatar colours and photos chosen by members (only those who set one).
+export async function getProfiles(authKey: string, userIds: string[]): Promise<{ colors: Record<string, string>; photos: Record<string, string> }> {
+  if (!userIds.length) return { colors: {}, photos: {} };
+  const r = await call<{ colors?: Record<string, string>; photos?: Record<string, string> }>(`/api/profiles?ids=${encodeURIComponent(userIds.join(','))}`, { authKey });
+  return { colors: r.colors ?? {}, photos: r.photos ?? {} };
+}
+
+// My profile photo (a resized data URL), or null to remove it. Returns its path.
+export async function uploadMyPhoto(authKey: string, image: string | null): Promise<string | null> {
+  const r = await call<{ photo: string | null }>('/api/profile/photo', { method: 'POST', authKey, body: JSON.stringify({ image }) });
+  return r.photo;
+}
+
+export async function uploadRoomPhoto(authKey: string, channelId: string, image: string): Promise<string> {
+  const r = await call<{ photo: string }>(`/api/rooms/${encodeURIComponent(channelId)}/photo`, { method: 'POST', authKey, body: JSON.stringify({ image }) });
+  return r.photo;
+}
+
+export async function getRoomPhotos(authKey: string, channelIds: string[]): Promise<Record<string, string>> {
+  if (!channelIds.length) return {};
+  const r = await call<{ photos?: Record<string, string> }>(`/api/room-photos?ids=${encodeURIComponent(channelIds.join(','))}`, { authKey });
+  return r.photos ?? {};
 }

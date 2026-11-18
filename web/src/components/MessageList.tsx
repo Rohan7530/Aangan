@@ -110,7 +110,7 @@ export function MessageList({
       ) : messages.length === 0 ? (
         <div className="flex flex-col items-center px-6 py-10 text-center">
           <CourtyardIllustration width={210} />
-          <p className="mt-6 text-[1.375rem] font-bold text-green">Your courtyard is ready</p>
+          <p className="mt-6 text-[1.375rem] font-bold text-accent-ink">Your courtyard is ready</p>
           <p className="mt-1 max-w-[20rem] text-ink-muted">Start the conversation. Everyone will read it their own way.</p>
           <p className="mt-6 font-semibold text-ink">Try saying</p>
           <ul className="mt-2 flex flex-wrap justify-center gap-2">
@@ -119,7 +119,7 @@ export function MessageList({
                 <button
                   type="button"
                   onClick={() => onSuggest(s)}
-                  className="rounded-full border-2 border-line-strong bg-surface px-4 font-semibold text-ink hover:border-green hover:bg-green-soft"
+                  className="rounded-full border-2 border-line-strong bg-surface px-4 font-semibold text-ink hover:border-accent hover:bg-accent-soft"
                   style={{ minHeight: 'var(--tap)' }}
                 >
                   {s}
@@ -137,7 +137,7 @@ export function MessageList({
             if (item.kind === 'day') {
               return (
                 <li key={item.key} className={`flex justify-center ${comfort ? 'pt-2' : 'pb-1 pt-5'}`}>
-                  <span className="rounded-full bg-sand px-4 py-1 font-semibold text-ink">{item.label}</span>
+                  <span className="rounded-full bg-fill px-4 py-1 font-semibold text-ink">{item.label}</span>
                 </li>
               );
             }
