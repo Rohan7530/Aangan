@@ -13,11 +13,13 @@ export async function getRoomConfig(): Promise<RoomConfig> {
   return (await res.json()) as RoomConfig;
 }
 
-export async function login(name: string): Promise<Session> {
+// Sign in. With the authKey of a user who signed in on this browser before,
+// the server reuses that user (same userId) instead of creating a new one.
+export async function login(name: string, authKey?: string): Promise<Session> {
   const res = await fetch('/api/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name }),
+    body: JSON.stringify(authKey ? { name, authKey } : { name }),
   });
   const body = (await res.json().catch(() => ({}))) as Partial<Session> & { error?: string };
   if (!res.ok) {

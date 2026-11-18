@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { getInviteInfo, joinInvite, login } from '../api';
 import { BrandMark } from '../components/BrandMark';
 import { CourtyardIllustration } from '../components/CourtyardIllustration';
-import { loadSession, saveSession, setLastRoom, type Session } from '../session';
+import { identityForName, loadSession, saveSession, setLastRoom, type Session } from '../session';
 
 // /join/<code>: shows which room the invite opens, asks for a name if this
 // browser has no session (e.g. a private window), then the server adds the
@@ -34,7 +34,7 @@ export function JoinPage({ code }: { code: string }) {
           setBusy(false);
           return;
         }
-        s = await login(trimmed);
+        s = await login(trimmed, identityForName(trimmed)?.authKey);
       }
       const joined = await joinInvite(s.authKey, code);
       saveSession(s);

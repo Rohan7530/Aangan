@@ -7,7 +7,7 @@ import { JoinPage } from './pages/JoinPage';
 import { PhonePage } from './pages/PhonePage';
 import { ShowcasePage } from './pages/ShowcasePage';
 import { WelcomePage } from './pages/WelcomePage';
-import { clearSession, forgetOtherRooms, listSavedSessions, loadSession, saveSession, type Session } from './session';
+import { clearSession, listIdentities, loadSession, saveSession, type Identity, type Session } from './session';
 
 type Boot = { status: 'loading' } | { status: 'ready' } | { status: 'error'; message: string };
 
@@ -25,7 +25,7 @@ export default function App() {
 function FamilyApp() {
   const [boot, setBoot] = useState<Boot>({ status: 'loading' });
   const [session, setSession] = useState<Session | null>(null);
-  const [saved, setSaved] = useState<Session[]>([]);
+  const [known, setKnown] = useState<Identity[]>([]);
 
   // Ask the server which family room is current, and drop sessions saved for an older one.
   useEffect(() => {
@@ -33,9 +33,8 @@ function FamilyApp() {
     getRoomConfig()
       .then((room) => {
         if (cancelled) return;
-        forgetOtherRooms(room.channelId);
-        setSession(loadSession());
-        setSaved(listSavedSessions());
+        setSession(loadSession(room.channelId));
+        setKnown(listIdentities());
         setBoot({ status: 'ready' });
       })
       .catch(() => !cancelled && setBoot({ status: 'error', message: 'Aangan cannot reach its server right now.' }));
@@ -49,12 +48,11 @@ function FamilyApp() {
     setSession(s);
   }, []);
 
+  // Sign out: forget the session; unmounting the workspace disconnects Nexconn.
   const handleLogout = useCallback(() => {
-    setSession((current) => {
-      clearSession(current?.userId);
-      return null;
-    });
-    setSaved(listSavedSessions());
+    clearSession();
+    setSession(null);
+    setKnown(listIdentities());
   }, []);
 
   if (boot.status === 'loading') {
@@ -73,7 +71,7 @@ function FamilyApp() {
       </div>
     );
   }
-  if (!session) return <WelcomePage savedSessions={saved} onLoggedIn={handleLoggedIn} />;
+  if (!session) return <WelcomePage known={known} onLoggedIn={handleLoggedIn} />;
   return (
     <ReaderPrefsProvider key={session.userId} userId={session.userId}>
       <Workspace session={session} onLogout={handleLogout} />

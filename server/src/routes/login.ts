@@ -3,7 +3,7 @@ import { randomBytes } from 'node:crypto';
 import type { Config } from '../config.js';
 import { ensureDemoRoom } from '../demo/demoRoom.js';
 import type { NexconnClient } from '../nexconn.js';
-import { registerRoom, upsertUser } from '../store.js';
+import { registerRoom, upsertUser, userByKey } from '../store.js';
 import { limits } from '../limits.js';
 
 export interface LoginResponse {
@@ -66,8 +66,12 @@ export function loginRouter(cfg: Config, nexconn: NexconnClient): Router {
       res.status(400).json({ error: 'Name must be 1-64 characters' });
       return;
     }
+    // Returning user on the same browser: the client sends the authKey it was given,
+    // and we reuse that userId instead of creating another member with the same name.
+    const authKeyIn = typeof req.body?.authKey === 'string' ? req.body.authKey.slice(0, 128) : '';
     try {
-      const userId = makeUserId(name);
+      const existing = authKeyIn ? await userByKey(authKeyIn) : null;
+      const userId = existing?.userId ?? makeUserId(name);
       const { token } = await nexconn.issueToken(userId, name);
       await ensureMemberOfFamily(userId);
       await registerRoom(family.channelId, family.channelName, null);
@@ -90,7 +94,7 @@ export function loginRouter(cfg: Config, nexconn: NexconnClient): Router {
         channelId: family.channelId,
         channelName: family.channelName,
       };
-      console.log(`[login] ${name} -> ${userId}`);
+      console.log(`[login] ${name} -> ${userId}${existing ? ' (returning)' : ''}`);
       res.json(body);
     } catch (err) {
       console.error('[login] failed:', err);

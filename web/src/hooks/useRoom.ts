@@ -21,6 +21,15 @@ import type { Session } from '../session';
 
 const READ_BATCH = 50;
 
+// Two members with the same name (e.g. someone who signed in twice on different
+// devices) get a short suffix from their user ID so they can be told apart.
+export function distinctNames(members: Member[]): Member[] {
+  const norm = (n: string) => n.trim().toLowerCase();
+  const counts = new Map<string, number>();
+  for (const m of members) if (m.name) counts.set(norm(m.name), (counts.get(norm(m.name)) ?? 0) + 1);
+  return members.map((m) => (m.name && (counts.get(norm(m.name)) ?? 0) > 1 ? { ...m, name: `${m.name} ·${m.userId.slice(-4)}` } : m));
+}
+
 function merge(current: RichMessage[], incoming: RichMessage[]): RichMessage[] {
   const byId = new Map(current.map((m) => [m.id, m]));
   for (const m of incoming) byId.set(m.id, { ...byId.get(m.id), ...m });
@@ -97,7 +106,7 @@ export function useRoom(session: Session, channelId: string, connection: Connect
     listMembers(channelId)
       .then((r) => {
         if (r.ok) {
-          setMembers(r.members);
+          setMembers(distinctNames(r.members));
           setMemberCount(r.members.length);
         } else {
           getMemberCount(channelId).then(setMemberCount);
@@ -257,7 +266,7 @@ export function useRoom(session: Session, channelId: string, connection: Connect
   const named = useMemo(
     () =>
       messages.map((m) => {
-        const senderName = m.senderName || names.get(m.senderId);
+        const senderName = names.get(m.senderId) || m.senderName;
         const reply = m.reply && !m.reply.senderName ? { ...m.reply, senderName: names.get(m.reply.senderId) } : m.reply;
         return senderName === m.senderName && reply === m.reply ? m : { ...m, senderName, reply };
       }),

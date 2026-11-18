@@ -6,10 +6,11 @@ import { StandardMessage } from '../components/StandardMessage';
 import { assignTones, ToneProvider } from '../components/tones';
 import { ComfortMessage, useSpeech } from '../features/reader-view';
 import type { RichMessage } from '../nexconn/rich';
-import type { Session } from '../session';
+import { identityForName, type Identity, type Session } from '../session';
 
 interface Props {
-  savedSessions: Session[];
+  /** People who have signed in on this browser before. */
+  known: Identity[];
   onLoggedIn: (session: Session) => void;
 }
 
@@ -72,7 +73,7 @@ function ModesPreview() {
   );
 }
 
-export function WelcomePage({ savedSessions, onLoggedIn }: Props) {
+export function WelcomePage({ known, onLoggedIn }: Props) {
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,7 +90,19 @@ export function WelcomePage({ savedSessions, onLoggedIn }: Props) {
     setBusy(true);
     setError(null);
     try {
-      onLoggedIn(await login(trimmed));
+      // Same name as someone who used this browser before: same user, not a new member.
+      onLoggedIn(await login(trimmed, identityForName(trimmed)?.authKey));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not join. Please try again.');
+      setBusy(false);
+    }
+  }
+
+  async function continueAs(identity: Identity) {
+    setBusy(true);
+    setError(null);
+    try {
+      onLoggedIn(await login(identity.name, identity.authKey));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not join. Please try again.');
       setBusy(false);
@@ -168,15 +181,16 @@ export function WelcomePage({ savedSessions, onLoggedIn }: Props) {
               <ArrowRightIcon />
             </a>
 
-            {savedSessions.length > 0 && (
+            {known.length > 0 && (
               <div className="mt-6 border-t border-line pt-5">
                 <h2 className="font-bold text-ink">Continue as</h2>
                 <ul className="mt-2 flex flex-col gap-2">
-                  {savedSessions.map((s) => (
+                  {known.map((s) => (
                     <li key={s.userId}>
                       <button
                         type="button"
-                        onClick={() => onLoggedIn(s)}
+                        disabled={busy}
+                        onClick={() => void continueAs(s)}
                         className="min-h-[52px] w-full rounded-2xl border-2 border-line bg-cream px-4 text-left text-[1.125rem] font-semibold hover:border-green"
                       >
                         {s.name}
