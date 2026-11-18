@@ -7,6 +7,8 @@ import { loginRouter } from './routes/login.js';
 import { roomsRouter } from './routes/rooms.js';
 import { translateRouter } from './routes/translate.js';
 import { profileRouter } from './routes/profile.js';
+import { fileURLToPath } from 'node:url';
+import { MEDIA_DIR } from './media.js';
 
 const cfg = loadConfig();
 const nexconn = new NexconnClient(cfg.nexconn);
@@ -14,7 +16,12 @@ const nexconn = new NexconnClient(cfg.nexconn);
 const app = express();
 // Behind a reverse proxy (hosting), set TRUST_PROXY (e.g. 1) so rate limits see real client IPs.
 if (process.env.TRUST_PROXY) app.set('trust proxy', Number(process.env.TRUST_PROXY) || process.env.TRUST_PROXY);
-app.use(express.json({ limit: '16kb' }));
+// Small JSON bodies everywhere, except photo uploads (256px pictures, ~30-80 KB).
+const smallJson = express.json({ limit: '16kb' });
+const photoJson = express.json({ limit: '400kb' });
+app.use((req, res, next) => (req.method === 'POST' && req.path.endsWith('/photo') ? photoJson : smallJson)(req, res, next));
+// Profile and family photos (file names carry the user/room id; ?v= changes with the picture).
+app.use('/api/media', express.static(fileURLToPath(MEDIA_DIR), { maxAge: '30d', immutable: true, fallthrough: false }));
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, areaCode: cfg.nexconn.areaCode, channelId: cfg.family.channelId });

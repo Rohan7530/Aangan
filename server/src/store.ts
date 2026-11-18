@@ -9,7 +9,8 @@ const DATA_DIR = new URL('../data/', import.meta.url);
 const FILE = new URL('store.json', DATA_DIR);
 
 interface StoreData {
-  users: Record<string, { name: string; authKey: string; color?: string }>;
+  users: Record<string, { name: string; authKey: string; color?: string; photo?: string }>;
+  roomPhotos: Record<string, string>;
   rooms: Record<string, { name: string; code: string; createdBy: string | null; createdAt: string }>;
 }
 
@@ -21,10 +22,11 @@ async function load(): Promise<StoreData> {
   try {
     data = JSON.parse(await readFile(FILE, 'utf8')) as StoreData;
   } catch {
-    data = { users: {}, rooms: {} };
+    data = { users: {}, rooms: {}, roomPhotos: {} };
   }
   data.users ??= {};
   data.rooms ??= {};
+  data.roomPhotos ??= {};
   return data;
 }
 
@@ -61,22 +63,40 @@ export async function userByKey(authKey: string): Promise<{ userId: string; name
 }
 
 // Profile changes from Settings (display name, avatar colour).
-export async function setProfile(userId: string, patch: { name?: string; color?: string }): Promise<void> {
+// Profile changes from Settings (display name, avatar colour, photo path; photo null = removed).
+export async function setProfile(userId: string, patch: { name?: string; color?: string; photo?: string | null }): Promise<void> {
   const d = await load();
   const u = d.users[userId];
   if (!u) return;
   if (patch.name) u.name = patch.name;
   if (patch.color) u.color = patch.color;
+  if (patch.photo === null) delete u.photo;
+  else if (patch.photo) u.photo = patch.photo;
   await save();
 }
 
-export async function colorsFor(userIds: string[]): Promise<Record<string, string>> {
+export async function profilesFor(userIds: string[]): Promise<{ colors: Record<string, string>; photos: Record<string, string> }> {
+  const d = await load();
+  const colors: Record<string, string> = {};
+  const photos: Record<string, string> = {};
+  for (const id of userIds) {
+    const u = d.users[id];
+    if (u?.color) colors[id] = u.color;
+    if (u?.photo) photos[id] = u.photo;
+  }
+  return { colors, photos };
+}
+
+export async function setRoomPhoto(channelId: string, photo: string): Promise<void> {
+  const d = await load();
+  d.roomPhotos[channelId] = photo;
+  await save();
+}
+
+export async function roomPhotosFor(channelIds: string[]): Promise<Record<string, string>> {
   const d = await load();
   const out: Record<string, string> = {};
-  for (const id of userIds) {
-    const c = d.users[id]?.color;
-    if (c) out[id] = c;
-  }
+  for (const id of channelIds) if (d.roomPhotos[id]) out[id] = d.roomPhotos[id];
   return out;
 }
 
