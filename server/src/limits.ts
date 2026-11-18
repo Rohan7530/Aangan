@@ -20,6 +20,8 @@ export const limits = {
     rateLimit({ windowMs: MIN, max: 30, key: byIp, message: 'The demo is busy from this network.' }),
     rateLimit({ windowMs: HOUR, max: 300, key: byIp, message: 'The demo is busy from this network.' }),
   ],
+  profile: [rateLimit({ windowMs: 10 * MIN, max: 30, key: byAuthOrIp, message: 'Too many profile changes.' })],
+  profiles: [rateLimit({ windowMs: MIN, max: 120, key: byAuthOrIp, message: 'Too many requests.' })],
   translate: [
     rateLimit({ windowMs: MIN, max: 120, key: byAuthOrIp, message: 'Too many translations at once.' }),
     rateLimit({ windowMs: MIN, max: 300, key: byIp, message: 'Too many translations from this network.' }),

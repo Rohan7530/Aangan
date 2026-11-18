@@ -9,7 +9,7 @@ const DATA_DIR = new URL('../data/', import.meta.url);
 const FILE = new URL('store.json', DATA_DIR);
 
 interface StoreData {
-  users: Record<string, { name: string; authKey: string }>;
+  users: Record<string, { name: string; authKey: string; color?: string }>;
   rooms: Record<string, { name: string; code: string; createdBy: string | null; createdAt: string }>;
 }
 
@@ -49,7 +49,7 @@ export async function upsertUser(userId: string, name: string): Promise<string> 
   const d = await load();
   const existing = d.users[userId];
   const authKey = existing?.authKey ?? randomBytes(24).toString('hex');
-  d.users[userId] = { name, authKey };
+  d.users[userId] = { ...existing, name, authKey };
   await save();
   return authKey;
 }
@@ -58,6 +58,26 @@ export async function userByKey(authKey: string): Promise<{ userId: string; name
   const d = await load();
   for (const [userId, u] of Object.entries(d.users)) if (u.authKey === authKey) return { userId, name: u.name };
   return null;
+}
+
+// Profile changes from Settings (display name, avatar colour).
+export async function setProfile(userId: string, patch: { name?: string; color?: string }): Promise<void> {
+  const d = await load();
+  const u = d.users[userId];
+  if (!u) return;
+  if (patch.name) u.name = patch.name;
+  if (patch.color) u.color = patch.color;
+  await save();
+}
+
+export async function colorsFor(userIds: string[]): Promise<Record<string, string>> {
+  const d = await load();
+  const out: Record<string, string> = {};
+  for (const id of userIds) {
+    const c = d.users[id]?.color;
+    if (c) out[id] = c;
+  }
+  return out;
 }
 
 // ---- rooms + invites -----------------------------------------------------------

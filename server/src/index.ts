@@ -6,6 +6,7 @@ import { demoRouter } from './routes/demo.js';
 import { loginRouter } from './routes/login.js';
 import { roomsRouter } from './routes/rooms.js';
 import { translateRouter } from './routes/translate.js';
+import { profileRouter } from './routes/profile.js';
 
 const cfg = loadConfig();
 const nexconn = new NexconnClient(cfg.nexconn);
@@ -27,6 +28,7 @@ app.use('/api', loginRouter(cfg, nexconn));
 app.use('/api', demoRouter(cfg, nexconn));
 app.use('/api', roomsRouter(cfg, nexconn));
 app.use('/api', translateRouter());
+app.use('/api', profileRouter());
 
 app.listen(cfg.port, () => {
   const room = cfg.family.isTestRoom ? `TEST room ${cfg.family.channelId}` : `room ${cfg.family.channelId}`;

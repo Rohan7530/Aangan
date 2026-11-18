@@ -21,7 +21,7 @@
 
   /* text */
   --color-ink: #2a2522; /* soft charcoal */
-  --color-ink-muted: #5c534b;
+  --color-ink-muted: #4f4740; /* AAA: 8.3 on cream, 7.5 on green-soft, 7.3 on terracotta-soft */
 
   /* accent + brand */
   --color-terracotta: #a9461f;
@@ -782,6 +782,158 @@ dialog.sheet[open] {
   }
   [data-reader-mode="standard"] button:not(:disabled):active {
     transform: none;
+  }
+}
+
+/* ==================================================================
+   Settings: avatar colour swatches and checkbox
+   ================================================================== */
+.color-swatch {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 72px;
+  padding: 6px 4px;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.color-swatch .swatch-dot {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+.color-swatch.is-comfort {
+  min-width: 88px;
+}
+.color-swatch.is-comfort .swatch-dot {
+  width: 56px;
+  height: 56px;
+  font-size: 1.5rem;
+}
+.color-swatch:hover {
+  border-color: var(--color-line-strong);
+}
+.color-swatch:has(input:checked) {
+  border-color: var(--color-green);
+  background: var(--color-green-soft);
+}
+.color-swatch:has(input:checked) .swatch-dot {
+  box-shadow:
+    0 0 0 3px var(--color-surface),
+    0 0 0 5px var(--color-ink);
+}
+.color-swatch:has(input:focus-visible) {
+  outline: 3px solid var(--color-green);
+  outline-offset: 2px;
+}
+.check-box {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  accent-color: var(--color-green);
+}
+.tone-name {
+  color: var(--tone);
+}
+
+/* ==================================================================
+   Dark mode. Neutrals are redefined; accent fills (green, terracotta,
+   danger) stay, so white text on them keeps its contrast; accent TEXT and
+   borders switch to light tints. Checked pairs (on surface #1f1b18):
+   ink 15.6:1, ink-muted 9.3:1, green text 11:1, terracotta text 7.9:1,
+   danger text 7.6:1: AAA, so Comfort mode stays AAA in both themes.
+   ================================================================== */
+:root[data-theme="dark"] {
+  --color-cream: #171412;
+  --color-courtyard: #110f0d;
+  --color-sand: #24201c;
+  --color-surface: #1f1b18;
+  --color-line: #3b342e;
+  --color-line-strong: #8c7f72;
+  --color-ink: #f4eee6;
+  --color-ink-muted: #cbbfb2;
+  --color-terracotta-soft: #3a2219;
+  --color-green-soft: #1d3329;
+  --dark-green-text: #a3d9bf;
+  --dark-terracotta-text: #f4a98a;
+  --dark-danger-text: #ff9f8f;
+}
+:root[data-theme="dark"] body {
+  background-image: radial-gradient(circle at 1px 1px, rgb(244 169 138 / 0.08) 1.2px, transparent 0);
+}
+[data-theme="dark"] .text-green {
+  color: var(--dark-green-text);
+}
+[data-theme="dark"] :is(.text-terracotta, .text-terracotta-deep) {
+  color: var(--dark-terracotta-text);
+}
+[data-theme="dark"] .text-danger {
+  color: var(--dark-danger-text);
+}
+[data-theme="dark"] .border-green {
+  border-color: #7fbf9f;
+}
+[data-theme="dark"] .border-danger {
+  border-color: #e0705f;
+}
+[data-theme="dark"] .bg-white:not(.on-dark) {
+  background: var(--color-surface);
+}
+[data-theme="dark"] :focus-visible {
+  outline-color: var(--dark-green-text);
+}
+[data-theme="dark"] .on-dark :focus-visible,
+[data-theme="dark"] .on-dark:focus-visible {
+  outline-color: #fff;
+}
+[data-theme="dark"] .tone-name {
+  color: color-mix(in oklab, var(--tone) 32%, white);
+}
+[data-theme="dark"] .comfort-card {
+  background: var(--color-surface);
+}
+[data-theme="dark"] .comfort-card.comfort-mine {
+  background: var(--color-terracotta-soft);
+  border-color: #6b3a26;
+  border-left-color: var(--color-terracotta);
+}
+[data-theme="dark"] .radio-dot {
+  background: var(--color-surface);
+}
+[data-theme="dark"] :is(.option-card, .color-swatch):has(input:checked) {
+  border-color: #7fbf9f;
+}
+[data-theme="dark"] .option-card:has(input:checked) .radio-dot {
+  border-color: var(--dark-green-text);
+}
+[data-theme="dark"] .option-card:has(input:checked) .radio-dot::after {
+  background: var(--dark-green-text);
+}
+[data-theme="dark"] .check-box {
+  accent-color: var(--dark-green-text);
+}
+[data-theme="dark"] .chat-glass {
+  background: rgb(23 20 18 / 0.78);
+}
+[data-theme="dark"] :is(.chat-glass-top, .chat-glass-bottom) {
+  border-color: rgb(59 52 46 / 0.9);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-theme="dark"] .chat-glass {
+    background: var(--color-cream);
+  }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  [data-theme="dark"] .chat-glass {
+    background: var(--color-cream);
   }
 }
 

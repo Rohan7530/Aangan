@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { senderLabel } from '../components/messageModel';
 import { assignTones } from '../components/tones';
+import { getColors } from '../api';
+import { setProfileColors } from '../features/settings/profileColors';
 import { getMemberCount, listMembers, onMembersChanged, type Member } from '../nexconn/group';
 import { watchPresence, type PresenceMap } from '../nexconn/presence';
 import { getReaders, markRead, onReadReceipts } from '../nexconn/receipts';
@@ -132,6 +134,12 @@ export function useRoom(session: Session, channelId: string, connection: Connect
 
   // ---- presence -----------------------------------------------------------------
   const memberKey = members.map((m) => m.userId).sort().join(',');
+
+  // ---- avatar colours members picked in Settings ------------------------------
+  useEffect(() => {
+    if (!memberKey) return;
+    getColors(session.authKey, memberKey.split(',')).then(setProfileColors).catch(() => undefined);
+  }, [memberKey, session.authKey]);
   useEffect(() => {
     if (!connected || !memberKey) return;
     let stop = () => {};

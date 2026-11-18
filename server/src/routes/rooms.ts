@@ -1,22 +1,9 @@
-import { Router, type NextFunction, type Request, type Response } from 'express';
+import { Router } from 'express';
+import { requireUser, type Authed } from '../auth.js';
 import type { Config } from '../config.js';
 import type { NexconnClient } from '../nexconn.js';
-import { randomCode, registerRoom, roomByCode, roomInfo, userByKey } from '../store.js';
+import { randomCode, registerRoom, roomByCode, roomInfo } from '../store.js';
 import { limits } from '../limits.js';
-
-type Authed = Request & { user?: { userId: string; name: string } };
-
-// App-level auth: the browser sends the authKey it got from /api/login.
-async function requireUser(req: Authed, res: Response, next: NextFunction) {
-  const key = (req.headers.authorization ?? '').replace(/^Bearer\s+/i, '').trim();
-  const user = key ? await userByKey(key) : null;
-  if (!user) {
-    res.status(401).json({ error: 'Please join again.' });
-    return;
-  }
-  req.user = user;
-  next();
-}
 
 const invitePath = (code: string) => `/join/${code}`;
 

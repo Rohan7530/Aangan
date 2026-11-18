@@ -74,7 +74,7 @@ function FamilyApp() {
   if (!session) return <WelcomePage known={known} onLoggedIn={handleLoggedIn} />;
   return (
     <ReaderPrefsProvider key={session.userId} userId={session.userId}>
-      <Workspace session={session} onLogout={handleLogout} />
+      <Workspace session={session} onLogout={handleLogout} onSessionChange={handleLoggedIn} />
     </ReaderPrefsProvider>
   );
 }

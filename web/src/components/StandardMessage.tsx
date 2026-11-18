@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { VoiceAttachment } from '../features/voice-reply/VoiceAttachment';
 import { TranslationNote } from '../features/reader-view/TranslationNote';
 import type { TranslationState } from '../features/reader-view/useTranslations';
@@ -91,7 +91,7 @@ export function StandardMessage({
         {!mine && <div className="w-9 shrink-0 self-start">{first && <Avatar id={msg.senderId} name={name} />}</div>}
         <div className={`relative flex max-w-[65%] flex-col ${mine ? 'items-end' : 'items-start'}`}>
           {!mine && first && (
-            <span className="mb-1 px-1 font-semibold leading-tight" style={{ color: tone }} aria-hidden="true">
+            <span className="tone-name mb-1 px-1 font-semibold leading-tight" style={{ '--tone': tone } as CSSProperties} aria-hidden="true">
               {name}
             </span>
           )}

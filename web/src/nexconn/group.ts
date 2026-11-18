@@ -44,13 +44,17 @@ export async function getMemberCount(channelId: string): Promise<number | null> 
   return typeof count === 'number' ? count : null;
 }
 
-// Calls cb when someone joins, leaves, or is removed from the group.
+// Calls cb when someone joins, leaves, is removed, or changes their nickname in the group.
 export function onMembersChanged(channelId: string, cb: () => void): () => void {
   const id = `aangan-group-${++groupHandlerSeq}`;
   NCEngine.addGroupChannelHandler(
     id,
     new GroupChannelHandler({
       onGroupOperation(event) {
+        if (event.groupId === channelId) cb();
+      },
+      // A member changed their nickname (e.g. renamed themselves in Settings).
+      onGroupMemberInfoChanged(event) {
         if (event.groupId === channelId) cb();
       },
     }),

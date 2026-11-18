@@ -4,7 +4,10 @@ import { createRoot } from 'react-dom/client';
 import '@fontsource-variable/noto-sans';
 import '@fontsource-variable/noto-sans-devanagari';
 import App from './App';
+import { applyTheme } from './features/settings/appearance';
 import './index.css';
+
+applyTheme();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

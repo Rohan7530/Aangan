@@ -3,7 +3,7 @@ import type { ConnectionState } from '../../nexconn/types';
 import { Avatar } from '../Avatar';
 import { BrandMark } from '../BrandMark';
 import { ConnectionChip } from '../ConnectionChip';
-import { PlusIcon } from '../icons';
+import { GearIcon, PlusIcon } from '../icons';
 import { formatListTime, senderLabel } from '../messageModel';
 import { RoomAvatar } from '../workspace/RoomAvatar';
 
@@ -13,6 +13,7 @@ interface Props {
   activeId: string | null;
   onSelect: (channelId: string) => void;
   onNewRoom: () => void;
+  onOpenSettings: () => void;
   me: { userId: string; name: string };
   connection: ConnectionState;
   /** Phones: the room list is the whole screen. */
@@ -22,7 +23,7 @@ interface Props {
 // Comfort room list: always visible on wide screens, the home screen on phones.
 // Big rows, large text, everything spelled out ("3 new messages"), no icon-only
 // buttons and nothing hidden behind a collapse toggle.
-export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, connection, fullWidth }: Props) {
+export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, onOpenSettings, me, connection, fullWidth }: Props) {
   return (
     <nav aria-label="Rooms" className={`flex h-full shrink-0 flex-col border-r-2 border-line bg-sand/70 ${fullWidth ? 'w-full' : 'w-[360px] xl:w-[400px]'}`}>
       <div className="flex items-center gap-3 px-5 pb-3 pt-5">
@@ -83,14 +84,23 @@ export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, m
         })}
       </ul>
 
-      <div className="border-t-2 border-line p-4">
+      <div className="flex flex-col gap-3 border-t-2 border-line p-4">
         <button
           type="button"
           onClick={onNewRoom}
-          className="inline-flex min-h-[60px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-green bg-surface text-[1.25rem] font-bold text-green hover:bg-green-soft"
+          className="inline-flex min-h-[64px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-green bg-surface text-[1.25rem] font-bold text-green hover:bg-green-soft"
         >
           <PlusIcon />
           <span>New room</span>
+        </button>
+        <button
+          type="button"
+          onClick={onOpenSettings}
+          aria-haspopup="dialog"
+          className="inline-flex min-h-[64px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-line-strong bg-surface text-[1.25rem] font-bold text-ink hover:border-green"
+        >
+          <GearIcon />
+          <span>Settings</span>
         </button>
       </div>
     </nav>

@@ -3,7 +3,7 @@ import type { ConnectionState } from '../../nexconn/types';
 import { Avatar } from '../Avatar';
 import { BrandMark } from '../BrandMark';
 import { ConnectionChip } from '../ConnectionChip';
-import { PlusIcon, SidebarIcon } from '../icons';
+import { GearIcon, PlusIcon, SidebarIcon } from '../icons';
 import { formatListTime, senderLabel } from '../messageModel';
 import { RoomAvatar } from './RoomAvatar';
 
@@ -17,6 +17,7 @@ interface Props {
   connection: ConnectionState;
   collapsed: boolean;
   onToggleCollapsed?: () => void;
+  onOpenSettings: () => void;
   /** Mobile: the room list is the whole screen. */
   fullWidth?: boolean;
 }
@@ -28,7 +29,7 @@ function preview(r: RoomSummary, myId: string): string {
   return `${who}: ${what}`;
 }
 
-export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, connection, collapsed, onToggleCollapsed, fullWidth }: Props) {
+export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, connection, collapsed, onToggleCollapsed, onOpenSettings, fullWidth }: Props) {
   const rail = collapsed && !fullWidth;
   const totalUnread = rooms.reduce((n, r) => n + r.unread, 0);
 
@@ -54,21 +55,6 @@ export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, conn
           >
             <SidebarIcon />
           </button>
-        )}
-      </div>
-
-      {/* my profile chip */}
-      <div className={`mx-3 mb-3 flex items-center gap-3 rounded-2xl ${rail ? 'justify-center' : 'border border-line bg-surface px-3 py-2'}`}>
-        <span title={rail ? `${me.name} (you)` : undefined}>
-          <Avatar id={me.userId} name={me.name} size={rail ? 40 : 40} mine />
-        </span>
-        {!rail && (
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-bold leading-tight">{me.name}</p>
-            <p className="text-[1rem] leading-tight">
-              <ConnectionChip state={connection} />
-            </p>
-          </div>
         )}
       </div>
 
@@ -144,6 +130,37 @@ export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, conn
           );
         })}
       </ul>
+
+      {/* me: avatar, name, connection, settings */}
+      <div className={`flex shrink-0 items-center gap-3 border-t border-line px-3 py-3 ${rail ? 'flex-col gap-2 px-2' : ''}`}>
+        <span title={rail ? `${me.name} (you)` : undefined} className="relative">
+          <Avatar id={me.userId} name={me.name} size={40} mine />
+          {rail && (
+            <span
+              className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-cream ${connection === 'connected' ? 'bg-green' : 'bg-ochre'}`}
+              aria-hidden="true"
+            />
+          )}
+        </span>
+        {!rail && (
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-bold leading-tight">{me.name}</p>
+            <p className="text-[1rem] leading-tight">
+              <ConnectionChip state={connection} />
+            </p>
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={onOpenSettings}
+          aria-haspopup="dialog"
+          aria-label="Settings"
+          title="Settings"
+          className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-ink-muted hover:bg-surface hover:text-ink"
+        >
+          <GearIcon />
+        </button>
+      </div>
     </nav>
   );
 }

@@ -1,4 +1,5 @@
 import { createContext, useContext, type ReactNode } from 'react';
+import { useProfileColor } from '../features/settings/profileColors';
 
 // A distinct warm colour per member. Every tone carries white initials at
 // >= 6.9:1 and works as a name colour on cream at >= 6.3:1. Terracotta is kept
@@ -25,6 +26,9 @@ export function ToneProvider({ tones, children }: { tones: Map<string, string>; 
   return <ToneCtx.Provider value={tones}>{children}</ToneCtx.Provider>;
 }
 
+// A colour the person picked in Settings wins over the assigned tone.
 export function useTone(userId: string): string {
-  return useContext(ToneCtx).get(userId) ?? hashTone(userId);
+  const picked = useProfileColor(userId);
+  const assigned = useContext(ToneCtx).get(userId);
+  return picked ?? assigned ?? hashTone(userId);
 }

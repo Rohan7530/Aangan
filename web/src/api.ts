@@ -86,3 +86,16 @@ export function joinInvite(authKey: string, code: string) {
     authKey,
   });
 }
+
+// ---- profile (Settings) -------------------------------------------------------------
+
+export function updateProfile(authKey: string, patch: { name?: string; color?: string }): Promise<{ ok: true; name: string; color?: string }> {
+  return call('/api/profile', { method: 'POST', authKey, body: JSON.stringify(patch) });
+}
+
+// Avatar colours chosen by members (only those who picked one).
+export async function getColors(authKey: string, userIds: string[]): Promise<Record<string, string>> {
+  if (!userIds.length) return {};
+  const r = await call<{ colors: Record<string, string> }>(`/api/profiles?ids=${encodeURIComponent(userIds.join(','))}`, { authKey });
+  return r.colors ?? {};
+}

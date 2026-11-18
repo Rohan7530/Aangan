@@ -10,8 +10,6 @@ import type { Speech } from './useSpeech';
 interface Props {
   open: boolean;
   onClose: () => void;
-  /** Omit to hide "Sign out" (e.g. in the showcase phones). */
-  onSignOut?: () => void;
   speech: Speech;
   myName: string;
 }
@@ -40,7 +38,7 @@ const STEPS: TextStep[] = [0, 1, 2];
 const STEP_GLYPH_SIZE: Record<TextStep, string> = { 0: '1.125rem', 1: '1.5rem', 2: '1.875rem' };
 
 // "How I read": reading style, text size and a live preview.
-export function ReaderSettingsSheet({ open, onClose, onSignOut, speech, myName }: Props) {
+export function ReaderSettingsSheet({ open, onClose, speech, myName }: Props) {
   const { prefs, setPrefs } = useReaderPrefs();
 
   return (
@@ -137,18 +135,6 @@ export function ReaderSettingsSheet({ open, onClose, onSignOut, speech, myName }
         </div>
       </section>
 
-      {onSignOut && (
-        <div className="mt-8 border-t border-line pt-5">
-          <button
-            type="button"
-            onClick={onSignOut}
-            className="rounded-2xl px-2 font-semibold text-danger underline underline-offset-4"
-            style={{ minHeight: 'var(--tap)' }}
-          >
-            Sign out of this device
-          </button>
-        </div>
-      )}
     </Sheet>
   );
 }

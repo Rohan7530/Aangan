@@ -3,7 +3,13 @@ import { ReaderSettingsSheet, useReaderPrefs, useSpeech } from '../../features/r
 import { useConnection } from '../../hooks/useConnection';
 import { useMediaQuery, useStoredFlag } from '../../hooks/useMediaQuery';
 import { useRooms } from '../../hooks/useRooms';
+import { getColors, updateProfile } from '../../api';
+import { useProfileColor, setProfileColors } from '../../features/settings/profileColors';
+import { SettingsSheet } from '../../features/settings/SettingsSheet';
+import { isSoundOn, playChime } from '../../features/settings/sound';
 import * as nexconn from '../../nexconn/client';
+import { setMyNickname, updateMyName } from '../../nexconn/profile';
+import { onRichMessages } from '../../nexconn/rich';
 import { getLastRoom, setLastRoom, type Session } from '../../session';
 import { ComfortRoom } from '../comfort/ComfortRoom';
 import { ComfortSidebar } from '../comfort/ComfortSidebar';
@@ -14,6 +20,8 @@ import { StandardRoom } from './StandardRoom';
 interface Props {
   session: Session;
   onLogout?: () => void;
+  /** After a name change in Settings. */
+  onSessionChange?: (session: Session) => void;
   /** Showcase: no sign-out, no remembered layout. */
   embedded?: boolean;
   /** Room to open first (e.g. after following an invite). */
@@ -24,7 +32,7 @@ interface Props {
 // Standard, >= 900px: [ Sidebar | Chat | Info panel ], full window.
 // Standard, < 900px:  one pane at a time; the room list is home.
 // Comfort:            one room at a time, large cards, "My rooms" button.
-export function Workspace({ session, onLogout, embedded = false, initialRoom }: Props) {
+export function Workspace({ session, onLogout, onSessionChange, embedded = false, initialRoom }: Props) {
   const { prefs } = useReaderPrefs();
   const speech = useSpeech();
   const logout = useMemo(() => onLogout ?? (() => window.location.reload()), [onLogout]);
@@ -43,6 +51,42 @@ export function Workspace({ session, onLogout, embedded = false, initialRoom }: 
   const [mobileView, setMobileView] = useState<'list' | 'chat'>(initialRoom ? 'chat' : 'list');
   const [readerOpen, setReaderOpen] = useState(false);
   const [newRoomOpen, setNewRoomOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const myColor = useProfileColor(session.userId) ?? '#a9461f';
+
+  // My avatar colour (if I picked one) for the sidebar before any room loads.
+  useEffect(() => {
+    getColors(session.authKey, [session.userId])
+      .then(setProfileColors)
+      .catch(() => undefined);
+  }, [session.authKey, session.userId]);
+
+  // A soft chime for new messages from others (Settings > Notifications).
+  useEffect(
+    () =>
+      onRichMessages((msgs) => {
+        const fresh = msgs.some((m) => m.senderId !== session.userId && Date.now() - m.sentAt < 60_000);
+        if (fresh && isSoundOn(session.userId)) playChime();
+      }),
+    [session.userId],
+  );
+
+  async function rename(name: string) {
+    await updateProfile(session.authKey, { name }); // our records + next sign-in
+    const r = await updateMyName(name).catch(() => ({ ok: false, code: -1 })); // Nexconn profile
+    if (!r.ok) console.warn('[settings] Nexconn profile name not updated:', r.code);
+    await setMyNickname(
+      rooms.map((x) => x.channelId),
+      session.userId,
+      name,
+    ); // member lists in every room
+    onSessionChange?.({ ...session, name });
+  }
+
+  async function changeColor(color: string) {
+    await updateProfile(session.authKey, { color });
+    setProfileColors({ [session.userId]: color });
+  }
 
   const select = useCallback(
     (id: string) => {
@@ -67,6 +111,7 @@ export function Workspace({ session, onLogout, embedded = false, initialRoom }: 
 
   async function signOut() {
     setReaderOpen(false);
+    setSettingsOpen(false);
     speech.stop();
     await nexconn.disconnect().catch(() => undefined);
     logout();
@@ -90,6 +135,7 @@ export function Workspace({ session, onLogout, embedded = false, initialRoom }: 
           setCollapsed(!collapsed);
         }
       }}
+      onOpenSettings={() => setSettingsOpen(true)}
       fullWidth={fullWidth}
     />
   );
@@ -104,6 +150,7 @@ export function Workspace({ session, onLogout, embedded = false, initialRoom }: 
         activeId={fullWidth ? null : activeId}
         onSelect={select}
         onNewRoom={() => setNewRoomOpen(true)}
+        onOpenSettings={() => setSettingsOpen(true)}
         me={me}
         connection={conn.state}
         fullWidth={fullWidth}
@@ -179,12 +226,21 @@ export function Workspace({ session, onLogout, embedded = false, initialRoom }: 
   return (
     <div className="reader-root flex h-dvh w-full overflow-hidden bg-cream" data-reader-mode={prefs.mode} data-text-step={prefs.textStep}>
       {body}
-      <ReaderSettingsSheet
-        open={readerOpen}
-        onClose={() => setReaderOpen(false)}
+      <ReaderSettingsSheet open={readerOpen} onClose={() => setReaderOpen(false)} speech={speech} myName={session.name} />
+      <SettingsSheet
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        comfort={comfort}
+        me={me}
+        myColor={myColor}
+        profileEditable={!embedded}
+        onRename={rename}
+        onColor={changeColor}
+        onOpenReader={() => {
+          setSettingsOpen(false);
+          setReaderOpen(true);
+        }}
         onSignOut={embedded ? undefined : signOut}
-        speech={speech}
-        myName={session.name}
       />
       <NewRoomSheet
         open={newRoomOpen}

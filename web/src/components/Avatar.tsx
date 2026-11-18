@@ -1,3 +1,4 @@
+import { useProfileColor } from '../features/settings/profileColors';
 import { useTone } from './tones';
 
 // First user-perceived character, so Devanagari names keep their vowel sign.
@@ -21,6 +22,7 @@ interface Props {
 
 export function Avatar({ id, name, size = 36, mine = false }: Props) {
   const tone = useTone(id);
+  const picked = useProfileColor(id);
   return (
     <span
       aria-hidden="true"
@@ -29,7 +31,7 @@ export function Avatar({ id, name, size = 36, mine = false }: Props) {
         width: size,
         height: size,
         fontSize: Math.max(16, Math.round(size * 0.44)),
-        background: mine ? '#a9461f' : tone,
+        background: mine ? (picked ?? '#a9461f') : tone,
       }}
     >
       {initialOf(name)}
