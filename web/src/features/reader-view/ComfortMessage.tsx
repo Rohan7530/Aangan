@@ -5,6 +5,9 @@ import { formatTime, senderLabel } from '../../components/messageModel';
 import { useTone } from '../../components/tones';
 import type { RichMessage } from '../../nexconn/rich';
 import { ListenButton } from './ListenButton';
+import { saysPrefix, speechLang, type Lang } from './translation';
+import { TranslationNote } from './TranslationNote';
+import type { TranslationState } from './useTranslations';
 import type { Speech } from './useSpeech';
 
 interface Props {
@@ -15,6 +18,9 @@ interface Props {
   seenBy?: string | null;
   as?: 'li' | 'div';
   onOpenImage?: (url: string, alt: string) => void;
+  translation?: TranslationState;
+  /** The reader's language: Listen reads translations in it. */
+  readerLang?: Lang;
 }
 
 function reactionSummary(reactions: Record<string, string[]>): string[] {
@@ -27,12 +33,15 @@ function reactionSummary(reactions: Record<string, string[]>): string[] {
 // Others: white card, sender's colour as a thick left border.
 // Mine: soft terracotta tint, terracotta left border, labelled "You".
 // The solid green Listen button is the clearest thing on the card.
-export function ComfortMessage({ msg, mine, animate = false, speech, seenBy, as: Tag = 'li', onOpenImage }: Props) {
+export function ComfortMessage({ msg, mine, animate = false, speech, seenBy, as: Tag = 'li', onOpenImage, translation, readerLang = 'en' }: Props) {
   const tone = useTone(msg.senderId);
   const name = mine ? 'You' : senderLabel(msg);
   const isPhoto = msg.kind === 'image';
-  const body = isPhoto ? 'a photo' : msg.text;
-  const spoken = isPhoto
+  const translated = translation?.status === 'done' ? translation.translated : null;
+  const body = isPhoto ? 'a photo' : (translated ?? msg.text);
+  const spoken = translated
+    ? `${saysPrefix(readerLang, name)} ${translated}`
+    : isPhoto
     ? `${mine ? 'You' : name} sent a photo.`
     : msg.reply
       ? `${mine ? 'You replied' : `${name} replied`} to ${msg.reply.senderName ?? 'a message'}: ${msg.text}`
@@ -75,7 +84,10 @@ export function ComfortMessage({ msg, mine, animate = false, speech, seenBy, as:
           {msg.imageUrl && <img src={msg.imageUrl} alt="" className="max-h-[60dvh] w-full object-contain" style={msg.thumbnail ? { backgroundImage: `url(${msg.thumbnail})`, backgroundSize: 'cover' } : undefined} />}
         </button>
       ) : (
-        <p className="comfort-text mt-4">{body}</p>
+        <>
+          <p className="comfort-text mt-4">{body}</p>
+          {translation && <TranslationNote state={translation} original={msg.text} size="comfort" />}
+        </>
       )}
 
       {reactions.length > 0 && (
@@ -86,7 +98,7 @@ export function ComfortMessage({ msg, mine, animate = false, speech, seenBy, as:
       )}
 
       <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <ListenButton messageId={msg.id} spokenText={spoken} sender={name} speech={speech} />
+        <ListenButton messageId={msg.id} spokenText={spoken} sender={name} speech={speech} lang={translated ? speechLang(readerLang) : undefined} />
         {mine && seenBy && (
           <p className="flex items-center gap-1.5 text-[1.125rem] font-semibold text-ink-muted">
             <CheckIcon />

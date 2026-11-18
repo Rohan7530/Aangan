@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Speech } from '../../features/reader-view';
+import { useReaderPrefs, useTranslations, type Speech } from '../../features/reader-view';
 import { useRoom } from '../../hooks/useRoom';
 import type { RichMessage } from '../../nexconn/rich';
 import type { ConnectionState } from '../../nexconn/types';
@@ -33,6 +33,8 @@ interface Props {
 export function ComfortRoom(props: Props) {
   const { session, channelId, roomName, connection, fatal, speech, onOpenReader, onSent, onBack, otherUnread = 0 } = props;
   const room = useRoom(session, channelId, connection);
+  const { prefs } = useReaderPrefs();
+  const translations = useTranslations(room.messages, session.userId, prefs.language, session.authKey);
   const [membersOpen, setMembersOpen] = useState(false);
   const [photo, setPhoto] = useState<File | null>(null);
   const [lightbox, setLightbox] = useState<{ url: string; alt: string } | null>(null);
@@ -111,6 +113,8 @@ export function ComfortRoom(props: Props) {
           speech={speech}
           seenBy={room.seenBy}
           myReactionKey={room.myReactionKey}
+          translations={translations}
+          readerLang={prefs.language}
           onSuggest={(text) => setPrefill({ text, nonce: Date.now() })}
           onOpenImage={(url, alt) => setLightbox({ url, alt })}
         />

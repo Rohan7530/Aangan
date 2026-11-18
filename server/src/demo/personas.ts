@@ -9,13 +9,15 @@ export interface Persona {
   label: string;
   /** Reading mode the showcase opens this persona in. */
   mode: 'standard' | 'comfort';
+  /** Language this persona reads in. */
+  language: 'en' | 'hi';
 }
 
 export const PERSONAS: Record<PersonaKey, Persona> = {
-  dadi: { key: 'dadi', name: 'Dadi', label: 'Dadi, 71', mode: 'comfort' },
-  papa: { key: 'papa', name: 'Papa', label: 'Papa, 49', mode: 'standard' },
-  meera: { key: 'meera', name: 'Meera', label: 'Meera, 27', mode: 'standard' },
-  arjun: { key: 'arjun', name: 'Arjun', label: 'Arjun, 24', mode: 'standard' },
+  dadi: { key: 'dadi', name: 'Dadi', label: 'Dadi, 71', mode: 'comfort', language: 'hi' },
+  papa: { key: 'papa', name: 'Papa', label: 'Papa, 49', mode: 'standard', language: 'en' },
+  meera: { key: 'meera', name: 'Meera', label: 'Meera, 27', mode: 'standard', language: 'en' },
+  arjun: { key: 'arjun', name: 'Arjun', label: 'Arjun, 24', mode: 'standard', language: 'en' },
 };
 
 // Persona user IDs are scoped to the demo room, so the real showcase and each

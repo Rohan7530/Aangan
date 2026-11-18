@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 export interface Speech {
   supported: boolean;
   speakingId: string | null;
-  speak: (id: string, text: string) => void;
+  speak: (id: string, text: string, lang?: string) => void;
   stop: () => void;
 }
 
@@ -18,11 +18,13 @@ function isSupported(): boolean {
 
 // Pick a voice for the text's script: Hindi voice for Devanagari, otherwise
 // the browser default (which follows the device language).
-function pickVoice(text: string): { lang?: string; voice?: SpeechSynthesisVoice } {
-  if (!DEVANAGARI.test(text)) return {};
+function pickVoice(text: string, lang?: string): { lang?: string; voice?: SpeechSynthesisVoice } {
+  const want = lang ?? (DEVANAGARI.test(text) ? 'hi-IN' : undefined);
+  if (!want) return {};
+  const prefix = want.slice(0, 2).toLowerCase();
   const voices = window.speechSynthesis.getVoices();
-  const voice = voices.find((v) => v.lang.toLowerCase().startsWith('hi'));
-  return { lang: 'hi-IN', voice };
+  const voice = voices.find((v) => v.lang.toLowerCase() === want.toLowerCase()) ?? voices.find((v) => v.lang.toLowerCase().startsWith(prefix));
+  return { lang: want, voice };
 }
 
 export function useSpeech(): Speech {
@@ -37,14 +39,14 @@ export function useSpeech(): Speech {
     setSpeakingId(null);
   }, []);
 
-  const speak = useCallback((id: string, text: string) => {
+  const speak = useCallback((id: string, text: string, lang?: string) => {
     if (!isSupported()) return;
     const synth = window.speechSynthesis;
     synth.cancel(); // only one message at a time
 
     const utterance = new SpeechSynthesisUtterance(text);
-    const { lang, voice } = pickVoice(text);
-    if (lang) utterance.lang = lang;
+    const { lang: useLang, voice } = pickVoice(text, lang);
+    if (useLang) utterance.lang = useLang;
     if (voice) utterance.voice = voice;
     utterance.rate = 0.92; // a little slower, easier to follow
 

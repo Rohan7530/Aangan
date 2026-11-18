@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useRef } from 'react';
-import { ComfortMessage, type ReaderMode, type Speech } from '../features/reader-view';
+import { ComfortMessage, type Lang, type ReaderMode, type Speech, type TranslationState } from '../features/reader-view';
 import type { RichMessage } from '../nexconn/rich';
 import { CourtyardIllustration } from './CourtyardIllustration';
 import { buildItems } from './messageModel';
@@ -16,6 +16,9 @@ interface Props extends MessageHandlers {
   seenBy: { messageId: string; text: string } | null;
   myReactionKey: string;
   onSuggest: (text: string) => void;
+  /** Per-reader translations of other people's messages. */
+  translations?: Map<string, TranslationState>;
+  readerLang?: Lang;
 }
 
 const NEAR_BOTTOM_PX = 160;
@@ -34,6 +37,8 @@ export function MessageList({
   onReply,
   onReact,
   onOpenImage,
+  translations,
+  readerLang,
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const nearBottom = useRef(true);
@@ -133,6 +138,8 @@ export function MessageList({
                 speech={speech}
                 seenBy={seen}
                 onOpenImage={onOpenImage}
+                translation={translations?.get(item.msg.id)}
+                readerLang={readerLang}
               />
             ) : (
               <StandardMessage
@@ -144,6 +151,7 @@ export function MessageList({
                 animate={animate}
                 seenBy={seen}
                 myReactionKey={myReactionKey}
+                translation={translations?.get(item.msg.id)}
                 onReply={onReply}
                 onReact={onReact}
                 onOpenImage={onOpenImage}

@@ -485,6 +485,16 @@ dialog.lightbox::backdrop {
   background: rgb(20 17 15 / 0.88);
 }
 
+/* Small on screen, 48px to the finger (WCAG target size). */
+.hit-48 {
+  position: relative;
+}
+.hit-48::after {
+  content: "";
+  position: absolute;
+  inset: -14px -6px;
+}
+
 /* ---------------- showcase: browser window frame ---------------- */
 .browser-frame {
   width: 100%;

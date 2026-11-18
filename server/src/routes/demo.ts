@@ -36,6 +36,7 @@ export function demoRouter(cfg: Config, nexconn: NexconnClient): Router {
         channelId: cfg.demo.channelId,
         channelName: cfg.demo.channelName,
         mode: p.mode,
+        language: p.language,
         label: p.label,
       });
     } catch (err) {

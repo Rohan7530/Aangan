@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Speech } from '../../features/reader-view';
+import { useReaderPrefs, useTranslations, type Speech } from '../../features/reader-view';
 import { useRoom } from '../../hooks/useRoom';
 import type { RichMessage } from '../../nexconn/rich';
 import type { ConnectionState } from '../../nexconn/types';
@@ -34,6 +34,8 @@ interface Props {
 export function StandardRoom(props: Props) {
   const { session, channelId, roomName, connection, fatal, speech, infoOpen, onToggleInfo, onOpenReader, onSent, narrow, onBack } = props;
   const room = useRoom(session, channelId, connection);
+  const { prefs } = useReaderPrefs();
+  const translations = useTranslations(room.messages, session.userId, prefs.language, session.authKey);
   const [replyTo, setReplyTo] = useState<RichMessage | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
   const [lightbox, setLightbox] = useState<{ url: string; alt: string } | null>(null);
@@ -123,6 +125,8 @@ export function StandardRoom(props: Props) {
             speech={speech}
             seenBy={room.seenBy}
             myReactionKey={room.myReactionKey}
+          translations={translations}
+          readerLang={prefs.language}
             onSuggest={(text) => setPrefill({ text, nonce: Date.now() })}
             onReply={setReplyTo}
             onReact={(id, emoji) => void room.toggleReaction(id, emoji)}

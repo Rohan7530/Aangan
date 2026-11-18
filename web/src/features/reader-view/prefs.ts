@@ -2,15 +2,20 @@
 // storage can move from localStorage to Nexconn (e.g. user profile extProfile)
 // later without touching any component.
 
+import type { Lang } from './translation';
+
 export type ReaderMode = 'standard' | 'comfort';
 export type TextStep = 0 | 1 | 2;
 
 export interface ReaderPrefs {
   mode: ReaderMode;
   textStep: TextStep;
+  /** The language this person reads in. Other people's messages are translated into it. */
+  language: Lang;
 }
 
-export const DEFAULT_READER_PREFS: ReaderPrefs = { mode: 'standard', textStep: 0 };
+export const DEFAULT_READER_PREFS: ReaderPrefs = { mode: 'standard', textStep: 0, language: 'en' };
+const LANG_CODES: Lang[] = ['en', 'hi', 'mr', 'ta', 'bn'];
 
 export const TEXT_STEP_LABELS: Record<TextStep, string> = {
   0: 'Regular',
@@ -31,7 +36,8 @@ function parse(raw: string | null): ReaderPrefs | null {
     const v = JSON.parse(raw) as Partial<ReaderPrefs>;
     const mode = v.mode === 'comfort' || v.mode === 'standard' ? v.mode : null;
     const step = v.textStep === 0 || v.textStep === 1 || v.textStep === 2 ? v.textStep : null;
-    return mode !== null && step !== null ? { mode, textStep: step } : null;
+    const language = LANG_CODES.includes(v.language as Lang) ? (v.language as Lang) : 'en';
+    return mode !== null && step !== null ? { mode, textStep: step, language } : null;
   } catch {
     return null;
   }

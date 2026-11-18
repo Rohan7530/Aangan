@@ -4,6 +4,7 @@ import type { RichMessage } from '../../nexconn/rich';
 import { ComfortMessage } from './ComfortMessage';
 import { TEXT_STEP_LABELS, type ReaderMode, type TextStep } from './prefs';
 import { useReaderPrefs } from './ReaderPrefsContext';
+import { LANGUAGES } from './translation';
 import type { Speech } from './useSpeech';
 
 interface Props {
@@ -64,6 +65,32 @@ export function ReaderSettingsSheet({ open, onClose, onSignOut, speech, myName }
               <span>
                 <span className="block font-bold">{m.title}</span>
                 <span className="block text-ink-muted">{m.detail}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset className="mt-7">
+        <legend className="mb-1 text-[1.125rem] font-bold">My language</legend>
+        <p className="mb-3 text-ink-muted">Messages from others are shown in this language. The original is always one tap away.</p>
+        <div className="grid grid-cols-2 gap-3">
+          {LANGUAGES.map((l) => (
+            <label key={l.code} className="option-card items-center">
+              <input
+                type="radio"
+                name="reader-language"
+                value={l.code}
+                checked={prefs.language === l.code}
+                onChange={() => setPrefs({ language: l.code })}
+                className="sr-only"
+              />
+              <span className="radio-dot" aria-hidden="true" />
+              <span>
+                <span className="block font-bold" lang={l.code}>
+                  {l.native}
+                </span>
+                {l.native !== l.english && <span className="block text-ink-muted">{l.english}</span>}
               </span>
             </label>
           ))}

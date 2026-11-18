@@ -8,12 +8,14 @@ interface Props {
   /** Short name for the accessible label, e.g. "Asha". */
   sender: string;
   speech: Speech;
+  /** BCP-47 voice language, e.g. "hi-IN" for a translated message. */
+  lang?: string;
 }
 
 // Large, labelled read-aloud control (Comfort mode): solid deep green with
 // white text (10:1), so it is the clearest thing on the card. While reading it
 // turns deep terracotta and says "Stop". Hidden without speech support.
-export function ListenButton({ messageId, spokenText, sender, speech }: Props) {
+export function ListenButton({ messageId, spokenText, sender, speech, lang }: Props) {
   if (!speech.supported) return null;
   const playing = speech.speakingId === messageId;
 
@@ -23,7 +25,7 @@ export function ListenButton({ messageId, spokenText, sender, speech }: Props) {
       className={`inline-flex min-h-[56px] items-center gap-3 rounded-2xl px-6 text-[1.25rem] font-bold text-white shadow-sm transition-colors ${
         playing ? 'bg-terracotta-deep hover:bg-[#6f2b14]' : 'bg-green hover:bg-[#173a2c]'
       }`}
-      onClick={() => (playing ? speech.stop() : speech.speak(messageId, spokenText))}
+      onClick={() => (playing ? speech.stop() : speech.speak(messageId, spokenText, lang))}
       aria-label={playing ? `Stop reading ${sender}'s message` : `Listen to ${sender}'s message`}
     >
       {playing ? (

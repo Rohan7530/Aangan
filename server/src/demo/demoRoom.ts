@@ -6,6 +6,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import type { Config } from '../config.js';
 import type { NexconnClient } from '../nexconn.js';
 import { registerRoom, upsertUser } from '../store.js';
+import { translateCached } from '../routes/translate.js';
 import { DEMO_ROOMS, PERSONAS, personaUserId, type DemoRoomSpec } from './personas.js';
 
 const DATA_DIR = new URL('../../data/', import.meta.url);
@@ -85,4 +86,28 @@ async function setUp(cfg: Config, nexconn: NexconnClient): Promise<void> {
     console.log(`[demo] room ${channelId} seeded with ${spec.script.length} messages`);
   }
   console.log(`[demo] rooms ready: ${DEMO_ROOMS.map((s) => demoChannelId(cfg, s)).join(', ')}`);
+  void prewarmTranslations();
+}
+
+// With the llm engine on, translate the seeded lines into Hindi and English in
+// the background, so the showcase phones show translations instantly.
+async function prewarmTranslations(): Promise<void> {
+  try {
+    let fresh = 0;
+    for (const spec of DEMO_ROOMS) {
+      for (const line of spec.script) {
+        for (const target of ['hi', 'en'] as const) {
+          const r = await translateCached(line.text, target);
+          if (!r) return; // engine off
+          if (!r.cached) {
+            fresh++;
+            await sleep(3000); // gentle on free-tier quotas
+          }
+        }
+      }
+    }
+    console.log(`[demo] translations ready (${fresh} new)`);
+  } catch (err) {
+    console.warn('[demo] translation pre-warm stopped:', err instanceof Error ? err.message : err);
+  }
 }

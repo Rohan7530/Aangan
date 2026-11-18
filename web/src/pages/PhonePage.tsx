@@ -29,7 +29,7 @@ export function PhonePage({ forceMode }: { forceMode?: 'standard' | 'comfort' })
   }, [persona]);
 
   const store = useMemo(
-    () => (session ? memoryReaderPrefsStore({ mode: forceMode ?? session.mode, textStep: 0 }) : null),
+    () => (session ? memoryReaderPrefsStore({ mode: forceMode ?? session.mode, textStep: 0, language: session.language ?? 'en' }) : null),
     [session, forceMode],
   );
 

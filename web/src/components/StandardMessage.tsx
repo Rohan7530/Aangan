@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { TranslationNote } from '../features/reader-view/TranslationNote';
+import type { TranslationState } from '../features/reader-view/useTranslations';
 import type { RichMessage } from '../nexconn/rich';
 import { Avatar } from './Avatar';
 import { CheckIcon, CopyIcon, ReplyIcon, SmileIcon } from './icons';
@@ -24,6 +26,8 @@ interface Props extends MessageHandlers {
   seenBy?: string | null;
   /** My reactions metadata key, to highlight my own reactions. */
   myReactionKey?: string;
+  /** Translation into the reader's language (other people's messages only). */
+  translation?: TranslationState;
 }
 
 function reactionCounts(reactions: Record<string, string[]>, myKey?: string) {
@@ -49,6 +53,7 @@ export function StandardMessage({
   animate = false,
   seenBy,
   myReactionKey,
+  translation,
   onReply,
   onReact,
   onOpenImage,
@@ -126,6 +131,20 @@ export function StandardMessage({
               >
                 {msg.imageUrl && <img src={msg.imageUrl} alt="" loading="lazy" />}
               </button>
+            ) : translation ? (
+              <>
+                <p className="msg-text">{translation.status === 'done' ? translation.translated : msg.text}</p>
+                <TranslationNote
+                  state={translation}
+                  original={msg.text}
+                  size="standard"
+                  trailing={
+                    <span className="time-spacer" aria-hidden="true">
+                      {time}
+                    </span>
+                  }
+                />
+              </>
             ) : (
               <p className="msg-text">
                 {msg.text}

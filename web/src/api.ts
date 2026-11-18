@@ -31,6 +31,7 @@ export type DemoPersona = 'arjun' | 'dadi' | 'papa' | 'meera';
 export interface DemoSession extends Session {
   mode: 'standard' | 'comfort';
   label: string;
+  language?: 'en' | 'hi' | 'mr' | 'ta' | 'bn';
 }
 
 // No-login session as one of the demo family, in the demo room only.

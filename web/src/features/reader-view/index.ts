@@ -13,3 +13,5 @@ export {
   type ReaderPrefsStore,
   type TextStep,
 } from './prefs';
+export { useTranslations, type TranslationState } from './useTranslations';
+export { LANGUAGES, getEngine, sourceName, speechLang, translate, type Engine, type Lang, type Translation } from './translation';
