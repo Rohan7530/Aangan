@@ -6,6 +6,7 @@ import { useRooms } from '../../hooks/useRooms';
 import * as nexconn from '../../nexconn/client';
 import { getLastRoom, setLastRoom, type Session } from '../../session';
 import { ComfortRoom } from '../comfort/ComfortRoom';
+import { ComfortSidebar } from '../comfort/ComfortSidebar';
 import { NewRoomSheet } from './NewRoomSheet';
 import { Sidebar } from './Sidebar';
 import { StandardRoom } from './StandardRoom';
@@ -95,20 +96,43 @@ export function Workspace({ session, onLogout, embedded = false, initialRoom }: 
 
   let body;
   if (comfort) {
-    body = (
+    // Comfort: rooms always visible on the left (wide), or the list first (phones).
+    const comfortList = (fullWidth: boolean) => (
+      <ComfortSidebar
+        rooms={rooms}
+        loaded={loaded}
+        activeId={fullWidth ? null : activeId}
+        onSelect={select}
+        onNewRoom={() => setNewRoomOpen(true)}
+        me={me}
+        connection={conn.state}
+        fullWidth={fullWidth}
+      />
+    );
+    const comfortRoom = (narrow: boolean) => (
       <ComfortRoom
         key={activeId}
         session={session}
         channelId={activeId}
         roomName={roomName}
-        rooms={rooms}
-        onSelectRoom={select}
         connection={conn.state}
         fatal={conn.fatal}
         speech={speech}
         onOpenReader={() => setReaderOpen(true)}
         onSent={noteMessage}
+        onBack={narrow ? () => setMobileView('list') : undefined}
+        otherUnread={rooms.filter((r) => r.channelId !== activeId).reduce((n, r) => n + r.unread, 0)}
       />
+    );
+    body = wide ? (
+      <>
+        {comfortList(false)}
+        {comfortRoom(false)}
+      </>
+    ) : mobileView === 'list' ? (
+      comfortList(true)
+    ) : (
+      comfortRoom(true)
     );
   } else if (wide) {
     body = (
