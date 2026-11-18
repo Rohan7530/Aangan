@@ -4,6 +4,7 @@ import type { Config } from '../config.js';
 import { ensureDemoRoom } from '../demo/demoRoom.js';
 import type { NexconnClient } from '../nexconn.js';
 import { registerRoom, upsertUser } from '../store.js';
+import { limits } from '../limits.js';
 
 export interface LoginResponse {
   userId: string;
@@ -59,7 +60,7 @@ export function loginRouter(cfg: Config, nexconn: NexconnClient): Router {
     familyGroupReady = true;
   }
 
-  router.post('/login', async (req, res) => {
+  router.post('/login', ...limits.login, async (req, res) => {
     const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
     if (name.length < 1 || name.length > 64) {
       res.status(400).json({ error: 'Name must be 1-64 characters' });

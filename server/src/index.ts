@@ -11,6 +11,8 @@ const cfg = loadConfig();
 const nexconn = new NexconnClient(cfg.nexconn);
 
 const app = express();
+// Behind a reverse proxy (hosting), set TRUST_PROXY (e.g. 1) so rate limits see real client IPs.
+if (process.env.TRUST_PROXY) app.set('trust proxy', Number(process.env.TRUST_PROXY) || process.env.TRUST_PROXY);
 app.use(express.json({ limit: '16kb' }));
 
 app.get('/api/health', (_req, res) => {

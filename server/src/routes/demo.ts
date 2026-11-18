@@ -4,6 +4,7 @@ import { ensureDemoRoom } from '../demo/demoRoom.js';
 import { isPersonaKey, PERSONAS, personaUserId } from '../demo/personas.js';
 import type { NexconnClient } from '../nexconn.js';
 import { upsertUser } from '../store.js';
+import { limits } from '../limits.js';
 
 // No-login sessions for the showcase. They only ever give access to the demo
 // rooms as one of the four demo personas, never to the real family room.
@@ -14,7 +15,7 @@ export function demoRouter(cfg: Config, nexconn: NexconnClient): Router {
     res.json(Object.values(PERSONAS).map(({ key, name, label, mode }) => ({ key, name, label, mode })));
   });
 
-  router.post('/demo/session', async (req, res) => {
+  router.post('/demo/session', ...limits.demoSession, async (req, res) => {
     const key = req.body?.persona;
     if (!isPersonaKey(key)) {
       res.status(400).json({ error: 'Unknown demo persona' });

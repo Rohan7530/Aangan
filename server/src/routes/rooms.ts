@@ -2,6 +2,7 @@ import { Router, type NextFunction, type Request, type Response } from 'express'
 import type { Config } from '../config.js';
 import type { NexconnClient } from '../nexconn.js';
 import { randomCode, registerRoom, roomByCode, roomInfo, userByKey } from '../store.js';
+import { limits } from '../limits.js';
 
 type Authed = Request & { user?: { userId: string; name: string } };
 
@@ -23,7 +24,7 @@ export function roomsRouter(cfg: Config, nexconn: NexconnClient): Router {
   const router = Router();
 
   // New room: the server creates the Nexconn group (owner = caller) and an invite code.
-  router.post('/rooms', requireUser, async (req: Authed, res) => {
+  router.post('/rooms', ...limits.createRoom, requireUser, async (req: Authed, res) => {
     const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
     if (name.length < 1 || name.length > 64) {
       res.status(400).json({ error: 'Room name must be 1-64 characters' });
@@ -53,7 +54,7 @@ export function roomsRouter(cfg: Config, nexconn: NexconnClient): Router {
   });
 
   // Public: what room does this invite open? (shown before joining)
-  router.get('/invites/:code', async (req, res) => {
+  router.get('/invites/:code', ...limits.inviteLookup, async (req, res) => {
     const room = await roomByCode(String(req.params.code));
     if (!room) {
       res.status(404).json({ error: 'This invite link is not valid.' });
@@ -63,7 +64,7 @@ export function roomsRouter(cfg: Config, nexconn: NexconnClient): Router {
   });
 
   // Join via invite: the server adds the caller to the Nexconn group.
-  router.post('/invites/:code/join', requireUser, async (req: Authed, res) => {
+  router.post('/invites/:code/join', ...limits.inviteJoin, requireUser, async (req: Authed, res) => {
     const room = await roomByCode(String(req.params.code));
     if (!room) {
       res.status(404).json({ error: 'This invite link is not valid.' });

@@ -1,6 +1,9 @@
 import type { NextFunction, Request, Response } from 'express';
 
 // Small in-memory fixed-window rate limiter (per server process).
+// RATE_LIMIT_SCALE multiplies every limit (the test server raises it, because
+// test suites sign in many people from one machine).
+const SCALE = Number(process.env.RATE_LIMIT_SCALE) > 0 ? Number(process.env.RATE_LIMIT_SCALE) : 1;
 export function rateLimit(opts: { windowMs: number; max: number; key: (req: Request) => string; message?: string }) {
   const hits = new Map<string, { count: number; resetAt: number }>();
   return (req: Request, res: Response, next: NextFunction) => {
@@ -15,9 +18,11 @@ export function rateLimit(opts: { windowMs: number; max: number; key: (req: Requ
     if (hits.size > 10_000) {
       for (const [key, v] of hits) if (v.resetAt <= now) hits.delete(key);
     }
-    if (h.count > opts.max) {
-      res.setHeader('Retry-After', String(Math.ceil((h.resetAt - now) / 1000)));
-      res.status(429).json({ error: opts.message ?? 'Too many requests. Please wait a moment and try again.' });
+    if (h.count > Math.max(1, Math.round(opts.max * SCALE))) {
+      const retryAfter = Math.ceil((h.resetAt - now) / 1000);
+      res.setHeader('Retry-After', String(retryAfter));
+      const wait = retryAfter <= 90 ? 'a minute' : `about ${Math.ceil(retryAfter / 60)} minutes`;
+      res.status(429).json({ error: `${opts.message ?? 'Too many requests.'} Please try again in ${wait}.`, retryAfter });
       return;
     }
     next();

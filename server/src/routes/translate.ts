@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { Router } from 'express';
-import { byAuthOrIp, rateLimit } from '../rateLimit.js';
+import { limits } from '../limits.js';
 import { userByKey } from '../store.js';
 import { LANGS, llmTranslate, loadTranslateConfig, type Lang, type LlmResult } from '../translate/engine.js';
 
@@ -68,7 +68,7 @@ export function translateRouter(): Router {
 
   router.post(
     '/translate',
-    rateLimit({ windowMs: 60_000, max: 120, key: byAuthOrIp, message: 'Too many translations at once. Please wait a moment.' }),
+    ...limits.translate,
     async (req, res) => {
       const auth = (req.headers.authorization ?? '').replace(/^Bearer\s+/i, '').trim();
       if (!auth || !(await userByKey(auth))) {
