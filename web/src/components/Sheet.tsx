@@ -9,7 +9,7 @@ interface Props {
 }
 
 // Bottom sheet on the native <dialog> element: focus trap, Escape to close and
-// focus return come from the browser. Used by "How I read" and "Who's here".
+// focus return come from the browser. Used by "How I read", Settings and others.
 export function Sheet({ open, onClose, title, subtitle, children }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
