@@ -12,7 +12,7 @@ import { LANGS, llmTranslate, loadTranslateConfig, type Lang, type LlmResult } f
 // so nobody can overwrite the translation of someone else's message.
 
 const DATA_DIR = new URL('../../data/', import.meta.url);
-const FILE = new URL('translations.json', DATA_DIR);
+const FILE = new URL(process.env.TRANSLATE_MOCK === '1' ? 'translations.mock.json' : 'translations.json', DATA_DIR);
 type Cache = Record<string, LlmResult & { at: string }>;
 let cache: Cache | null = null;
 let writing: Promise<void> = Promise.resolve();
@@ -59,11 +59,11 @@ export async function translateCached(text: string, target: Lang): Promise<(LlmR
 export function translateRouter(): Router {
   const router = Router();
   const cfg = cfgOnce;
-  console.log(cfg ? `[translate] llm engine on (${cfg.provider}, ${cfg.model})` : '[translate] llm engine off (no TRANSLATE_API_KEY)');
+  console.log(cfg?.provider === 'mock' ? '[translate] llm engine MOCKED for tests (no network calls)' : cfg ? `[translate] llm engine on (${cfg.provider}, ${cfg.model})` : '[translate] llm engine off (no TRANSLATE_API_KEY)');
 
   // Tells the browser which engine to use. Never includes the key.
   router.get('/translate/config', (_req, res) => {
-    res.json({ llm: cfg !== null });
+    res.json(cfg?.provider === 'mock' ? { llm: true, mock: true } : { llm: cfg !== null });
   });
 
   router.post(

@@ -2,6 +2,8 @@
 // .env here and never sent to the browser: routes return only results.
 // Provider is swappable with TRANSLATE_PROVIDER=gemini | anthropic.
 
+import { mockTranslate } from './mock.js';
+
 export const LANGS = ['en', 'hi', 'mr', 'ta', 'bn'] as const;
 export type Lang = (typeof LANGS)[number];
 export type SourceLang = Lang | 'hinglish' | 'other';
@@ -28,7 +30,7 @@ export interface LlmResult {
 }
 
 export interface TranslateConfig {
-  provider: 'gemini' | 'anthropic';
+  provider: 'gemini' | 'anthropic' | 'mock';
   apiKey: string;
   model: string;
   /** Tried in order when the main model is overloaded (503/429) or times out. */
@@ -36,6 +38,8 @@ export interface TranslateConfig {
 }
 
 export function loadTranslateConfig(): TranslateConfig | null {
+  // Tests (npm run dev:test) use a local mock and never call a real provider.
+  if (process.env.TRANSLATE_MOCK === '1') return { provider: 'mock', apiKey: '', model: 'mock', fallbacks: [] };
   const apiKey = process.env.TRANSLATE_API_KEY?.trim();
   if (!apiKey) return null; // engine simply off
   const provider = process.env.TRANSLATE_PROVIDER?.trim().toLowerCase() === 'anthropic' ? 'anthropic' : 'gemini';
@@ -153,6 +157,7 @@ class BadOutput extends Error {}
 
 // Main model first, then the fallbacks, skipping models that are resting.
 export async function llmTranslate(cfg: TranslateConfig, text: string, target: Lang): Promise<LlmResult> {
+  if (cfg.provider === 'mock') return mockTranslate(text, target);
   const call = cfg.provider === 'anthropic' ? anthropic : gemini;
   const all = [cfg.model, ...cfg.fallbacks];
   const ready = all.filter((m) => (resting.get(m) ?? 0) <= Date.now());
