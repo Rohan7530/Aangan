@@ -7,7 +7,8 @@
    8.3 (AAA), ink on surface 14.9 (AAA), green on green-soft 8.3.
    ------------------------------------------------------------------ */
 @theme {
-  --font-sans: "Noto Sans Variable", "Noto Sans Devanagari Variable", "Noto Sans",
+  --font-sans:
+    "Noto Sans Variable", "Noto Sans Devanagari Variable", "Noto Sans",
     "Noto Sans Devanagari", system-ui, sans-serif;
 
   /* courtyard neutrals */
@@ -61,7 +62,11 @@ body {
   color: var(--color-ink);
   background-color: var(--color-courtyard);
   /* a quiet rangoli-like dot grid around the column */
-  background-image: radial-gradient(circle at 1px 1px, rgb(169 70 31 / 0.12) 1.2px, transparent 0);
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgb(169 70 31 / 0.12) 1.2px,
+    transparent 0
+  );
   background-size: 22px 22px;
   -webkit-font-smoothing: antialiased;
 }
@@ -584,6 +589,200 @@ dialog.sheet[open] {
 }
 .speaking-bars span:nth-child(3) {
   animation-delay: 300ms;
+}
+
+/* ==================================================================
+   Standard mode polish: frosted header/composer, layered shadows,
+   spring motion. Unlayered on purpose (wins over utilities).
+   Comfort mode is untouched: everything is scoped to Standard or to
+   Standard-only components, and stays opaque there.
+   ================================================================== */
+:root {
+  --spring: cubic-bezier(0.2, 0.9, 0.3, 1.04);
+  --spring-dur: 540ms;
+  --shadow-1: 0 1px 1px rgb(42 37 34 / 0.04), 0 1px 3px rgb(42 37 34 / 0.06);
+  --shadow-2:
+    0 1px 2px rgb(42 37 34 / 0.05), 0 4px 10px -2px rgb(42 37 34 / 0.08),
+    0 12px 24px -8px rgb(42 37 34 / 0.12);
+  --shadow-3:
+    0 2px 4px rgb(42 37 34 / 0.05), 0 12px 24px -6px rgb(42 37 34 / 0.12),
+    0 32px 64px -16px rgb(42 37 34 / 0.24);
+}
+@supports (animation-timing-function: linear(0, 1)) {
+  :root {
+    /* damped spring (k 300, c 24): ~5% overshoot, settles in ~540ms */
+    --spring: linear(
+      0,
+      0.033,
+      0.117,
+      0.23,
+      0.355,
+      0.481,
+      0.599,
+      0.706,
+      0.796,
+      0.871,
+      0.93,
+      0.975,
+      1.007,
+      1.029,
+      1.041,
+      1.048,
+      1.049,
+      1.047,
+      1.042,
+      1.036,
+      1.03,
+      1.024,
+      1.018,
+      1.013,
+      1.009,
+      1.006,
+      1.003,
+      1.001,
+      0.999,
+      0.998,
+      1
+    );
+  }
+}
+
+/* Frosted chat header and composer (Standard room only). */
+.chat-glass {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: rgb(250 244 234 / 0.8);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  backdrop-filter: blur(18px) saturate(1.6);
+}
+.chat-glass-top {
+  top: 0;
+  border-bottom: 1px solid rgb(228 216 197 / 0.9);
+  box-shadow: 0 8px 20px -18px rgb(42 37 34 / 0.45);
+}
+.chat-glass-bottom {
+  bottom: 0;
+  border-top: 1px solid rgb(228 216 197 / 0.9);
+  box-shadow: 0 -8px 20px -18px rgb(42 37 34 / 0.45);
+}
+.chat-glass-bottom > form {
+  background: transparent;
+  border-top-color: transparent;
+}
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  .chat-glass {
+    background: var(--color-cream);
+  }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .chat-glass {
+    background: var(--color-cream);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+.chat-scroll {
+  padding-top: var(--chat-top, 0px);
+  padding-bottom: var(--chat-bottom, 0px);
+  scroll-padding-top: calc(var(--chat-top, 0px) + 8px);
+  scroll-padding-bottom: calc(var(--chat-bottom, 0px) + 8px);
+}
+
+/* Layered shadows */
+[data-reader-mode="standard"] .bubble-theirs {
+  box-shadow: var(--shadow-1);
+}
+[data-reader-mode="standard"] .bubble-mine {
+  box-shadow:
+    0 1px 1px rgb(134 53 26 / 0.12),
+    0 2px 6px -2px rgb(134 53 26 / 0.2);
+}
+.msg-actions {
+  box-shadow: var(--shadow-2);
+  transform: translateY(4px);
+  transition:
+    opacity 140ms ease,
+    transform var(--spring-dur) var(--spring);
+}
+.msg-row:hover .msg-actions,
+.msg-row:focus-within .msg-actions,
+.msg-row[data-selected] .msg-actions {
+  transform: none;
+}
+.emoji-popover {
+  box-shadow: var(--shadow-3);
+  transform-origin: bottom left;
+  animation:
+    pop-fade 160ms ease-out both,
+    pop-in var(--spring-dur) var(--spring) both;
+}
+@keyframes pop-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pop-in {
+  from {
+    transform: translateY(8px) scale(0.94);
+  }
+}
+
+/* Sheets in Standard: spring up, soft blurred backdrop */
+[data-reader-mode="standard"] dialog.sheet {
+  box-shadow: var(--shadow-3);
+}
+[data-reader-mode="standard"] dialog.sheet[open] {
+  animation:
+    pop-fade 180ms ease-out both,
+    sheet-rise var(--spring-dur) var(--spring) both;
+}
+[data-reader-mode="standard"] dialog.sheet[open]::backdrop {
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  animation: pop-fade 200ms ease-out both;
+}
+@keyframes sheet-rise {
+  from {
+    transform: translateY(36px) scale(0.98);
+  }
+}
+
+/* New messages in Standard: fade + spring rise */
+[data-reader-mode="standard"] .msg-enter {
+  animation:
+    pop-fade 180ms ease-out both,
+    msg-rise var(--spring-dur) var(--spring) both;
+}
+@keyframes msg-rise {
+  from {
+    transform: translateY(14px) scale(0.98);
+  }
+}
+
+/* Hover and press feedback in Standard */
+[data-reader-mode="standard"] :is(button, a, label.option-card) {
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 160ms var(--spring);
+}
+[data-reader-mode="standard"] button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msg-actions {
+    transform: none;
+  }
+  [data-reader-mode="standard"] button:not(:disabled):active {
+    transform: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

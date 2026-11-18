@@ -1,18 +1,23 @@
-import { useState } from 'react';
-import { speechLang, useReaderPrefs, useTranslations, type Speech } from '../../features/reader-view';
-import { useRoom } from '../../hooks/useRoom';
-import type { RichMessage } from '../../nexconn/rich';
-import type { ConnectionState } from '../../nexconn/types';
-import type { Session } from '../../session';
-import { ConnectionChip } from '../ConnectionChip';
-import { BackIcon, InfoIcon, TextSizeIcon } from '../icons';
-import { Lightbox } from '../Lightbox';
-import { MessageList } from '../MessageList';
-import { PhotoSendSheet } from '../PhotoSendSheet';
-import { COMPOSER_INPUT_ID, StandardComposer } from '../StandardComposer';
-import { ToneProvider } from '../tones';
-import { InfoPanel } from './InfoPanel';
-import { RoomAvatar } from './RoomAvatar';
+import { useLayoutEffect, useRef, useState } from "react";
+import {
+  speechLang,
+  useReaderPrefs,
+  useTranslations,
+  type Speech,
+} from "../../features/reader-view";
+import { useRoom } from "../../hooks/useRoom";
+import type { RichMessage } from "../../nexconn/rich";
+import type { ConnectionState } from "../../nexconn/types";
+import type { Session } from "../../session";
+import { ConnectionChip } from "../ConnectionChip";
+import { BackIcon, InfoIcon, TextSizeIcon } from "../icons";
+import { Lightbox } from "../Lightbox";
+import { MessageList } from "../MessageList";
+import { PhotoSendSheet } from "../PhotoSendSheet";
+import { COMPOSER_INPUT_ID, StandardComposer } from "../StandardComposer";
+import { ToneProvider } from "../tones";
+import { InfoPanel } from "./InfoPanel";
+import { RoomAvatar } from "./RoomAvatar";
 
 interface Props {
   session: Session;
@@ -32,17 +37,71 @@ interface Props {
 
 // One open room in Standard mode: [ chat | info panel ].
 export function StandardRoom(props: Props) {
-  const { session, channelId, roomName, connection, fatal, speech, infoOpen, onToggleInfo, onOpenReader, onSent, narrow, onBack } = props;
+  const {
+    session,
+    channelId,
+    roomName,
+    connection,
+    fatal,
+    speech,
+    infoOpen,
+    onToggleInfo,
+    onOpenReader,
+    onSent,
+    narrow,
+    onBack,
+  } = props;
   const room = useRoom(session, channelId, connection);
   const { prefs } = useReaderPrefs();
-  const translations = useTranslations(room.messages, session.userId, prefs.language, session.authKey);
+  const translations = useTranslations(
+    room.messages,
+    session.userId,
+    prefs.language,
+    session.authKey,
+  );
   const [replyTo, setReplyTo] = useState<RichMessage | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
-  const [lightbox, setLightbox] = useState<{ url: string; alt: string } | null>(null);
-  const [prefill, setPrefill] = useState<{ text: string; nonce: number } | null>(null);
+  const [lightbox, setLightbox] = useState<{ url: string; alt: string } | null>(
+    null,
+  );
+  const [prefill, setPrefill] = useState<{
+    text: string;
+    nonce: number;
+  } | null>(null);
 
   const showInfoOnly = narrow && infoOpen;
-  const membersLine = room.memberCount === null ? null : `${room.memberCount} ${room.memberCount === 1 ? 'member' : 'members'}`;
+
+  // The header and composer float over the message list (frosted glass), so the
+  // list is padded by their measured heights and stays pinned to the newest
+  // message when the composer grows.
+  const sectionRef = useRef<HTMLElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    const top = topRef.current;
+    const bottom = bottomRef.current;
+    if (!section || !top || !bottom) return;
+    const apply = () => {
+      const scroller = section.querySelector<HTMLElement>(".chat-scroll");
+      const atBottom = scroller
+        ? scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight <
+          24
+        : false;
+      section.style.setProperty("--chat-top", `${top.offsetHeight}px`);
+      section.style.setProperty("--chat-bottom", `${bottom.offsetHeight}px`);
+      if (scroller && atBottom) scroller.scrollTop = scroller.scrollHeight;
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(top);
+    ro.observe(bottom);
+    return () => ro.disconnect();
+  }, [showInfoOnly]);
+  const membersLine =
+    room.memberCount === null
+      ? null
+      : `${room.memberCount} ${room.memberCount === 1 ? "member" : "members"}`;
 
   const info = (
     <InfoPanel
@@ -60,61 +119,82 @@ export function StandardRoom(props: Props) {
   return (
     <ToneProvider tones={room.tones}>
       {!showInfoOnly && (
-        <section aria-label={`${roomName} conversation`} className="flex min-w-0 flex-1 flex-col bg-cream">
+        <section
+          ref={sectionRef}
+          aria-label={`${roomName} conversation`}
+          className="chat-stage relative flex min-w-0 flex-1 flex-col bg-cream"
+        >
           <a href={`#${COMPOSER_INPUT_ID}`} className="skip-link">
             Skip to message box
           </a>
-          <header className="flex shrink-0 items-center gap-2 border-b border-line bg-cream px-3 py-2">
-            {onBack && (
+          <div ref={topRef} className="chat-glass chat-glass-top">
+            <header className="flex shrink-0 items-center gap-2 px-3 py-2">
+              {onBack && (
+                <button
+                  type="button"
+                  onClick={onBack}
+                  aria-label="Back to rooms"
+                  className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-ink hover:bg-sand"
+                >
+                  <BackIcon />
+                </button>
+              )}
+              <RoomAvatar id={channelId} name={roomName} size={40} />
+              <div className="min-w-0 flex-1 px-1">
+                <h1 className="truncate text-[1.25rem] font-bold leading-tight text-green">
+                  {roomName}
+                </h1>
+                <p className="flex flex-wrap items-center gap-x-2 text-[1rem] leading-snug text-ink-muted">
+                  {membersLine && (
+                    <span className="whitespace-nowrap">{membersLine}</span>
+                  )}
+                  {room.onlineCount !== null && (
+                    <span className="whitespace-nowrap">
+                      · {room.onlineCount} online
+                    </span>
+                  )}
+                  <span className="whitespace-nowrap">
+                    <ConnectionChip state={connection} />
+                  </span>
+                </p>
+              </div>
               <button
                 type="button"
-                onClick={onBack}
-                aria-label="Back to rooms"
-                className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-ink hover:bg-sand"
+                onClick={onOpenReader}
+                aria-haspopup="dialog"
+                className="inline-flex min-h-[48px] shrink-0 items-center gap-2 rounded-2xl border-2 border-green bg-surface px-3 font-semibold text-green hover:bg-green-soft"
               >
-                <BackIcon />
+                <TextSizeIcon />
+                <span className={narrow ? "sr-only" : ""}>How I read</span>
               </button>
-            )}
-            <RoomAvatar id={channelId} name={roomName} size={40} />
-            <div className="min-w-0 flex-1 px-1">
-              <h1 className="truncate text-[1.25rem] font-bold leading-tight text-green">{roomName}</h1>
-              <p className="flex flex-wrap items-center gap-x-2 text-[1rem] leading-snug text-ink-muted">
-                {membersLine && <span className="whitespace-nowrap">{membersLine}</span>}
-                {room.onlineCount !== null && <span className="whitespace-nowrap">· {room.onlineCount} online</span>}
-                <span className="whitespace-nowrap">
-                  <ConnectionChip state={connection} />
-                </span>
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onOpenReader}
-              aria-haspopup="dialog"
-              className="inline-flex min-h-[48px] shrink-0 items-center gap-2 rounded-2xl border-2 border-green bg-surface px-3 font-semibold text-green hover:bg-green-soft"
-            >
-              <TextSizeIcon />
-              <span className={narrow ? 'sr-only' : ''}>How I read</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => onToggleInfo(!infoOpen)}
-              aria-pressed={infoOpen}
-              aria-label="Room info"
-              title="Room info"
-              className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${infoOpen ? 'bg-green-soft text-green' : 'text-ink-muted hover:bg-sand hover:text-ink'}`}
-            >
-              <InfoIcon />
-            </button>
-          </header>
+              <button
+                type="button"
+                onClick={() => onToggleInfo(!infoOpen)}
+                aria-pressed={infoOpen}
+                aria-label="Room info"
+                title="Room info"
+                className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${infoOpen ? "bg-green-soft text-green" : "text-ink-muted hover:bg-sand hover:text-ink"}`}
+              >
+                <InfoIcon />
+              </button>
+            </header>
 
-          {fatal ? (
-            <p role="alert" className="border-b border-line bg-terracotta-soft px-4 py-3 font-semibold text-terracotta-deep">
-              {fatal}
-            </p>
-          ) : (
-            connection === 'offline' &&
-            !room.loading && <p className="border-b border-line bg-sand px-4 py-3 text-ink">You are offline. Aangan will reconnect by itself.</p>
-          )}
+            {fatal ? (
+              <p
+                role="alert"
+                className="border-b border-line bg-terracotta-soft px-4 py-3 font-semibold text-terracotta-deep"
+              >
+                {fatal}
+              </p>
+            ) : (
+              connection === "offline" &&
+              !room.loading && (
+                <p className="border-b border-line bg-sand px-4 py-3 text-ink">
+                  You are offline. Aangan will reconnect by itself.
+                </p>
+              )
+            )}
+          </div>
 
           <MessageList
             messages={room.messages}
@@ -125,27 +205,37 @@ export function StandardRoom(props: Props) {
             speech={speech}
             seenBy={room.seenBy}
             myReactionKey={room.myReactionKey}
-          translations={translations}
-          readerLang={prefs.language}
+            translations={translations}
+            readerLang={prefs.language}
             onSuggest={(text) => setPrefill({ text, nonce: Date.now() })}
             onReply={setReplyTo}
             onReact={(id, emoji) => void room.toggleReaction(id, emoji)}
             onOpenImage={(url, alt) => setLightbox({ url, alt })}
           />
-          <StandardComposer
-            speechLang={speechLang(prefs.language)}
-            onSendVoice={async (transcript, audio) => onSent(await room.sendVoiceReply(transcript, audio, speechLang(prefs.language)))}
-            disabled={connection !== 'connected'}
-            onSend={async (text) => {
-              const sent = await room.sendText(text, replyTo);
-              setReplyTo(null);
-              onSent(sent);
-            }}
-            onPickPhoto={setPhoto}
-            replyTo={replyTo}
-            onCancelReply={() => setReplyTo(null)}
-            prefill={prefill}
-          />
+          <div ref={bottomRef} className="chat-glass chat-glass-bottom">
+            <StandardComposer
+              speechLang={speechLang(prefs.language)}
+              onSendVoice={async (transcript, audio) =>
+                onSent(
+                  await room.sendVoiceReply(
+                    transcript,
+                    audio,
+                    speechLang(prefs.language),
+                  ),
+                )
+              }
+              disabled={connection !== "connected"}
+              onSend={async (text) => {
+                const sent = await room.sendText(text, replyTo);
+                setReplyTo(null);
+                onSent(sent);
+              }}
+              onPickPhoto={setPhoto}
+              replyTo={replyTo}
+              onCancelReply={() => setReplyTo(null)}
+              prefill={prefill}
+            />
+          </div>
           <div aria-live="polite" aria-atomic="true" className="sr-only">
             {room.announcement}
           </div>

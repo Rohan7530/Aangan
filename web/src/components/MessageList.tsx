@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { ComfortMessage, type Lang, type ReaderMode, type Speech, type TranslationState } from '../features/reader-view';
 import type { RichMessage } from '../nexconn/rich';
 import { CourtyardIllustration } from './CourtyardIllustration';
@@ -66,6 +66,20 @@ export function MessageList({
     if (el) el.scrollTop = el.scrollHeight;
   }, [mode]);
 
+  // Content can grow after it renders (translations, photos, the read state).
+  // If the reader was at the newest message, keep them there.
+  const empty = loading || messages.length === 0;
+  useEffect(() => {
+    const el = scrollRef.current;
+    const content = el?.lastElementChild;
+    if (!el || !content || empty) return;
+    const ro = new ResizeObserver(() => {
+      if (nearBottom.current) el.scrollTop = el.scrollHeight;
+    });
+    ro.observe(content);
+    return () => ro.disconnect();
+  }, [empty]);
+
   const jumpTo = (id: string) => {
     const el = document.getElementById(`msg-${id}`);
     if (!el) return;
@@ -83,7 +97,7 @@ export function MessageList({
       role="region"
       aria-label="Message history"
       tabIndex={0}
-      className="min-h-0 flex-1 overflow-y-auto focus-visible:outline-offset-[-3px]"
+      className="chat-scroll min-h-0 flex-1 overflow-y-auto focus-visible:outline-offset-[-3px]"
       onScroll={(e) => {
         const el = e.currentTarget;
         nearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < NEAR_BOTTOM_PX;
