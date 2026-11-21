@@ -11,7 +11,10 @@
     "dev": "concurrently -k -n server,web -c blue,green \"npm run dev -w server\" \"npm run dev -w web\"",
     "dev:test": "concurrently -k -n test-server,test-web -c magenta,cyan \"AANGAN_ROOM=test TRANSLATE_MOCK=${TRANSLATE_MOCK:-1} npm run dev -w server\" \"AANGAN_API_PORT=3002 npm run dev -w web -- --port 5174 --strictPort\"",
     "build": "npm run build -w server && npm run build -w web",
-    "typecheck": "npm run typecheck -w server && npm run typecheck -w web"
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w web",
+    "setup:ai": "node scripts/setup-ai.mjs",
+    "test:ai": "node -e \"process.exit(require('child_process').spawnSync(process.platform==='win32'?'ai/.venv/Scripts/python.exe':'ai/.venv/bin/python',['-m','pytest','ai/tests','-q'],{stdio:'inherit'}).status)\"",
+    "smoke": "node scripts/smoke.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
