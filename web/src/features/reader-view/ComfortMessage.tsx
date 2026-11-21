@@ -4,7 +4,9 @@ import { CheckIcon } from '../../components/icons';
 import { VoiceAttachment } from '../voice-reply/VoiceAttachment';
 import { formatTime, senderLabel } from '../../components/messageModel';
 import { useTone } from '../../components/tones';
+import type { ShieldVerdict } from '../../api';
 import type { RichMessage } from '../../nexconn/rich';
+import { ShieldWarning } from '../scam-shield/ShieldWarning';
 import { ListenButton } from './ListenButton';
 import { saysPrefix, speechLang, type Lang } from './translation';
 import { TranslationNote } from './TranslationNote';
@@ -22,6 +24,8 @@ interface Props {
   translation?: TranslationState;
   /** The reader's language: Listen reads translations in it. */
   readerLang?: Lang;
+  shield?: ShieldVerdict;
+  onAskFamily?: (msg: RichMessage, verdict: ShieldVerdict) => void;
 }
 
 function reactionSummary(reactions: Record<string, string[]>): string[] {
@@ -34,7 +38,7 @@ function reactionSummary(reactions: Record<string, string[]>): string[] {
 // Others: white card, sender's colour as a thick left border.
 // Mine: soft terracotta tint, terracotta left border, labelled "You".
 // The solid green Listen button is the clearest thing on the card.
-export function ComfortMessage({ msg, mine, animate = false, speech, seenBy, as: Tag = 'li', onOpenImage, translation, readerLang = 'en' }: Props) {
+export function ComfortMessage({ msg, mine, animate = false, speech, seenBy, as: Tag = 'li', onOpenImage, translation, readerLang = 'en', shield, onAskFamily }: Props) {
   const tone = useTone(msg.senderId);
   const name = mine ? 'You' : senderLabel(msg);
   const isPhoto = msg.kind === 'image';
@@ -55,7 +59,7 @@ export function ComfortMessage({ msg, mine, animate = false, speech, seenBy, as:
   return (
     <Tag
       id={`msg-${msg.id}`}
-      className={`comfort-card ${mine ? 'comfort-mine' : ''} ${animate ? 'msg-enter' : ''}`}
+      className={`comfort-card ${mine ? 'comfort-mine' : ''} ${shield?.level === 'danger' ? 'comfort-flagged' : ''} ${animate ? 'msg-enter' : ''}`}
       style={mine ? undefined : ({ '--card-accent': tone } as CSSProperties)}
     >
       <div className="flex items-center gap-3">
@@ -90,6 +94,16 @@ export function ComfortMessage({ msg, mine, animate = false, speech, seenBy, as:
         <>
           <p className="comfort-text mt-4">{body}</p>
           {translation && <TranslationNote state={translation} original={msg.text} size="comfort" />}
+          {shield && (
+            <ShieldWarning
+              verdict={shield}
+              size="comfort"
+              lang={readerLang}
+              speakId={`shield-${msg.id}`}
+              speech={speech}
+              onAskFamily={onAskFamily ? () => onAskFamily(msg, shield) : undefined}
+            />
+          )}
         </>
       )}
 

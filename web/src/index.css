@@ -341,6 +341,25 @@ textarea::placeholder {
   pointer-events: none;
   transition: opacity 120ms ease;
 }
+/* Beside the bubble on wide screens; above it on phones so it never makes the page scroll sideways. */
+.msg-actions-theirs {
+  left: calc(100% + 8px);
+}
+.msg-actions-mine {
+  right: calc(100% + 8px);
+}
+@media (max-width: 767px) {
+  .msg-actions {
+    top: auto;
+    bottom: calc(100% + 4px);
+  }
+  .msg-actions-theirs {
+    left: 0;
+  }
+  .msg-actions-mine {
+    right: 0;
+  }
+}
 .msg-row:hover .msg-actions,
 .msg-row:focus-within .msg-actions,
 .msg-row[data-selected] .msg-actions {
@@ -594,4 +613,159 @@ dialog.sheet[open] {
     transition: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ---------------- Scam shield ----------------
+   Calm, high-contrast tones. Danger: deep red text on a pale rose card (9:1+).
+   Caution: deep amber on pale butter. Safe: deep green on pale mint. */
+.shield-danger {
+  --sh-ink: #6e1a10;
+  --sh-bg: #fdecea;
+  --sh-line: #b43a2a;
+  --sh-solid: #9b2c1f;
+}
+.shield-caution {
+  --sh-ink: #5c3d06;
+  --sh-bg: #fff4d6;
+  --sh-line: #b07a12;
+  --sh-solid: #7a5212;
+}
+.shield-safe {
+  --sh-ink: #173a2c;
+  --sh-bg: #e3ece5;
+  --sh-line: #2f6b52;
+  --sh-solid: #1f4a39;
+}
+.shield-card {
+  margin-top: 16px;
+  padding: 18px 18px 20px;
+  border-radius: 22px;
+  border: 2px solid var(--sh-line);
+  background: var(--sh-bg);
+  color: var(--sh-ink);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.6) inset, 0 10px 24px -18px var(--sh-line);
+}
+.shield-badge {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: var(--sh-solid);
+  color: #fff;
+}
+.shield-note {
+  margin-top: 6px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1.5px solid var(--sh-line);
+  background: var(--sh-bg);
+  color: var(--sh-ink);
+  font-size: 1rem;
+  line-height: 1.4;
+  max-width: 100%;
+}
+.shield-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 16px;
+  border: 2px solid var(--sh-solid, var(--color-green));
+  background: #fff;
+  color: var(--sh-solid, var(--color-green));
+  font-weight: 700;
+}
+.shield-btn:hover {
+  background: var(--sh-bg, var(--color-green-soft));
+}
+.shield-btn-solid {
+  background: var(--sh-solid, #9b2c1f);
+  border-color: var(--sh-solid, #9b2c1f);
+  color: #fff;
+}
+.shield-btn-solid:hover {
+  background: var(--sh-ink, #6e1a10);
+}
+
+/* Comfort card for a message the shield flagged as dangerous. */
+.comfort-card.comfort-flagged {
+  border-color: #e7b3aa;
+  border-left-color: #9b2c1f;
+}
+
+/* ---------------- AI helpers ---------------- */
+.assist-pill {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 72px;
+  padding: 12px 18px;
+  border-radius: 22px;
+  border: 2px solid #2f6b52;
+  background: linear-gradient(135deg, #e9f3ec, #f6efe0);
+  color: var(--color-green);
+  box-shadow: 0 12px 26px -20px rgb(31 74 57 / 0.7);
+}
+.assist-pill:hover {
+  background: linear-gradient(135deg, #dcebe1, #f2e7d2);
+}
+.assist-pill-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+  background: var(--color-green);
+  color: #fff;
+}
+.assist-card {
+  padding: 16px 18px 20px;
+  border-radius: 22px;
+  border: 2px solid #2f6b52;
+  background: linear-gradient(160deg, #eef6f0, #fbf6ec);
+  color: #173a2c;
+}
+.quick-reply {
+  min-height: 52px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 2px solid var(--color-green);
+  background: var(--color-surface);
+  color: var(--color-green);
+  font-size: 1.1875rem;
+  font-weight: 700;
+}
+.quick-reply:hover {
+  background: var(--color-green-soft);
+}
+
+/* "Is this safe?" entry on the Comfort home screen. */
+.safe-cta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 84px;
+  padding: 14px 18px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #1f4a39, #2c6650);
+  color: #fff;
+  box-shadow: 0 16px 30px -20px rgb(31 74 57 / 0.9), inset 0 1px 0 rgb(255 255 255 / 0.18);
+}
+.safe-cta:hover {
+  background: linear-gradient(135deg, #173a2c, #245844);
+}
+.safe-cta-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.16);
+  border: 1.5px solid rgb(255 255 255 / 0.35);
+}
+.safe-cta:focus-visible {
+  outline-color: var(--color-terracotta);
 }

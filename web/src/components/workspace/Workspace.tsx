@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ReaderSettingsSheet, useReaderPrefs, useSpeech } from '../../features/reader-view';
+import { SafeCheckSheet } from '../../features/scam-shield';
+import { listMembers, type Member } from '../../nexconn/group';
 import { useConnection } from '../../hooks/useConnection';
 import { useMediaQuery, useStoredFlag } from '../../hooks/useMediaQuery';
 import { useRooms } from '../../hooks/useRooms';
@@ -43,6 +45,15 @@ export function Workspace({ session, onLogout, embedded = false, initialRoom }: 
   const [mobileView, setMobileView] = useState<'list' | 'chat'>(initialRoom ? 'chat' : 'list');
   const [readerOpen, setReaderOpen] = useState(false);
   const [newRoomOpen, setNewRoomOpen] = useState(false);
+  const [safeOpen, setSafeOpen] = useState(false);
+  const [safeMembers, setSafeMembers] = useState<Member[]>([]);
+  const openSafeCheck = useCallback(() => {
+    setSafeOpen(true);
+    // People who can be asked: everyone in the room the reader is in.
+    listMembers(activeId)
+      .then((r) => r.ok && setSafeMembers(r.members))
+      .catch(() => undefined);
+  }, [activeId]);
 
   const select = useCallback(
     (id: string) => {
@@ -91,6 +102,7 @@ export function Workspace({ session, onLogout, embedded = false, initialRoom }: 
         }
       }}
       fullWidth={fullWidth}
+      onCheckSafe={openSafeCheck}
     />
   );
 
@@ -107,6 +119,8 @@ export function Workspace({ session, onLogout, embedded = false, initialRoom }: 
         me={me}
         connection={conn.state}
         fullWidth={fullWidth}
+        onCheckSafe={openSafeCheck}
+        lang={prefs.language}
       />
     );
     const comfortRoom = (narrow: boolean) => (
@@ -185,6 +199,14 @@ export function Workspace({ session, onLogout, embedded = false, initialRoom }: 
         onSignOut={embedded ? undefined : signOut}
         speech={speech}
         myName={session.name}
+      />
+      <SafeCheckSheet
+        open={safeOpen}
+        onClose={() => setSafeOpen(false)}
+        me={{ userId: session.userId, authKey: session.authKey }}
+        lang={prefs.language}
+        members={safeMembers}
+        speech={speech}
       />
       <NewRoomSheet
         open={newRoomOpen}

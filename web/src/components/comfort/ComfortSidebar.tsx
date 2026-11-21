@@ -1,9 +1,11 @@
+import type { ReaderLang } from '../../api';
+import { shieldEnglish, shieldText } from '../../features/scam-shield';
 import type { RoomSummary } from '../../nexconn/rooms';
 import type { ConnectionState } from '../../nexconn/types';
 import { Avatar } from '../Avatar';
 import { BrandMark } from '../BrandMark';
 import { ConnectionChip } from '../ConnectionChip';
-import { PlusIcon } from '../icons';
+import { PlusIcon, ShieldIcon } from '../icons';
 import { formatListTime, senderLabel } from '../messageModel';
 import { RoomAvatar } from '../workspace/RoomAvatar';
 
@@ -17,12 +19,15 @@ interface Props {
   connection: ConnectionState;
   /** Phones: the room list is the whole screen. */
   fullWidth?: boolean;
+  /** Opens "Is this safe?". */
+  onCheckSafe?: () => void;
+  lang?: ReaderLang;
 }
 
 // Comfort room list: always visible on wide screens, the home screen on phones.
 // Big rows, large text, everything spelled out ("3 new messages"), no icon-only
 // buttons and nothing hidden behind a collapse toggle.
-export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, connection, fullWidth }: Props) {
+export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, connection, fullWidth, onCheckSafe, lang = 'en' }: Props) {
   return (
     <nav aria-label="Rooms" className={`flex h-full shrink-0 flex-col border-r-2 border-line bg-sand/70 ${fullWidth ? 'w-full' : 'w-[360px] xl:w-[400px]'}`}>
       <div className="flex items-center gap-3 px-5 pb-3 pt-5">
@@ -39,6 +44,20 @@ export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, m
           </p>
         </div>
       </div>
+
+      {onCheckSafe && (
+        <button type="button" onClick={onCheckSafe} className="safe-cta mx-4 mb-4">
+          <span className="safe-cta-icon" aria-hidden="true">
+            <ShieldIcon />
+          </span>
+          <span className="min-w-0 flex-1 text-left">
+            <span className="block text-[1.375rem] font-bold leading-tight">{shieldText(lang, 'isThisSafe')}</span>
+            <span className="block text-[1.0625rem] leading-snug opacity-90">
+              {shieldEnglish(lang, 'isThisSafe') ? `${shieldEnglish(lang, 'isThisSafe')} · ` : ''}Check an SMS or WhatsApp message
+            </span>
+          </span>
+        </button>
+      )}
 
       <h2 className="px-5 pb-2 text-[1.5rem] font-bold text-ink">My rooms</h2>
 

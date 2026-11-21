@@ -3,7 +3,7 @@ import type { ConnectionState } from '../../nexconn/types';
 import { Avatar } from '../Avatar';
 import { BrandMark } from '../BrandMark';
 import { ConnectionChip } from '../ConnectionChip';
-import { PlusIcon, SidebarIcon } from '../icons';
+import { PlusIcon, ShieldIcon, SidebarIcon } from '../icons';
 import { formatListTime, senderLabel } from '../messageModel';
 import { RoomAvatar } from './RoomAvatar';
 
@@ -19,6 +19,8 @@ interface Props {
   onToggleCollapsed?: () => void;
   /** Mobile: the room list is the whole screen. */
   fullWidth?: boolean;
+  /** Opens "Is this safe?". */
+  onCheckSafe?: () => void;
 }
 
 function preview(r: RoomSummary, myId: string): string {
@@ -28,7 +30,7 @@ function preview(r: RoomSummary, myId: string): string {
   return `${who}: ${what}`;
 }
 
-export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, connection, collapsed, onToggleCollapsed, fullWidth }: Props) {
+export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, connection, collapsed, onToggleCollapsed, fullWidth, onCheckSafe }: Props) {
   const rail = collapsed && !fullWidth;
   const totalUnread = rooms.reduce((n, r) => n + r.unread, 0);
 
@@ -85,6 +87,20 @@ export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, conn
           <PlusIcon />
           {!rail && <span>New room</span>}
         </button>
+        {onCheckSafe && (
+          <button
+            type="button"
+            onClick={onCheckSafe}
+            aria-label={rail ? 'Is this safe? Check a message' : undefined}
+            title={rail ? 'Is this safe?' : undefined}
+            className={`mt-2 inline-flex min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-green font-semibold text-white hover:bg-[#173a2c] ${
+              rail ? 'w-10 px-0' : 'w-full px-4'
+            }`}
+          >
+            <ShieldIcon />
+            {!rail && <span>Is this safe?</span>}
+          </button>
+        )}
       </div>
 
       {!rail && (

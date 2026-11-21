@@ -3,7 +3,7 @@ import { getRoomInvite } from '../../api';
 import type { Member } from '../../nexconn/group';
 import type { PresenceMap } from '../../nexconn/presence';
 import { Avatar } from '../Avatar';
-import { CheckIcon, CloseIcon, CopyIcon, HeartIcon, LinkIcon } from '../icons';
+import { CheckIcon, CloseIcon, CopyIcon, LinkIcon } from '../icons';
 
 interface Props {
   channelId: string;
@@ -16,8 +16,7 @@ interface Props {
   fullWidth?: boolean;
 }
 
-// Room info: who is here (with online dots), the invite link, and a reserved
-// "Family check-in" section for the next feature.
+// Room info: who is here (with online dots) and the invite link.
 export function InfoPanel({ channelId, roomName, members, presence, myId, authKey, onClose, fullWidth }: Props) {
   const [invite, setInvite] = useState<string | null>(null);
   const [inviteError, setInviteError] = useState<string | null>(null);
@@ -121,12 +120,6 @@ export function InfoPanel({ channelId, roomName, members, presence, myId, authKe
           )}
         </section>
 
-        <section aria-labelledby="info-checkin" className="mt-6 rounded-2xl border-2 border-dashed border-line-strong p-4">
-          <h3 id="info-checkin" className="flex items-center gap-2 font-bold">
-            <HeartIcon /> Family check-in
-          </h3>
-          <p className="mt-1 text-ink-muted">Coming soon: one tap a day for “I’m fine”, and a gentle alert if someone misses it.</p>
-        </section>
       </div>
     </aside>
   );

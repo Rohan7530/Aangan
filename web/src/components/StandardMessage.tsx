@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { VoiceAttachment } from '../features/voice-reply/VoiceAttachment';
 import { TranslationNote } from '../features/reader-view/TranslationNote';
 import type { TranslationState } from '../features/reader-view/useTranslations';
+import type { ShieldVerdict } from '../api';
+import type { Lang } from '../features/reader-view/translation';
+import { ShieldWarning } from '../features/scam-shield/ShieldWarning';
 import type { RichMessage } from '../nexconn/rich';
 import { Avatar } from './Avatar';
 import { CheckIcon, CopyIcon, ReplyIcon, SmileIcon } from './icons';
@@ -29,6 +32,9 @@ interface Props extends MessageHandlers {
   myReactionKey?: string;
   /** Translation into the reader's language (other people's messages only). */
   translation?: TranslationState;
+  shield?: ShieldVerdict;
+  readerLang?: Lang;
+  onAskFamily?: (msg: RichMessage, verdict: ShieldVerdict) => void;
 }
 
 function reactionCounts(reactions: Record<string, string[]>, myKey?: string) {
@@ -55,6 +61,9 @@ export function StandardMessage({
   seenBy,
   myReactionKey,
   translation,
+  shield,
+  readerLang = 'en',
+  onAskFamily,
   onReply,
   onReact,
   onOpenImage,
@@ -161,6 +170,16 @@ export function StandardMessage({
             </time>
           </div>
 
+          {shield && (
+            <ShieldWarning
+              verdict={shield}
+              size="standard"
+              lang={readerLang}
+              speakId={`shield-${msg.id}`}
+              onAskFamily={onAskFamily ? () => onAskFamily(msg, shield) : undefined}
+            />
+          )}
+
           {counts.length > 0 && (
             <ul className={`mt-1 flex flex-wrap gap-1 ${mine ? 'justify-end' : ''}`} aria-label="Reactions">
               {counts.map(([emoji, c]) => (
@@ -182,7 +201,7 @@ export function StandardMessage({
           )}
 
           {interactive && (
-            <div className={`msg-actions ${mine ? 'right-full mr-2' : 'left-full ml-2'}`} role="group" aria-label="Message actions">
+            <div className={`msg-actions ${mine ? 'msg-actions-mine' : 'msg-actions-theirs'}`} role="group" aria-label="Message actions">
               {picking ? (
                 QUICK_REACTIONS.map((e) => (
                   <button

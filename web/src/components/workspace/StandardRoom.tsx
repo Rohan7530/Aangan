@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { speechLang, useReaderPrefs, useTranslations, type Speech } from '../../features/reader-view';
 import { useRoom } from '../../hooks/useRoom';
+import type { ShieldVerdict } from '../../api';
+import { AskFamilySheet, useShield } from '../../features/scam-shield';
 import type { RichMessage } from '../../nexconn/rich';
 import type { ConnectionState } from '../../nexconn/types';
 import type { Session } from '../../session';
@@ -36,6 +38,8 @@ export function StandardRoom(props: Props) {
   const room = useRoom(session, channelId, connection);
   const { prefs } = useReaderPrefs();
   const translations = useTranslations(room.messages, session.userId, prefs.language, session.authKey);
+  const shields = useShield(room.messages, session.userId, prefs.language, session.authKey);
+  const [asking, setAsking] = useState<{ text: string; verdict: ShieldVerdict | null } | null>(null);
   const [replyTo, setReplyTo] = useState<RichMessage | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
   const [lightbox, setLightbox] = useState<{ url: string; alt: string } | null>(null);
@@ -131,6 +135,8 @@ export function StandardRoom(props: Props) {
             onReply={setReplyTo}
             onReact={(id, emoji) => void room.toggleReaction(id, emoji)}
             onOpenImage={(url, alt) => setLightbox({ url, alt })}
+            shields={shields}
+            onAskFamily={(msg, verdict) => setAsking({ text: msg.text, verdict })}
           />
           <StandardComposer
             speechLang={speechLang(prefs.language)}
@@ -164,6 +170,13 @@ export function StandardRoom(props: Props) {
         }}
       />
       <Lightbox image={lightbox} onClose={() => setLightbox(null)} />
+      <AskFamilySheet
+        target={asking}
+        onClose={() => setAsking(null)}
+        me={{ userId: session.userId, authKey: session.authKey }}
+        lang={prefs.language}
+        members={room.members}
+      />
     </ToneProvider>
   );
 }
