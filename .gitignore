@@ -17,3 +17,11 @@ server/data/
 # logs and OS files
 *.log
 .DS_Store
+
+# Playwright MCP screenshots and logs
+.playwright-mcp/
+
+# Python AI sidecar
+ai/.venv/
+__pycache__/
+.pytest_cache/
