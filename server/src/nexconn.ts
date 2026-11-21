@@ -129,7 +129,7 @@ export class NexconnClient {
   }
 
   // docs: POST /v4/group-channel/message/send (rate limit 20/s)
-  // Sends a text message AS fromUserId. `user` inside content is the sender
+  // Sends a text message AS fromUserId, also into the sender's own history. `user` inside content is the sender
   // info the Web SDK exposes as message.content.senderUserInfo.
   async sendGroupText(
     fromUserId: string,
@@ -143,6 +143,9 @@ export class NexconnClient {
       messageType: 'RC:TxtMsg',
       content: JSON.stringify({ content: text, user: { id: sender.id, name: sender.name } }),
       needReadReceipt: 1,
+      // Default 0 leaves the message out of the sender's own history
+      // (docs: platform-chat-api/message/send-group, isEchoToSender).
+      isEchoToSender: 1,
     });
     return res.code;
   }

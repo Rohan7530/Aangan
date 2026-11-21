@@ -58,7 +58,7 @@ export function loadConfig() {
     demo: {
       channelId: room.isTestRoom
         ? `${room.channelId}demo`.slice(0, 64)
-        : process.env.AANGAN_DEMO_CHANNEL_ID?.trim() || 'aangandemo2',
+        : process.env.AANGAN_DEMO_CHANNEL_ID?.trim() || 'aangandemo5',
       channelName: 'The Sharma Family',
     },
   };

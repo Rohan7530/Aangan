@@ -59,7 +59,7 @@ export async function translateCached(text: string, target: Lang): Promise<(LlmR
 export function translateRouter(): Router {
   const router = Router();
   const cfg = cfgOnce;
-  console.log(cfg?.provider === 'mock' ? '[translate] llm engine MOCKED for tests (no network calls)' : cfg ? `[translate] llm engine on (${cfg.provider}, ${cfg.model})` : '[translate] llm engine off (no TRANSLATE_API_KEY)');
+  console.log(cfg?.provider === 'mock' ? '[translate] llm engine MOCKED for tests (no network calls)' : cfg ? `[translate] llm engine on (${cfg.provider}, ${cfg.model}${cfg.backup ? `; backup ${cfg.backup.provider}` : ''})` : '[translate] llm engine off (no TRANSLATE_API_KEY)');
 
   // Tells the browser which engine to use. Never includes the key.
   router.get('/translate/config', (_req, res) => {

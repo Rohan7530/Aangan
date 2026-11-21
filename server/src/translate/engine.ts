@@ -1,6 +1,7 @@
 // The "llm" translation engine (server side only). The API key is read from
 // .env here and never sent to the browser: routes return only results.
-// Provider is swappable with TRANSLATE_PROVIDER=gemini | anthropic.
+// Provider is swappable with TRANSLATE_PROVIDER=sarvam | gemini | anthropic.
+// With sarvam (key in SARVAM_API_KEY), TRANSLATE_API_KEY serves Gemini as the backup.
 
 import { mockTranslate } from './mock.js';
 
@@ -30,26 +31,37 @@ export interface LlmResult {
 }
 
 export interface TranslateConfig {
-  provider: 'gemini' | 'anthropic' | 'mock';
+  provider: 'gemini' | 'anthropic' | 'sarvam' | 'mock';
   apiKey: string;
   model: string;
   /** Tried in order when the main model is overloaded (503/429) or times out. */
   fallbacks: string[];
+  /** Tried after all of this provider's models fail (e.g. Gemini behind Sarvam). */
+  backup?: TranslateConfig;
 }
+
+const DEFAULT_MODEL = { gemini: 'gemini-3.8-flash', anthropic: 'claude-haiku-5-5', sarvam: 'sarvam-105b' } as const;
+const DEFAULT_FALLBACKS = { gemini: 'gemini-flash-lite-latest,gemini-3.5-flash-lite', anthropic: '', sarvam: '' } as const;
 
 export function loadTranslateConfig(): TranslateConfig | null {
   // Tests (npm run dev:test) use a local mock and never call a real provider.
   if (process.env.TRANSLATE_MOCK === '1') return { provider: 'mock', apiKey: '', model: 'mock', fallbacks: [] };
-  const apiKey = process.env.TRANSLATE_API_KEY?.trim();
+  const name = process.env.TRANSLATE_PROVIDER?.trim().toLowerCase();
+  const provider = name === 'anthropic' || name === 'sarvam' ? name : 'gemini';
+  const translateKey = process.env.TRANSLATE_API_KEY?.trim() ?? '';
+  const apiKey = provider === 'sarvam' ? process.env.SARVAM_API_KEY?.trim() || translateKey : translateKey;
   if (!apiKey) return null; // engine simply off
-  const provider = process.env.TRANSLATE_PROVIDER?.trim().toLowerCase() === 'anthropic' ? 'anthropic' : 'gemini';
-  const model =
-    process.env.TRANSLATE_MODEL?.trim() || (provider === 'gemini' ? 'gemini-3.8-flash' : 'claude-haiku-5-5');
-  const fallbacks = (process.env.TRANSLATE_FALLBACK_MODELS ?? (provider === 'gemini' ? 'gemini-flash-lite-latest,gemini-3.5-flash-lite' : ''))
+  const model = process.env.TRANSLATE_MODEL?.trim() || DEFAULT_MODEL[provider];
+  const fallbacks = (process.env.TRANSLATE_FALLBACK_MODELS ?? DEFAULT_FALLBACKS[provider])
     .split(',')
     .map((m) => m.trim())
     .filter((m) => m && m !== model);
-  return { provider, apiKey, model, fallbacks };
+  let backup: TranslateConfig | undefined;
+  if (provider === 'sarvam' && translateKey && translateKey !== apiKey) {
+    const b = process.env.BACKUP_PROVIDER?.trim().toLowerCase() === 'anthropic' ? 'anthropic' : 'gemini';
+    backup = { provider: b, apiKey: translateKey, model: DEFAULT_MODEL[b], fallbacks: DEFAULT_FALLBACKS[b].split(',').filter(Boolean) };
+  }
+  return { provider, apiKey, model, fallbacks, backup };
 }
 
 const SOURCES: SourceLang[] = ['en', 'hi', 'hinglish', 'mr', 'ta', 'bn', 'other'];
@@ -108,6 +120,33 @@ async function anthropic(cfg: TranslateConfig, model: string, text: string, targ
   return parse(out.slice(out.indexOf('{'), out.lastIndexOf('}') + 1));
 }
 
+// Sarvam chat completions (OpenAI-style). reasoning_effort: null turns the model's
+// thinking off: ~1 s instead of 3-5 s, same translations in our tests.
+async function sarvam(cfg: TranslateConfig, model: string, text: string, target: Lang): Promise<LlmResult> {
+  const res = await fetch('https://api.sarvam.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'api-subscription-key': cfg.apiKey },
+    signal: AbortSignal.timeout(12_000),
+    body: JSON.stringify({
+      model,
+      temperature: 0,
+      max_tokens: 1024,
+      reasoning_effort: null,
+      messages: [
+        { role: 'system', content: `${SYSTEM} Reply with JSON only: {"sourceLang": one of ${SOURCES.join('|')}, "translated": string}.` },
+        { role: 'user', content: `Target language: ${NAMES[target]} (code ${target})\nMessage:\n${text}` },
+      ],
+    }),
+  });
+  const body = (await res.json().catch(() => ({}))) as { choices?: { message?: { content?: string } }[]; error?: { message?: string } };
+  // 402 = credits used up: rest it like a daily quota so the backup takes over.
+  if (!res.ok) throw new ProviderError(res.status, `sarvam ${model} ${res.status}: ${body.error?.message?.slice(0, 120) ?? 'error'}`, res.status === 402);
+  let out = body.choices?.[0]?.message?.content ?? '';
+  if (out.includes('</think>')) out = out.split('</think>').pop() ?? '';
+  out = out.trim();
+  return parse(out.slice(out.indexOf('{'), out.lastIndexOf('}') + 1));
+}
+
 class ProviderError extends Error {
   constructor(
     readonly status: number,
@@ -126,6 +165,7 @@ function rest(model: string, err: unknown) {
   let ms = 0;
   if (err instanceof ProviderError) {
     if (err.status === 404) ms = Number.POSITIVE_INFINITY;
+    else if (err.status === 401 || err.status === 402 || err.status === 403) ms = 60 * 60_000; // bad key / no credits
     else if (err.status === 429) ms = err.perDay ? 60 * 60_000 : 2 * 60_000;
     else if (err.status >= 500) ms = 2 * 60_000;
   } else if (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError')) {
@@ -155,19 +195,23 @@ export function looksTranslated(text: string, target: Lang, r: LlmResult): boole
 
 class BadOutput extends Error {}
 
-// Main model first, then the fallbacks, skipping models that are resting.
+// Main model first, then its fallbacks, then the backup provider's models,
+// skipping models that are resting.
 export async function llmTranslate(cfg: TranslateConfig, text: string, target: Lang): Promise<LlmResult> {
   if (cfg.provider === 'mock') return mockTranslate(text, target);
-  const call = cfg.provider === 'anthropic' ? anthropic : gemini;
-  const all = [cfg.model, ...cfg.fallbacks];
-  const ready = all.filter((m) => (resting.get(m) ?? 0) <= Date.now());
+  const all: { c: TranslateConfig; model: string; key: string }[] = [];
+  for (let c: TranslateConfig | undefined = cfg; c; c = c.backup) {
+    for (const model of [c.model, ...c.fallbacks]) all.push({ c, model, key: `${c.provider}:${model}` });
+  }
+  const ready = all.filter((m) => (resting.get(m.key) ?? 0) <= Date.now());
   const order = ready.length ? ready : all; // everything resting: try anyway
   let last: unknown;
   const deadline = Date.now() + 25_000; // never keep a reader waiting longer than this
-  for (const model of order) {
+  for (const { c, model, key } of order) {
     if (Date.now() > deadline) break;
+    const call = c.provider === 'anthropic' ? anthropic : c.provider === 'sarvam' ? sarvam : gemini;
     try {
-      const r = await call(cfg, model, text, target);
+      const r = await call(c, model, text, target);
       if (!looksTranslated(text, target, r)) throw new BadOutput(`${model} did not translate into ${target}`);
       return r;
     } catch (err) {
@@ -176,9 +220,9 @@ export async function llmTranslate(cfg: TranslateConfig, text: string, target: L
         console.warn(`[translate] ${err.message}; trying the next model`);
         continue;
       }
-      const skip = rest(model, err);
+      const skip = rest(key, err);
       console.warn(`[translate] ${err instanceof Error ? err.message.slice(0, 110) : err}${skip ? ' (resting this model)' : ''}`);
-      if (!skip && !(err instanceof TypeError)) throw err; // a real error (bad output etc.): stop
+      if (!skip && !(err instanceof TypeError) && !c.backup) throw err; // a real error and nothing left to try: stop
     }
   }
   throw last instanceof Error ? last : new Error('translation failed');
