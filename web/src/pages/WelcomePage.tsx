@@ -16,7 +16,7 @@ interface Props {
 const PROMISES = [
   { icon: <TextSizeIcon />, title: 'Big, clear text', text: 'Comfort mode for anyone who needs it.' },
   { icon: <SpeakerIcon />, title: 'Read aloud', text: 'Any message, with one tap on Listen.' },
-  { icon: <GlobeIcon />, title: 'Your own language', text: 'Each person in theirs. Coming soon.' },
+  { icon: <GlobeIcon />, title: 'Your own language', text: 'Each person reads in theirs: Hindi, Marathi, English and more.' },
 ];
 
 // One real message, rendered by the real components in both reading modes.
@@ -99,10 +99,10 @@ export function WelcomePage({ savedSessions, onLoggedIn }: Props) {
   return (
     <div className="min-h-full">
       <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4" aria-label="Aangan">
-        <span className="flex items-center gap-3">
+        <a href="/welcome.html" className="flex items-center gap-3" aria-label="Aangan: how it works">
           <BrandMark size={40} />
           <span className="text-[1.5rem] font-bold text-green">Aangan</span>
-        </span>
+        </a>
         <a
           href="/showcase"
           className="inline-flex min-h-[48px] items-center gap-2 rounded-2xl px-3 font-semibold text-green underline-offset-4 hover:underline"
@@ -122,7 +122,7 @@ export function WelcomePage({ savedSessions, onLoggedIn }: Props) {
           </h1>
           <p className="mt-4 max-w-xl text-[1.25rem] leading-relaxed text-ink-muted">
             One message, delivered to each person in the form they can use: large clear text, read aloud, and
-            soon in their own language. So Dadi stays in the conversation too.
+            in their own language. So Dadi stays in the conversation too.
           </p>
 
           <form

@@ -73,7 +73,16 @@ function FamilyApp() {
       </div>
     );
   }
-  if (!session) return <WelcomePage savedSessions={saved} onLoggedIn={handleLoggedIn} />;
+  if (!session) {
+    // First visit (no saved family on this device): show the story first.
+    // The landing page's buttons come back here with ?start=1.
+    const fresh = saved.length === 0 && !new URLSearchParams(window.location.search).has('start');
+    if (fresh && window.location.pathname === '/') {
+      window.location.replace('/welcome.html');
+      return null;
+    }
+    return <WelcomePage savedSessions={saved} onLoggedIn={handleLoggedIn} />;
+  }
   return (
     <ReaderPrefsProvider key={session.userId} userId={session.userId}>
       <Workspace session={session} onLogout={handleLogout} />
