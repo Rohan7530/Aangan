@@ -40,13 +40,14 @@ export function QuickReplies({ message, lang, authKey, onPick }: Props) {
   if (!replies.length) return null;
   return (
     <div role="group" aria-label={`Quick replies to ${sender ?? 'the last message'}`}>
-      <p className="mb-1.5 text-[1rem] font-semibold text-ink-muted">
+      <p className="mb-1.5 hidden text-[1rem] font-semibold text-ink-muted sm:block">
         {t(lang, 'quickReplies')}
         {lang !== 'en' && ' · Quick replies'}
       </p>
-      <ul className="flex flex-wrap gap-2">
+      {/* One row that scrolls sideways on phones; wraps on wider screens. */}
+      <ul className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 sm:flex-wrap sm:overflow-visible">
         {replies.map((r) => (
-          <li key={r}>
+          <li key={r} className="shrink-0">
             <button type="button" onClick={() => onPick(r)} className="quick-reply">
               {r}
             </button>

@@ -104,8 +104,12 @@ export function WhatDidIMiss({ channelId, messages, me, lang, speech }: Props) {
             <SparkIcon />
           </span>
           <span className="min-w-0 flex-1 text-left">
-            <span className="block text-[1.375rem] font-bold leading-tight">{t(lang, 'whatDidIMiss')}</span>
-            <span className="block text-[1.0625rem] opacity-85">
+            <span className="block text-[1.375rem] font-bold leading-tight">
+              {t(lang, 'whatDidIMiss')}
+              {/* Phones: the English name in small type under it, instead of the long subtitle. */}
+              {en(lang, 'whatDidIMiss') && <span className="block text-[1rem] font-semibold opacity-85 sm:hidden">{en(lang, 'whatDidIMiss')}</span>}
+            </span>
+            <span className="hidden text-[1.0625rem] opacity-85 sm:block">
               {fresh ? t(lang, 'newMessages', { n: String(missed.length) }) : t(lang, 'recentMessages')}
               {en(lang, 'whatDidIMiss') ? ` · ${en(lang, 'whatDidIMiss')}` : ''}
             </span>

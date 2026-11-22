@@ -502,6 +502,9 @@ dialog.sheet[open]::backdrop {
   border-top-color: transparent;
 }
 .chat-scroll {
+  /* Contains the absolutely positioned sr-only labels inside messages; without it they
+     escape the list and stretch the whole page (a second, outer scrollbar). */
+  position: relative;
   padding-top: var(--chat-top, 0px);
   padding-bottom: var(--chat-bottom, 0px);
   scroll-padding-top: calc(var(--chat-top, 0px) + 8px);
@@ -729,11 +732,30 @@ dialog.lightbox::backdrop {
   inset: -14px -6px;
 }
 
+/* ---------------- scrollbars ---------------- */
+/* Thin, theme-coloured scrollbars instead of the grey ones with arrow buttons (Windows). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+/* Phone-sized screens (and the showcase phone) scroll by touch; no scrollbar, as on a real phone. */
+@media (max-width: 640px) {
+  * {
+    scrollbar-width: none;
+  }
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* ---------------- showcase frames ---------------- */
 .phone-frame {
   position: relative;
   width: min(390px, calc(100vw - 40px));
-  height: min(820px, max(640px, calc(100dvh - 300px)));
+  height: min(840px, max(700px, calc(100dvh - 240px)));
   padding: 12px;
   border-radius: 54px;
   background: #1c1c1e;
@@ -795,7 +817,7 @@ dialog.lightbox::backdrop {
 .browser-screen {
   display: block;
   width: 100%;
-  height: min(780px, max(600px, calc(100dvh - 300px)));
+  height: min(800px, max(660px, calc(100dvh - 280px)));
   border: 0;
   background: var(--color-chat);
 }
@@ -1458,8 +1480,8 @@ dialog.lightbox::backdrop {
   display: flex;
   align-items: center;
   gap: 14px;
-  min-height: 72px;
-  padding: 12px 18px;
+  min-height: 64px;
+  padding: 10px 16px;
   border-radius: var(--radius-card);
   border: 1px solid var(--color-line);
   background: var(--color-surface);

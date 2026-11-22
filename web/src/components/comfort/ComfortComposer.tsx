@@ -101,8 +101,9 @@ export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill, speech
             e.target.value = '';
           }}
         />
-        {/* One row: Photo, Speak, the message box, Send. On phones the labels sit under the icons. */}
-        <div className="flex items-end gap-2 @3xl:gap-3">
+        {/* One row: Photo, Speak, the message box, Send. On narrow phones the message box gets its own
+            full-width row above the buttons, so it is never squeezed to a few letters. */}
+        <div className="flex flex-wrap items-end gap-2 @md:flex-nowrap @3xl:gap-3">
           <button type="button" disabled={disabled} onClick={() => fileRef.current?.click()} className={`${big} text-ink disabled:opacity-60`}>
             <span className="text-accent-ink">
               <PhotoIcon />
@@ -120,13 +121,13 @@ export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill, speech
             placeholder={disabled ? 'Waiting for connection…' : 'Type a message'}
             disabled={disabled}
             aria-describedby={error ? errorId : undefined}
-            className="min-w-0 flex-1 resize-none rounded-[24px] border border-line-strong bg-surface px-5 py-[14px] leading-snug text-ink placeholder:text-ink-muted focus:border-accent focus-visible:outline-offset-1 disabled:bg-fill"
+            className="order-first min-w-0 flex-[1_1_100%] resize-none rounded-[24px] @md:order-none @md:flex-1 border border-line-strong bg-surface px-5 py-[14px] leading-snug text-ink placeholder:text-ink-muted focus:border-accent focus-visible:outline-offset-1 disabled:bg-fill"
             style={{ fontSize: 'var(--input-size)', minHeight: 64, maxHeight: 200 }}
           />
           <button
             type="submit"
             disabled={!canSend}
-            className="send-btn inline-flex min-h-[64px] shrink-0 items-center justify-center gap-2 rounded-full bg-accent px-5 text-[1.25rem] font-bold text-on-accent hover:bg-accent-deep disabled:bg-fill disabled:text-ink-muted @3xl:px-7 @3xl:text-[1.375rem]"
+            className="send-btn inline-flex min-h-[64px] flex-1 items-center @md:flex-none @md:shrink-0 justify-center gap-2 rounded-full bg-accent px-5 text-[1.25rem] font-bold text-on-accent hover:bg-accent-deep disabled:bg-fill disabled:text-ink-muted @3xl:px-7 @3xl:text-[1.375rem]"
           >
             <span>{sending ? 'Sending…' : 'Send'}</span>
             <span className="hidden @3xl:inline">
