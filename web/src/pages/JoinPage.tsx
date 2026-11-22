@@ -1,7 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { getInviteInfo, joinInvite, login } from '../api';
-import { BrandMark } from '../components/BrandMark';
-import { CourtyardIllustration } from '../components/CourtyardIllustration';
+import '@fontsource-variable/unbounded';
+import '@fontsource-variable/figtree';
+import '@fontsource/martian-mono/400.css';
+import { NightBackdrop, NightMark } from '../components/NightBackdrop';
 import { identityForName, loadSession, saveSession, setLastRoom, type Session } from '../session';
 
 // /join/<code>: shows which room the invite opens, asks for a name if this
@@ -49,18 +51,16 @@ export function JoinPage({ code }: { code: string }) {
   const askName = !session || useNewName;
 
   return (
-    <main className="flex min-h-full items-center justify-center px-5 py-10">
-      <div className="w-full max-w-md rounded-[28px] border border-line bg-surface p-7 text-center shadow-[0_18px_40px_-24px_rgb(42_37_34/0.45)]">
+    <main className="night-page flex min-h-full items-center justify-center px-5 py-10">
+      <NightBackdrop />
+      <div className="night-panel night-rise w-full max-w-md p-7 text-center">
         <div className="flex justify-center">
-          <BrandMark size={56} />
+          <NightMark size={56} />
         </div>
         {room ? (
           <>
-            <p className="mt-5 font-semibold text-danger">You’re invited to</p>
-            <h1 className="mt-1 text-balance text-[2rem] font-bold leading-tight text-accent-ink">{room.name}</h1>
-            <div className="mt-5 flex justify-center">
-              <CourtyardIllustration width={180} />
-            </div>
+            <p className="night-eyebrow mt-5">You’re invited to</p>
+            <h1 className="night-display night-glowtext mt-3 text-balance text-[2rem] leading-tight">{room.name}</h1>
             <form onSubmit={join} noValidate className="mt-6 text-left">
               {askName ? (
                 <>
@@ -74,7 +74,7 @@ export function JoinPage({ code }: { code: string }) {
                     onChange={(e) => setName(e.target.value)}
                     maxLength={64}
                     autoComplete="given-name"
-                    className="mt-2 min-h-[56px] w-full rounded-2xl border border-line-strong bg-surface px-4 text-ink text-[1.25rem] focus:border-accent focus-visible:outline-offset-1"
+                    className="night-input mt-2"
                   />
                 </>
               ) : (
@@ -90,7 +90,7 @@ export function JoinPage({ code }: { code: string }) {
               <button
                 type="submit"
                 disabled={busy}
-                className="mt-4 min-h-[56px] w-full rounded-2xl bg-accent px-6 text-[1.25rem] font-bold text-white hover:bg-accent-deep disabled:opacity-80"
+                className="night-btn night-btn-primary mt-4 w-full disabled:opacity-80"
               >
                 {busy ? 'Joining…' : `Join ${room.name}`}
               </button>

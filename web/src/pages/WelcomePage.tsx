@@ -1,7 +1,10 @@
 import { useId, useMemo, useState, type FormEvent } from 'react';
 import { login } from '../api';
-import { BrandMark } from '../components/BrandMark';
-import { ArrowRightIcon, GlobeIcon, SpeakerIcon, TextSizeIcon } from '../components/icons';
+import '@fontsource-variable/unbounded';
+import '@fontsource-variable/figtree';
+import '@fontsource/martian-mono/400.css';
+import { NightBackdrop, NightMark } from '../components/NightBackdrop';
+import { ArrowRightIcon, GlobeIcon, ShieldIcon, SpeakerIcon, TextSizeIcon } from '../components/icons';
 import { StandardMessage } from '../components/StandardMessage';
 import { assignTones, ToneProvider } from '../components/tones';
 import { ComfortMessage, useSpeech } from '../features/reader-view';
@@ -18,6 +21,7 @@ const PROMISES = [
   { icon: <TextSizeIcon />, title: 'Big, clear text', text: 'Comfort mode for anyone who needs it.' },
   { icon: <SpeakerIcon />, title: 'Read aloud', text: 'Any message, with one tap on Listen.' },
   { icon: <GlobeIcon />, title: 'Your own language', text: 'Each person reads it in theirs: English, हिन्दी, मराठी, தமிழ், বাংলা.' },
+  { icon: <ShieldIcon />, title: 'Scam shield', text: 'Suspicious messages are flagged before anyone taps a link.' },
 ];
 
 // One real message, rendered by the real components in both reading modes.
@@ -48,11 +52,9 @@ function ModesPreview() {
   const tones = useMemo(() => assignTones(['landing-meera']), []);
   return (
     <ToneProvider tones={tones}>
-      <div className="grid gap-4 sm:grid-cols-[1fr_1.25fr]" aria-label="The same message in two reading modes">
-        <figure className="rounded-[28px] border border-line bg-canvas p-4 shadow-[0_18px_40px_-24px_rgb(42_37_34/0.45)]">
-          <figcaption className="mb-2 font-semibold text-ink-muted">
-            <span className="text-ink">Arjun</span> reads it in Standard
-          </figcaption>
+      <div className="grid gap-5 sm:grid-cols-[1fr_1.2fr] sm:items-start" aria-label="The same message in two reading modes">
+        <figure className="night-panel night-card night-card-tilt-l p-4">
+          <figcaption className="night-label mb-3">Arjun · Standard</figcaption>
           <div className="reader-root" data-reader-mode="standard" data-text-step="0">
             <ul className="list-none">
               <StandardMessage msg={SAMPLE} mine={false} first last />
@@ -60,10 +62,8 @@ function ModesPreview() {
             </ul>
           </div>
         </figure>
-        <figure className="rounded-[28px] border border-line bg-canvas p-4 shadow-[0_18px_40px_-24px_rgb(42_37_34/0.45)]">
-          <figcaption className="mb-2 font-semibold text-ink-muted">
-            <span className="text-ink">Dadi</span> reads it in Comfort
-          </figcaption>
+        <figure className="night-panel night-card night-card-tilt-r p-4 sm:mt-10">
+          <figcaption className="night-label mb-3">Dadi · Comfort</figcaption>
           <div className="reader-root" data-reader-mode="comfort" data-text-step="0">
             <ComfortMessage as="div" msg={SAMPLE} mine={false} speech={speech} />
           </div>
@@ -110,39 +110,41 @@ export function WelcomePage({ known, onLoggedIn }: Props) {
   }
 
   return (
-    <div className="min-h-full">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4" aria-label="Aangan">
+    <div className="night-page">
+      <NightBackdrop />
+      <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5" aria-label="Aangan">
         <a href="/welcome.html" className="flex items-center gap-3" aria-label="Aangan: how it works">
-          <BrandMark size={40} />
-          <span className="text-[1.5rem] font-bold text-accent-ink">Aangan</span>
+          <NightMark size={38} />
+          <span className="night-display text-[1.375rem] leading-none">
+            Aangan
+            <small lang="hi" className="mt-1 block font-[family-name:var(--font-night)] text-[1rem] font-semibold text-[#ffb23f]">
+              आँगन
+            </small>
+          </span>
         </a>
-        <a
-          href="/showcase"
-          className="inline-flex min-h-[48px] items-center gap-2 rounded-2xl px-3 font-semibold text-accent-ink underline-offset-4 hover:underline"
-        >
-          See it live
-          <ArrowRightIcon />
-        </a>
+        <div className="flex items-center gap-1">
+          <a href="/welcome.html#how" className="hidden min-h-[48px] items-center rounded-xl px-3 text-ink-muted hover:text-ink sm:inline-flex">
+            How it works
+          </a>
+          <a href="/showcase" className="night-btn night-btn-ghost !min-h-[48px] !px-4 !text-[1rem]">
+            See it live
+            <ArrowRightIcon />
+          </a>
+        </div>
       </nav>
 
-      <main className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-14 pt-6 lg:grid-cols-[1fr_1.1fr] lg:gap-14 lg:pt-12">
+      <main className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-16 pt-8 lg:grid-cols-[1fr_1.1fr] lg:gap-14 lg:pt-14">
         <div>
-          <p className="font-semibold text-danger">
-            <span lang="hi">आँगन</span> · the family courtyard
-          </p>
-          <h1 className="mt-3 text-balance text-[2.5rem] font-bold leading-[1.1] tracking-tight text-ink sm:text-[3.25rem]">
-            The family chat that reads the way you do.
+          <p className="night-eyebrow night-rise">Step into your family room</p>
+          <h1 className="night-display night-rise mt-5 text-balance text-[2.5rem] leading-[1.08] sm:text-[3.5rem]" style={{ animationDelay: '80ms' }}>
+            Welcome home to your <span className="night-glowtext">family courtyard.</span>
           </h1>
-          <p className="mt-4 max-w-xl text-[1.25rem] leading-relaxed text-ink-muted">
+          <p className="night-rise mt-5 max-w-xl text-[1.25rem] leading-relaxed text-ink-muted" style={{ animationDelay: '160ms' }}>
             One message, delivered to each person in the form they can use: large clear text, read aloud, and
             in their own language. So Dadi stays in the conversation too.
           </p>
 
-          <form
-            onSubmit={submit}
-            noValidate
-            className="mt-8 max-w-md rounded-[28px] border border-line bg-surface p-6 shadow-[0_18px_40px_-24px_rgb(42_37_34/0.45)]"
-          >
+          <form onSubmit={submit} noValidate className="night-panel night-rise mt-8 max-w-md p-6" style={{ animationDelay: '240ms' }}>
             <label htmlFor="welcome-name" className="block text-[1.25rem] font-bold">
               Your name
             </label>
@@ -159,40 +161,35 @@ export function WelcomePage({ known, onLoggedIn }: Props) {
               disabled={busy}
               aria-describedby={`${helpId}${error ? ` ${errorId}` : ''}`}
               aria-invalid={error ? true : undefined}
-              className="mt-3 min-h-[56px] w-full rounded-2xl border border-line-strong bg-surface px-4 text-ink text-[1.25rem] focus:border-accent focus-visible:outline-offset-1"
+              className="night-input mt-3"
             />
             {error && (
               <p id={errorId} role="alert" className="mt-2 font-semibold text-danger">
                 {error}
               </p>
             )}
-            <button
-              type="submit"
-              disabled={busy}
-              className="mt-5 min-h-[56px] w-full rounded-2xl bg-accent px-6 text-[1.25rem] font-bold text-white hover:bg-accent-deep disabled:opacity-80"
-            >
+            <button type="submit" disabled={busy} className="night-btn night-btn-primary mt-5 w-full disabled:opacity-80">
               {busy ? 'Joining…' : 'Join your family'}
+              {!busy && <ArrowRightIcon />}
             </button>
-            <a
-              href="/showcase"
-              className="mt-3 flex min-h-[56px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-accent bg-transparent px-6 text-[1.125rem] font-semibold text-accent-ink hover:bg-accent-soft"
-            >
+            <a href="/showcase" className="night-btn night-btn-ghost mt-3 w-full">
               Try the demo
               <ArrowRightIcon />
             </a>
 
             {known.length > 0 && (
               <div className="mt-6 border-t border-line pt-5">
-                <h2 className="font-bold text-ink">Continue as</h2>
-                <ul className="mt-2 flex flex-col gap-2">
+                <h2 className="night-label">Continue as</h2>
+                <ul className="mt-3 flex flex-col gap-2">
                   {known.map((s) => (
                     <li key={s.userId}>
                       <button
                         type="button"
                         disabled={busy}
                         onClick={() => void continueAs(s)}
-                        className="min-h-[52px] w-full rounded-2xl border-2 border-line bg-canvas px-4 text-left text-[1.125rem] font-semibold hover:border-accent"
+                        className="night-btn night-btn-ghost w-full !justify-start text-left"
                       >
+                        <NightMark size={22} />
                         {s.name}
                       </button>
                     </li>
@@ -201,19 +198,26 @@ export function WelcomePage({ known, onLoggedIn }: Props) {
               </div>
             )}
           </form>
+
+          <p className="night-rise mt-6 flex flex-wrap gap-2" style={{ animationDelay: '320ms' }}>
+            <span className="night-pill">Built on Nexconn Chat</span>
+            <span className="night-pill">Translation · Listen · Voice · Scam shield</span>
+          </p>
         </div>
 
-        <ModesPreview />
+        <div className="night-rise" style={{ animationDelay: '200ms' }}>
+          <ModesPreview />
+        </div>
       </main>
 
-      <section aria-label="What Aangan does" className="border-t border-line bg-canvas/70">
-        <ul className="mx-auto grid max-w-6xl gap-6 px-5 py-10 sm:grid-cols-3">
+      <section aria-label="What Aangan does" className="border-t border-line">
+        <ul className="mx-auto grid max-w-6xl gap-4 px-5 py-12 sm:grid-cols-2 lg:grid-cols-4">
           {PROMISES.map((p) => (
-            <li key={p.title} className="flex items-start gap-3">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-accent-soft text-accent-ink">{p.icon}</span>
+            <li key={p.title} className="night-panel flex items-start gap-3 p-5">
+              <span className="night-icon">{p.icon}</span>
               <span>
-                <span className="block font-bold text-ink">{p.title}</span>
-                <span className="block text-ink-muted">{p.text}</span>
+                <span className="night-display block text-[1.125rem]">{p.title}</span>
+                <span className="mt-1 block text-ink-muted">{p.text}</span>
               </span>
             </li>
           ))}
