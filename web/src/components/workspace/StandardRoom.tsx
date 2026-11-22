@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { speechLang, useReaderPrefs, useTranslations, type Speech } from '../../features/reader-view';
 import { useRoom } from '../../hooks/useRoom';
 import type { ShieldVerdict } from '../../api';
+import { WhatDidIMiss } from '../../features/assist';
 import { AskFamilySheet, useShield } from '../../features/scam-shield';
 import type { RichMessage } from '../../nexconn/rich';
 import type { ConnectionState } from '../../nexconn/types';
@@ -150,6 +151,14 @@ export function StandardRoom(props: Props) {
               connection === 'offline' &&
               !room.loading && <p className="border-b border-line bg-fill px-4 py-3 text-ink">You are offline. Aangan will reconnect by itself.</p>
             )}
+            {/* In the floating top bar, so it is on screen when the chat opens at the newest message. */}
+            <WhatDidIMiss
+              channelId={channelId}
+              messages={room.messages}
+              me={{ userId: session.userId, name: session.name, authKey: session.authKey }}
+              lang={prefs.language}
+              speech={speech}
+            />
           </div>
 
           <MessageList

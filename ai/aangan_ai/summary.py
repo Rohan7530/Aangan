@@ -78,13 +78,28 @@ def _untag(text: str) -> str:
     return text.replace("[SCAM RISK]", "").replace("SCAM RISK", "")
 
 
+def _words(text: str) -> set[str]:
+    return {w.strip(".,!?।:;\"'“”") for w in text.lower().split()} - {""}
+
+
+def _distinct(lines: list[str], limit: float = 0.6) -> list[str]:
+    """Drop lines that repeat an earlier one in other words (most of the same words)."""
+    kept: list[str] = []
+    for line in lines:
+        w = _words(line)
+        if any(len(w & _words(k)) / max(1, len(w | _words(k))) >= limit for k in kept):
+            continue
+        kept.append(line)
+    return kept
+
+
 def _validator(lang: str):
     def validate(data: dict[str, Any]) -> dict[str, Any]:
         raw = data.get("lines")
         if not isinstance(raw, list):
             raise ValueError("lines is not a list")
         cleaned = [" ".join(_untag(x).split())[:300] for x in raw if isinstance(x, str) and _untag(x).strip()]
-        lines = list(dict.fromkeys(cleaned))[:MAX_LINES]  # drop exact repeats
+        lines = _distinct(cleaned)[:MAX_LINES]
         if not lines:
             raise ValueError("no lines")
         spoken = data.get("spoken")
@@ -126,12 +141,13 @@ class Summary:
             user = (
                 f"Reader language: {texts.LANG_NAMES[lang]} (code {lang})\n"
                 f"Reader name: {reader or '(not given)'}\n"
-                f"Messages, oldest first:\n<<<\n{body}\n>>>"
+                f"Messages, oldest first:\n<<<\n{body}\n>>>\n"
+                f"Write every string in 'lines' and 'spoken' in {texts.LANG_NAMES[lang]} only, in its own script, "
+                "even when the messages are in English. Keep names as they are."
             )
-            # A little thinking (Sarvam) makes it follow "say you, don't repeat" reliably; ~2 s more.
-            ai = await self.llm.json(
-                SYSTEM, user, SCHEMA, temperature=0.0, validate=_validator(lang), max_tokens=2500, reasoning="low"
-            )
+            # Thinking off (Sarvam): about 1 s. With reasoning "low" it now spends the whole token
+            # budget thinking and returns no answer; the language rule above keeps it in the reader's script.
+            ai = await self.llm.json(SYSTEM, user, SCHEMA, temperature=0.0, validate=_validator(lang), max_tokens=1200)
             if ai is not None:
                 return ai
         return fallback(lang, reader, messages)

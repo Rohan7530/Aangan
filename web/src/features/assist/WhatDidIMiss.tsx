@@ -48,11 +48,15 @@ export function WhatDidIMiss({ channelId, messages, me, lang, speech }: Props) {
     }
   }, [newest, me.userId, channelId, roomReady]);
 
-  const missed = useMemo(() => {
-    if (roomReady !== channelId) return [];
+  // New messages since the last visit when there are some; otherwise the recent
+  // ones, so the summary is always there (it used to vanish after the first visit,
+  // because opening a room marks everything as seen).
+  const { missed, fresh } = useMemo(() => {
+    if (roomReady !== channelId) return { missed: [], fresh: false };
     const others = messages.filter((m) => m.senderId !== me.userId && m.text && m.kind !== 'image');
     const since = lastSeen.current;
-    return since === null ? others.slice(-15) : others.filter((m) => m.sentAt > since).slice(-40);
+    const unseen = since === null ? [] : others.filter((m) => m.sentAt > since).slice(-40);
+    return unseen.length >= 2 ? { missed: unseen, fresh: true } : { missed: others.slice(-15), fresh: false };
   }, [messages, me.userId, channelId, roomReady]);
 
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -93,7 +97,7 @@ export function WhatDidIMiss({ channelId, messages, me, lang, speech }: Props) {
   if (missed.length < 2 && !open) return null;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pt-3">
+    <div className="mx-auto w-full max-w-3xl shrink-0 px-4 pb-2 pt-2">
       {!open ? (
         <button type="button" onClick={() => void show()} className="assist-pill w-full">
           <span className="assist-pill-icon" aria-hidden="true">
@@ -102,14 +106,14 @@ export function WhatDidIMiss({ channelId, messages, me, lang, speech }: Props) {
           <span className="min-w-0 flex-1 text-left">
             <span className="block text-[1.375rem] font-bold leading-tight">{t(lang, 'whatDidIMiss')}</span>
             <span className="block text-[1.0625rem] opacity-85">
-              {en(lang, 'whatDidIMiss') ? `${en(lang, 'whatDidIMiss')} · ` : ''}
-              {missed.length} new {missed.length === 1 ? 'message' : 'messages'}
+              {fresh ? t(lang, 'newMessages', { n: String(missed.length) }) : t(lang, 'recentMessages')}
+              {en(lang, 'whatDidIMiss') ? ` · ${en(lang, 'whatDidIMiss')}` : ''}
             </span>
           </span>
           <SpeakerIcon />
         </button>
       ) : (
-        <section className="assist-card" aria-label="What did I miss" aria-live="polite">
+        <section className="assist-card max-h-[45vh] overflow-y-auto" aria-label="What did I miss" aria-live="polite">
           <div className="flex items-center gap-3">
             <span className="assist-pill-icon" aria-hidden="true">
               <SparkIcon />

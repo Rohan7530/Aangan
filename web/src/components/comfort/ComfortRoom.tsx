@@ -165,6 +165,9 @@ export function ComfortRoom(props: Props) {
             !room.loading && <p className="border-b border-line bg-fill px-4 py-3 text-ink">You are offline. Aangan will reconnect by itself.</p>
           )}
 
+          {/* Pinned above the list (not inside it), so it is on screen when the chat opens at the newest message. */}
+          <WhatDidIMiss channelId={channelId} messages={room.messages} me={me} lang={prefs.language} speech={speech} />
+
           <MessageList
             messages={room.messages}
             myUserId={session.userId}
@@ -180,7 +183,6 @@ export function ComfortRoom(props: Props) {
             onOpenImage={(url, alt) => setLightbox({ url, alt })}
             shields={shields}
             onAskFamily={(msg, verdict) => setAsking({ text: msg.text, verdict })}
-            header={<WhatDidIMiss channelId={channelId} messages={room.messages} me={me} lang={prefs.language} speech={speech} />}
           />
           <ComfortComposer
             speechLang={speechLang(prefs.language)}
