@@ -77,7 +77,7 @@ export function NewRoomSheet({ open, authKey, onClose, onCreated }: Props) {
                 onCreated(created.channelId);
                 onClose();
               }}
-              className="min-h-[52px] flex-1 rounded-2xl bg-accent font-bold text-white hover:bg-accent-deep"
+              className="min-h-[52px] flex-1 rounded-2xl bg-accent font-bold text-on-accent hover:bg-accent-deep"
             >
               Open family
             </button>
@@ -105,7 +105,7 @@ export function NewRoomSheet({ open, authKey, onClose, onCreated }: Props) {
           <button
             type="submit"
             disabled={busy}
-            className="mt-4 min-h-[56px] w-full rounded-2xl bg-accent text-[1.125rem] font-bold text-white hover:bg-accent-deep disabled:opacity-80"
+            className="mt-4 min-h-[56px] w-full rounded-2xl bg-accent text-[1.125rem] font-bold text-on-accent hover:bg-accent-deep disabled:opacity-80"
           >
             {busy ? 'Creating…' : 'Create family'}
           </button>

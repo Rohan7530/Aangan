@@ -1,43 +1,48 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------
-   Aangan design tokens: clean, iOS-like, one accent.
+   Aangan design tokens: the courtyard by day (light) and by night (dark),
+   both from the landing page's palette (welcome.html): marigold for
+   actions, burnt orange for my messages, jade for "online".
    Light values below; dark values and Comfort (AAA) overrides further down.
-   Spec colours are used as given wherever they are decorative (unread dot
-   #007AFF, online dot #34C759, focus ring). Where text sits on or in a colour,
-   it is deepened just enough for WCAG:
-     white on #007AFF is 4.02:1 (fails AA)  -> fills #0062CC, white 5.80:1
-     #007AFF text on #F2F2F7 is 3.60:1      -> accent text #0062CC, 5.20:1
-     #6E6E73 on the other bubble is 4.18:1  -> secondary text #636366, 4.94:1
-     #FF3B30 text is 3.55:1                 -> danger #D70015, 5.38:1
+   Light contrast (WCAG):
+     ink #20170B on the other bubble        14.6:1
+     muted #6B5638 on white / bubble        7.0:1 / 5.8:1
+     accent text #9A4A0B on white / bubble  6.3:1 / 5.2:1
+     #1B1103 on marigold #FFB23F            10.4:1
+     white on my bubble (#B04E1A-#8F3E0F)   5.3-7.3:1
+     focus ring #D9700A on white / canvas   3.4:1 / 3.0:1
    ------------------------------------------------------------------ */
 @theme {
+  /* Figtree + Unbounded: the landing page's type, so the app reads as one product. */
   --font-sans:
-    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter Variable", Inter,
+    "Figtree Variable", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter Variable", Inter,
     "Noto Sans Devanagari Variable", "Noto Sans Devanagari", system-ui, sans-serif;
+  --font-display: "Unbounded Variable", "Arial Black", system-ui, sans-serif;
 
-  --color-canvas: #f2f2f7; /* grouped background: sidebar, info panel */
-  --color-chat: #ffffff; /* the conversation */
+  --color-canvas: #fbf3e6; /* warm cream: sidebar, info panel */
+  --color-chat: #fffaf1; /* the conversation */
   --color-surface: #ffffff; /* cards, rows, inputs */
-  --color-elevated: #ffffff; /* popovers, sheets */
-  --color-fill: #e5e5ea; /* quiet fills: hover, day pill, chips */
-  --color-line: #e5e5ea; /* hairlines */
-  --color-line-strong: #8e8e93; /* input borders, 3.3:1 on white */
+  --color-elevated: #fffdf8; /* popovers, sheets */
+  --color-fill: #f4e9d8; /* quiet fills: hover, day pill, chips */
+  --color-line: #eadfcb; /* hairlines */
+  --color-line-strong: #9a8566; /* input borders, 3.6:1 on white */
 
-  --color-ink: #1c1c1e;
-  --color-ink-muted: #636366;
+  --color-ink: #20170b;
+  --color-ink-muted: #6b5638;
 
-  --color-accent: #0062cc; /* fills with white text */
-  --color-accent-deep: #004fa8; /* pressed / hover */
-  --color-accent-ink: #0062cc; /* blue text and links */
-  --color-accent-soft: #e3eeff; /* selected rows */
-  --color-accent-dot: #007aff; /* unread dot, focus ring (decorative) */
+  --color-accent: #ffb23f; /* marigold fill, dark text on it */
+  --color-accent-deep: #ffc35f; /* hover */
+  --color-accent-ink: #9a4a0b; /* marigold-brown text and links */
+  --color-accent-soft: #ffefd4; /* selected rows */
+  --color-accent-dot: #d9700a; /* unread dot, focus ring */
+  --color-on-accent: #1b1103; /* text and icons on an accent fill */
 
-  --color-bubble-mine: #0062cc;
-  --color-bubble-other: #e9e9eb;
+  --color-bubble-mine: #a2471a; /* solid fallback under the gradient */
+  --color-bubble-other: #f3e8d6;
 
-  --color-success: #34c759; /* online dot */
-  --color-success-ink: #1e7b34;
+  --color-success: #16b893; /* online dot (jade) */
+  --color-success-ink: #0f7a60;
   --color-warning: #ff9500;
   --color-danger: #d70015;
   --color-danger-fill: #d70015;
@@ -58,45 +63,58 @@
   --text-base--line-height: 1.75rem;
 }
 
-/* ---------------- dark ---------------- */
+/* The landing page's night palette, available everywhere (brand mark, glows). */
+:root {
+  --night: #060a13;
+  --night-deep: #0b1222;
+  --marigold: #ffb23f;
+  --marigold-deep: #f08a1c;
+  --jade: #3fe3c0;
+}
+
+/* ---------------- dark = the night courtyard ----------------
+   Same palette as the landing, sign-in and invite pages (welcome.html):
+   night navy, marigold for actions, jade for "online", burnt-orange bubbles
+   for my messages and glass bubbles for everyone else's. */
 :root[data-theme="dark"] {
-  --color-canvas: #000000;
-  --color-chat: #000000;
-  --color-surface: #1c1c1e;
-  --color-elevated: #2c2c2e;
-  --color-fill: #2c2c2e;
-  --color-line: #38383a;
-  --color-line-strong: #8e8e93;
-  --color-ink: #ffffff;
-  --color-ink-muted: #a1a1a6; /* spec #8E8E93 is 4.3:1 on #2C2C2E */
-  --color-accent: #0062cc;
-  --color-accent-deep: #1a73e0;
-  --color-accent-ink: #409cff; /* spec #0A84FF is 4.1:1 on the other bubble */
-  --color-accent-soft: #0b2a4a;
-  --color-accent-dot: #0a84ff;
-  --color-bubble-mine: #0062cc; /* spec #0A84FF carries white at only 3.65:1 */
-  --color-bubble-other: #262629;
-  --color-success: #30d158;
-  --color-success-ink: #30d158;
+  --color-canvas: #0b1222; /* sidebar, info panel */
+  --color-chat: #080e1b; /* the conversation: a shade deeper, it is the stage */
+  --color-surface: #0f1830;
+  --color-elevated: #142041;
+  --color-fill: #1a2647;
+  --color-line: rgb(160 184 255 / 0.16);
+  --color-line-strong: rgb(160 184 255 / 0.5);
+  --color-ink: #eef2fb;
+  --color-ink-muted: #aab4cf; /* 8.2:1 on #0f1830 */
+  --color-accent: #ffb23f; /* marigold fill, dark text on it */
+  --color-accent-deep: #ffc35f;
+  --color-accent-ink: #ffc35f; /* marigold text and links, 9:1 on the other bubble */
+  --color-accent-soft: rgb(255 178 63 / 0.12);
+  --color-accent-dot: #ffb23f;
+  --color-on-accent: #1b1103; /* 10:1 on the marigold */
+  --color-bubble-mine: #a2471a; /* solid fallback under the gradient below; white 5.9:1 */
+  --color-bubble-other: #16213d;
+  --color-success: #3fe3c0;
+  --color-success-ink: #3fe3c0;
   --color-warning: #ff9f0a;
-  --color-danger: #ff6961;
+  --color-danger: #ff8a94;
   --color-danger-fill: #d70015;
-  --color-danger-soft: #3a1414;
+  --color-danger-soft: #3a1420;
   color-scheme: dark;
 }
 
 /* ---------------- Comfort: same palette, AAA text (7:1, 4.5:1 for large) ---------------- */
 .reader-root[data-reader-mode="comfort"] {
-  --color-ink-muted: #48484a; /* 7.5:1 on the other bubble */
-  --color-accent-ink: #0047a0; /* 7.2:1 on the other bubble */
+  --color-ink-muted: #4a3a22; /* 9.0:1 on the other bubble */
+  --color-accent-ink: #7a3a06; /* 7.1:1 on the other bubble */
   --color-danger: #b00012;
-  --color-success-ink: #14632a;
+  --color-success-ink: #0b5e49; /* 7.7:1 on white */
 }
 :root[data-theme="dark"] .reader-root[data-reader-mode="comfort"] {
-  --color-ink-muted: #c7c7cc;
-  --color-accent-ink: #7cc2ff;
-  --color-danger: #ff9f99;
-  --color-success-ink: #5be584;
+  --color-ink-muted: #c7cde0;
+  --color-accent-ink: #ffc35f;
+  --color-danger: #ffb0b7;
+  --color-success-ink: #5ff0d0;
 }
 
 /* ---------------- base ---------------- */
@@ -133,7 +151,7 @@ body {
   padding: 12px 16px;
   border-radius: var(--radius-card);
   background: var(--color-accent);
-  color: #fff;
+  color: var(--color-on-accent);
   font-size: 1.25rem;
   font-weight: 700;
 }
@@ -186,9 +204,9 @@ textarea::placeholder {
 
 /* ---------------- shadows + motion ---------------- */
 :root {
-  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.06);
-  --shadow-2: 0 1px 2px rgb(0 0 0 / 0.06), 0 6px 16px -4px rgb(0 0 0 / 0.1);
-  --shadow-3: 0 2px 6px rgb(0 0 0 / 0.08), 0 18px 40px -12px rgb(0 0 0 / 0.22);
+  --shadow-1: 0 1px 2px rgb(60 38 10 / 0.07);
+  --shadow-2: 0 1px 2px rgb(60 38 10 / 0.07), 0 6px 16px -4px rgb(60 38 10 / 0.12);
+  --shadow-3: 0 2px 6px rgb(60 38 10 / 0.09), 0 18px 40px -12px rgb(60 38 10 / 0.25);
   --spring: cubic-bezier(0.2, 0.9, 0.3, 1.04);
   --spring-dur: 540ms;
 }
@@ -418,7 +436,7 @@ textarea::placeholder {
     width: 10px;
     height: 10px;
     border-radius: 999px;
-    background: #fff;
+    background: var(--color-on-accent);
   }
 
   /* ---------------- sheets (native <dialog>) ---------------- */
@@ -460,10 +478,16 @@ dialog.sheet[open]::backdrop {
   left: 0;
   right: 0;
   z-index: 10;
-  background: var(--color-surface);
+  /* near-opaque glass: the stage's glow shows faintly, text stays crisp */
+  background: rgb(255 250 241 / 0.88);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
 }
 :root[data-theme="dark"] .chat-glass {
-  background: var(--color-surface);
+  /* near-opaque night glass: the stage's glow shows faintly, text stays crisp */
+  background: rgb(11 18 34 / 0.86);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
 }
 .chat-glass-top {
   top: 0;
@@ -633,7 +657,7 @@ dialog.sheet[open]::backdrop {
   padding: 0 7px;
   border-radius: 999px;
   background: var(--color-accent);
-  color: #fff;
+  color: var(--color-on-accent);
   font-size: 1rem;
   font-weight: 700;
   line-height: 1;
@@ -1242,6 +1266,62 @@ dialog.lightbox::backdrop {
 .night-card-tilt-r.night-card {
   animation-name: night-card-float-r;
 }
+/* night pages: content column and header, matching welcome.html */
+.night-wrap {
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
+  padding-inline: clamp(20px, 4vw, 56px);
+}
+.night-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--color-line);
+  background: rgb(6 10 19 / 0.62);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+}
+.night-nav-bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  min-height: 76px;
+}
+.night-nav-bar > :last-child {
+  justify-self: end;
+}
+.night-nav-pill {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.03);
+}
+.night-nav-pill a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  color: var(--color-ink-muted);
+  font-size: 1rem;
+  font-weight: 500;
+}
+.night-nav-pill a:hover {
+  background: rgb(255 255 255 / 0.07);
+  color: var(--color-ink);
+}
+@media (max-width: 860px) {
+  .night-nav-bar {
+    grid-template-columns: 1fr auto;
+  }
+  .night-nav-pill {
+    display: none;
+  }
+}
 /* staggered entrance */
 .night-rise {
   animation: night-rise 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
@@ -1397,7 +1477,7 @@ dialog.lightbox::backdrop {
   height: 44px;
   border-radius: 12px;
   background: var(--color-accent);
-  color: #fff;
+  color: var(--color-on-accent);
 }
 .assist-card {
   padding: 16px 18px 20px;
@@ -1421,7 +1501,8 @@ dialog.lightbox::backdrop {
   background: var(--color-accent-soft);
 }
 
-/* "Is this safe?" entry in the sidebar (both modes). White on #004FA8 is 7.8:1. */
+/* "Is this safe?" entry in the sidebar (both modes): the landing page's
+   marigold primary button. #1B1103 on the marigold is 7.4-10.4:1. */
 .safe-cta {
   display: flex;
   align-items: center;
@@ -1429,12 +1510,14 @@ dialog.lightbox::backdrop {
   min-height: 64px;
   padding: 10px 14px;
   border-radius: var(--radius-card);
-  background: #004fa8;
-  color: #fff;
-  box-shadow: var(--shadow-1);
+  background: linear-gradient(180deg, #ffc35f, var(--marigold-deep));
+  color: var(--color-on-accent);
+  box-shadow:
+    0 10px 26px -12px rgb(240 138 28 / 0.6),
+    0 1px 0 rgb(255 255 255 / 0.5) inset;
 }
 .safe-cta:hover {
-  background: #003d8f;
+  filter: brightness(1.06);
 }
 .safe-cta-icon {
   display: grid;
@@ -1443,8 +1526,256 @@ dialog.lightbox::backdrop {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: rgb(255 255 255 / 0.18);
+  background: rgb(27 17 3 / 0.12);
 }
 .safe-cta:focus-visible {
-  outline-color: var(--color-accent-dot);
+  outline-color: var(--color-ink);
+}
+
+/* ==================================================================
+   The courtyard by day (light) and by night (dark): the chat app wears
+   the same look as the landing, sign-in and invite pages.
+   ================================================================== */
+/* The conversation is the stage. By day: warm cream with a marigold sun
+   glow, a jade glow and a few scattered marigold petals. By night: the same
+   glows on navy with a sparse, still starfield. Nothing moves behind text
+   people are reading. */
+.chat-stage {
+  background-color: var(--color-chat);
+  background-image:
+    radial-gradient(1.6px 1.6px at 24px 38px, rgb(240 138 28 / 0.22), transparent),
+    radial-gradient(1.4px 1.4px at 208px 176px, rgb(240 138 28 / 0.18), transparent),
+    radial-gradient(1.4px 1.4px at 248px 24px, rgb(22 184 147 / 0.2), transparent),
+    radial-gradient(60% 45% at 88% 0%, rgb(255 178 63 / 0.16), transparent 70%),
+    radial-gradient(45% 40% at 0% 100%, rgb(63 227 192 / 0.1), transparent 70%);
+  background-size:
+    280px 280px,
+    280px 280px,
+    280px 280px,
+    100% 100%,
+    100% 100%;
+}
+:root[data-theme="dark"] .chat-stage {
+  background-image:
+    radial-gradient(1.2px 1.2px at 24px 38px, rgb(220 230 255 / 0.35), transparent),
+    radial-gradient(1px 1px at 132px 92px, rgb(220 230 255 / 0.25), transparent),
+    radial-gradient(1.4px 1.4px at 208px 176px, rgb(255 178 63 / 0.35), transparent),
+    radial-gradient(1px 1px at 76px 214px, rgb(220 230 255 / 0.22), transparent),
+    radial-gradient(1.2px 1.2px at 248px 24px, rgb(63 227 192 / 0.3), transparent),
+    radial-gradient(60% 45% at 88% 0%, rgb(255 178 63 / 0.08), transparent 70%),
+    radial-gradient(45% 40% at 0% 100%, rgb(63 227 192 / 0.06), transparent 70%),
+    radial-gradient(50% 55% at 12% 8%, rgb(90 120 255 / 0.07), transparent 70%);
+  background-size:
+    280px 280px,
+    280px 280px,
+    280px 280px,
+    280px 280px,
+    280px 280px,
+    100% 100%,
+    100% 100%,
+    100% 100%;
+}
+/* Sidebar and info panel: a warm glow in the top corner, like the landing hero. */
+.app-side {
+  background-image: radial-gradient(90% 38% at 0% 0%, rgb(255 178 63 / 0.14), transparent 70%);
+}
+:root[data-theme="dark"] .app-side {
+  background-image: radial-gradient(90% 38% at 0% 0%, rgb(255 178 63 / 0.07), transparent 70%);
+}
+
+/* Bubbles, as on the landing page's desktop mock-up: burnt orange for mine
+   (white >= 5.3:1), a soft outlined bubble for everyone else. */
+.bubble-mine,
+.c-row.is-mine .c-bubble {
+  background-image: linear-gradient(180deg, #b04e1a, #8f3e0f);
+}
+.bubble-mine .bubble-time {
+  color: #fff;
+}
+.bubble-theirs,
+.c-row:not(.is-mine) .c-bubble {
+  outline: 1px solid var(--color-line);
+  outline-offset: -1px;
+}
+
+/* Every marigold action gets the landing page's gradient. */
+.bg-accent:not(:disabled) {
+  background-image: linear-gradient(180deg, #ffc35f, var(--marigold-deep));
+}
+.bg-accent:not(:disabled):hover {
+  filter: brightness(1.06);
+}
+
+/* Sheets dim to warm brown by day and to night after dark, not grey. */
+dialog.sheet::backdrop {
+  background: rgb(32 23 11 / 0.38);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+:root[data-theme="dark"] dialog.sheet::backdrop {
+  background: rgb(3 6 14 / 0.62);
+}
+
+/* ==================================================================
+   Motion. Calm and short: things arrive, they do not bounce around.
+   Entrances use fill-mode `backwards` so no transform is left behind
+   once they finish. All of it is switched off by the reduced-motion
+   rule above.
+   ================================================================== */
+:root {
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Switching family: the conversation rises in. */
+@keyframes room-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+.room-enter {
+  animation: room-in 380ms var(--ease-out) backwards;
+}
+
+/* The family list arrives one row after another. */
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+}
+.room-row {
+  animation: row-in 460ms var(--ease-out) backwards;
+  animation-delay: calc(min(var(--i, 0), 8) * 50ms);
+}
+/* The open family gets a glowing bar that grows in. */
+@keyframes bar-in {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+}
+.room-row > button[aria-current="true"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 4px;
+  border-radius: 4px;
+  background: var(--color-accent-dot);
+  box-shadow: 0 0 12px var(--color-accent-dot);
+  animation: bar-in 420ms var(--spring) backwards;
+}
+
+/* Family info slides in from the right. */
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+.panel-enter {
+  animation: panel-in 440ms var(--ease-out) backwards;
+}
+
+/* A scam warning unfolds under its message, then glows once to be noticed. */
+@keyframes shield-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+}
+@keyframes shield-glow {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sh-line) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 12px transparent;
+  }
+}
+.shield-enter {
+  transform-origin: top left;
+  animation: shield-in 420ms var(--ease-out) backwards;
+}
+.shield-enter:is(.shield-danger, .shield-caution) {
+  animation:
+    shield-in 420ms var(--ease-out) backwards,
+    shield-glow 1.3s ease-out 380ms 1;
+}
+
+/* Unread counts pop in. */
+@keyframes badge-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+.unread-badge,
+.unread-dot {
+  animation: badge-pop 420ms var(--spring) backwards;
+}
+
+/* Send wakes up when there is something to send. */
+.send-btn {
+  transition:
+    transform 320ms var(--spring),
+    box-shadow 220ms ease,
+    background-color 150ms ease,
+    color 150ms ease,
+    filter 150ms ease;
+}
+.send-btn:disabled {
+  transform: scale(0.88);
+}
+.send-btn:not(:disabled) {
+  box-shadow: 0 6px 18px -6px color-mix(in srgb, var(--color-accent-dot) 70%, transparent);
+}
+.send-btn:not(:disabled):hover {
+  transform: scale(1.06);
+}
+
+/* The message box glows softly while you type. */
+.chat-glass-bottom textarea {
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+.chat-glass-bottom textarea:focus {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent-dot) 16%, transparent);
+}
+
+/* Online people breathe gently in the member list. */
+@keyframes online-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+.status-dot.bg-success::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 2px solid var(--color-success);
+  animation: online-ring 2.6s ease-out infinite;
+}
+
+/* Light <-> Dark: a soft cross-fade instead of a flash. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 420ms;
+  animation-timing-function: ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .status-dot.bg-success::after {
+    display: none;
+  }
+  .send-btn:disabled {
+    transform: none;
+  }
 }

@@ -1,6 +1,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-// Self-hosted fonts: Inter (Latin; Apple devices use the system SF font first) + Noto Sans Devanagari.
+// Self-hosted fonts: Figtree (body) and Unbounded (brand + titles), as on the landing page;
+// Inter as a Latin fallback; Noto Sans Devanagari for Hindi and Marathi.
+import '@fontsource-variable/figtree';
+import '@fontsource-variable/unbounded';
 import '@fontsource-variable/inter';
 import '@fontsource-variable/noto-sans-devanagari';
 import App from './App';

@@ -89,7 +89,7 @@ export function StandardRoom(props: Props) {
   return (
     <ToneProvider tones={room.tones}>
       {!showInfoOnly && (
-        <section ref={sectionRef} aria-label={`${roomName} conversation`} className="chat-stage relative flex min-w-0 flex-1 flex-col bg-chat">
+        <section ref={sectionRef} aria-label={`${roomName} conversation`} className="chat-stage room-enter relative flex min-w-0 flex-1 flex-col bg-chat">
           <a href={`#${COMPOSER_INPUT_ID}`} className="skip-link">
             Skip to message box
           </a>
@@ -107,7 +107,7 @@ export function StandardRoom(props: Props) {
               )}
               <RoomAvatar id={channelId} name={roomName} size={40} />
               <div className="min-w-0 flex-1 px-1">
-                <h1 className="truncate text-[1.25rem] font-bold leading-tight">{roomName}</h1>
+                <h1 className="font-display truncate text-[1.1875rem] font-semibold leading-tight">{roomName}</h1>
                 <p className="flex flex-wrap items-center gap-x-2 text-[1rem] leading-snug text-ink-muted">
                   {membersLine && (
                     <span className="whitespace-nowrap">

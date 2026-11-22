@@ -144,7 +144,7 @@ export function VoicePanel({ voice, size, onSend }: Props) {
             type="button"
             onClick={() => void send()}
             disabled={sending || !state.transcript.trim()}
-            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-accent px-6 font-bold text-white hover:bg-accent-deep disabled:opacity-70 ${
+            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-accent px-6 font-bold text-on-accent hover:bg-accent-deep disabled:opacity-70 ${
               comfort ? 'min-h-[64px] text-[1.5rem]' : 'min-h-[48px]'
             }`}
           >
@@ -173,7 +173,7 @@ export function VoicePanel({ voice, size, onSend }: Props) {
           <button
             type="button"
             onClick={() => void voice.start()}
-            className={`rounded-2xl bg-accent px-5 font-bold text-white ${comfort ? 'min-h-[64px] text-[1.25rem]' : 'min-h-[48px]'}`}
+            className={`rounded-2xl bg-accent px-5 font-bold text-on-accent ${comfort ? 'min-h-[64px] text-[1.25rem]' : 'min-h-[48px]'}`}
           >
             Try again
           </button>

@@ -49,7 +49,7 @@ export function AskFamilyPanel({ me, lang, text, verdict, members, onDone }: Pro
           <CheckIcon /> {t(lang, 'sent', { name: sentTo })}
         </p>
         {en(lang, 'sent', { name: sentTo }) && <p className="mt-1 text-[1.0625rem]">{en(lang, 'sent', { name: sentTo })}</p>}
-        <button type="button" onClick={onDone} className="mt-4 min-h-[56px] w-full rounded-2xl bg-accent px-5 text-[1.25rem] font-bold text-white hover:bg-accent-deep">
+        <button type="button" onClick={onDone} className="mt-4 min-h-[56px] w-full rounded-2xl bg-accent px-5 text-[1.25rem] font-bold text-on-accent hover:bg-accent-deep">
           OK
         </button>
       </div>

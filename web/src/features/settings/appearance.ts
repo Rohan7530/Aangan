@@ -45,8 +45,16 @@ export function setThemePref(pref: ThemePref): void {
   } catch {
     // storage blocked: still applies for this visit
   }
-  applyTheme();
-  listeners.forEach((l) => l());
+  const run = () => {
+    applyTheme();
+    listeners.forEach((l) => l());
+  };
+  // A soft cross-fade between Light and Dark where the browser supports it
+  // (View Transitions); an instant switch otherwise or for reduced motion.
+  const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
+  const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if (doc.startViewTransition && !still) doc.startViewTransition(run);
+  else run();
 }
 
 export function useThemePref(): [ThemePref, (t: ThemePref) => void] {

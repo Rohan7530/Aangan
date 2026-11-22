@@ -22,8 +22,8 @@ export function ListenButton({ messageId, spokenText, sender, speech, lang }: Pr
   return (
     <button
       type="button"
-      className={`inline-flex min-h-[56px] items-center gap-3 rounded-2xl px-6 text-[1.25rem] font-bold text-white shadow-sm transition-colors ${
-        playing ? 'bg-rec hover:bg-rec-deep' : 'bg-accent hover:bg-accent-deep'
+      className={`inline-flex min-h-[56px] items-center gap-3 rounded-2xl px-6 text-[1.25rem] font-bold shadow-sm transition-colors ${
+        playing ? 'bg-rec text-white hover:bg-rec-deep' : 'bg-accent text-on-accent hover:bg-accent-deep'
       }`}
       onClick={() => (playing ? speech.stop() : speech.speak(messageId, spokenText, lang))}
       aria-label={playing ? `Stop reading ${sender}'s message` : `Listen to ${sender}'s message`}

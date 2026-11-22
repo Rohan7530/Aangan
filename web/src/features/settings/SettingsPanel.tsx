@@ -146,7 +146,7 @@ export function SettingsPanel({ onClose, connection, comfort, me, myColor, myPho
   const text = comfort ? 'text-[1.25rem]' : '';
   const tap = comfort ? 'min-h-[64px] text-[1.25rem]' : 'min-h-[48px]';
   const card = 'group-card mt-2 p-4';
-  const btnPrimary = `rounded-full bg-accent px-5 ${comfort ? 'font-bold' : 'font-semibold'} text-white hover:bg-accent-deep disabled:opacity-70 ${tap}`;
+  const btnPrimary = `rounded-full bg-accent px-5 ${comfort ? 'font-bold' : 'font-semibold'} text-on-accent hover:bg-accent-deep disabled:opacity-70 ${tap}`;
   const btnSecondary = `rounded-full border border-line-strong bg-surface px-5 ${comfort ? 'font-bold' : 'font-semibold'} text-accent-ink hover:bg-accent-soft ${tap}`;
   const langName = LANGUAGES.find((l) => l.code === prefs.language)?.english ?? 'English';
 

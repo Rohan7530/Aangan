@@ -4,6 +4,7 @@ import '@fontsource-variable/unbounded';
 import '@fontsource-variable/figtree';
 import '@fontsource/martian-mono/400.css';
 import { NightBackdrop, NightMark } from '../components/NightBackdrop';
+import { BackIcon } from '../components/icons';
 import { identityForName, loadSession, saveSession, setLastRoom, type Session } from '../session';
 
 // /join/<code>: shows which room the invite opens, asks for a name if this
@@ -51,8 +52,14 @@ export function JoinPage({ code }: { code: string }) {
   const askName = !session || useNewName;
 
   return (
-    <main className="night-page flex min-h-full items-center justify-center px-5 py-10">
+    <main className="night-page flex min-h-full flex-col items-center justify-center px-5 py-10">
       <NightBackdrop />
+      <div className="mb-4 flex w-full max-w-md">
+        <a href="/welcome.html" className="night-btn night-btn-ghost !min-h-[48px] !gap-2 !px-4 !text-[1rem]">
+          <BackIcon />
+          What is Aangan?
+        </a>
+      </div>
       <div className="night-panel night-rise w-full max-w-md p-7 text-center">
         <div className="flex justify-center">
           <NightMark size={56} />

@@ -90,7 +90,7 @@ export function ComfortRoom(props: Props) {
   return (
     <ToneProvider tones={room.tones}>
       {(sideBySide || !infoOpen) && (
-        <section aria-label={`${roomName} conversation`} className="flex min-w-0 flex-1 flex-col bg-chat">
+        <section aria-label={`${roomName} conversation`} className="chat-stage room-enter flex min-w-0 flex-1 flex-col bg-chat">
           <a href="#composer-input" className="skip-link">
             Skip to message box
           </a>
@@ -101,7 +101,7 @@ export function ComfortRoom(props: Props) {
                   <BackIcon />
                   <span className="whitespace-nowrap">My families</span>
                   {otherUnread > 0 && (
-                    <span className="rounded-xl bg-accent px-2 text-white">
+                    <span className="rounded-xl bg-accent px-2 text-on-accent">
                       {otherUnread} new<span className="sr-only"> in other rooms</span>
                     </span>
                   )}

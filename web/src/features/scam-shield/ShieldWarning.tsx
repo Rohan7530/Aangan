@@ -30,7 +30,7 @@ export function ShieldWarning({ verdict, size, lang, speakId, speech, onAskFamil
 
   if (size === 'standard') {
     return (
-      <div className={`shield-note ${tone}`} role="note">
+      <div className={`shield-note shield-enter ${tone}`} role="note">
         <button type="button" className="flex w-full items-center gap-2 text-left font-semibold" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
           {safe ? <ShieldIcon /> : <AlertIcon />}
           <span className="min-w-0 flex-1">
@@ -58,7 +58,7 @@ export function ShieldWarning({ verdict, size, lang, speakId, speech, onAskFamil
   }
 
   return (
-    <section className={`shield-card ${tone}`} aria-label={englishTitle}>
+    <section className={`shield-card shield-enter ${tone}`} aria-label={englishTitle}>
       <div className="flex items-start gap-3">
         <span className="shield-badge" aria-hidden="true">
           {safe ? <ShieldIcon /> : <AlertIcon />}

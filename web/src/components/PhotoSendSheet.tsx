@@ -65,7 +65,7 @@ export function PhotoSendSheet({ file, onCancel, onSend }: Props) {
           type="button"
           onClick={send}
           disabled={sending}
-          className="min-h-[52px] flex-1 rounded-2xl bg-accent font-bold text-white hover:bg-accent-deep disabled:opacity-80"
+          className="min-h-[52px] flex-1 rounded-2xl bg-accent font-bold text-on-accent hover:bg-accent-deep disabled:opacity-80"
         >
           {sending ? 'Sending…' : 'Send photo'}
         </button>

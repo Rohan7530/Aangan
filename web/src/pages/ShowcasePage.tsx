@@ -48,7 +48,7 @@ export function ShowcasePage() {
             aria-pressed={active === v.key}
             onClick={() => setActive(v.key)}
             className={`min-h-[52px] flex-1 rounded-2xl border-2 px-3 font-semibold ${
-              active === v.key ? 'border-accent bg-accent text-white' : 'border-line-strong bg-surface text-ink'
+              active === v.key ? 'border-accent bg-accent text-on-accent' : 'border-line-strong bg-surface text-ink'
             }`}
           >
             {v.name.split(',')[0]} · {v.mode}

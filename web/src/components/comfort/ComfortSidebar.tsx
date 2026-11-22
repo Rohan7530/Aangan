@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { ReaderLang } from '../../api';
 import { shieldEnglish, shieldText } from '../../features/scam-shield';
 import type { RoomSummary } from '../../nexconn/rooms';
@@ -32,10 +32,10 @@ interface Props {
 // text, everything spelled out ("3 new messages"), no icon-only buttons.
 export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, settingsOpen, onToggleSettings, settingsPanel, me, connection, fullWidth, onCheckSafe, lang = 'en' }: Props) {
   return (
-    <nav aria-label="My families" className={`flex h-full shrink-0 flex-col border-r border-line bg-canvas ${fullWidth ? 'w-full' : 'w-[340px] xl:w-[360px]'}`}>
+    <nav aria-label="My families" className={`app-side flex h-full shrink-0 flex-col border-r border-line bg-canvas ${fullWidth ? 'w-full' : 'w-[340px] xl:w-[360px]'}`}>
       <div className="flex items-center gap-3 px-5 pb-2 pt-5">
         <BrandMark size={44} />
-        <span className="text-[1.75rem] font-bold tracking-tight">Aangan</span>
+        <span className="font-display text-[1.625rem] font-semibold tracking-tight">Aangan</span>
       </div>
 
       {onCheckSafe && (
@@ -56,17 +56,17 @@ export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, s
 
       <ul className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
         {!loaded && <li className="px-3 py-4 text-[1.25rem] text-ink-muted">Loading your families…</li>}
-        {rooms.map((r) => {
+        {rooms.map((r, i) => {
           const active = r.channelId === activeId;
           const who = r.last ? (r.last.senderId === me.userId ? 'You' : senderLabel(r.last)) : null;
           const what = r.last ? (r.last.kind === 'image' ? 'sent a photo' : r.last.kind === 'voice' ? `voice message: ${r.last.text}` : r.last.text) : 'No messages yet';
           return (
-            <li key={r.channelId} className="mb-2">
+            <li key={r.channelId} className="room-row mb-2" style={{ '--i': i } as CSSProperties}>
               <button
                 type="button"
                 onClick={() => onSelect(r.channelId)}
                 aria-current={active ? 'true' : undefined}
-                className={`flex w-full items-center gap-4 rounded-[var(--radius-card)] p-4 text-left ${
+                className={`relative flex w-full items-center gap-4 rounded-[var(--radius-card)] p-4 text-left ${
                   active ? 'bg-surface shadow-[var(--shadow-2)] outline outline-2 outline-accent' : 'bg-surface hover:bg-accent-soft'
                 }`}
                 style={{ minHeight: 96 }}
@@ -83,7 +83,7 @@ export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, s
                     <span className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
                       {r.last && <span className="text-[1.125rem] text-ink-muted">{formatListTime(r.last.sentAt)}</span>}
                       {r.unread > 0 && (
-                        <span className="rounded-full bg-accent px-3 py-0.5 text-[1.125rem] font-bold text-white">
+                        <span className="rounded-full bg-accent px-3 py-0.5 text-[1.125rem] font-bold text-on-accent">
                           {r.unread} new {r.unread === 1 ? 'message' : 'messages'}
                         </span>
                       )}

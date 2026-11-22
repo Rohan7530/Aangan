@@ -112,28 +112,33 @@ export function WelcomePage({ known, onLoggedIn }: Props) {
   return (
     <div className="night-page">
       <NightBackdrop />
-      <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5" aria-label="Aangan">
-        <a href="/welcome.html" className="flex items-center gap-3" aria-label="Aangan: how it works">
-          <NightMark size={38} />
-          <span className="night-display text-[1.375rem] leading-none">
-            Aangan
-            <small lang="hi" className="mt-1 block font-[family-name:var(--font-night)] text-[1rem] font-semibold text-[#ffb23f]">
-              आँगन
-            </small>
-          </span>
-        </a>
-        <div className="flex items-center gap-1">
-          <a href="/welcome.html#how" className="hidden min-h-[48px] items-center rounded-xl px-3 text-ink-muted hover:text-ink sm:inline-flex">
-            How it works
+      {/* Same header as the landing page: the logo is the way home. */}
+      <header className="night-nav">
+        <div className="night-wrap night-nav-bar">
+          <a href="/welcome.html" className="flex items-center gap-3" aria-label="Aangan home">
+            <NightMark size={36} />
+            <span className="night-display text-[1.25rem] leading-none">
+              Aangan
+              <small lang="hi" className="mt-1 block font-[family-name:var(--font-night)] text-[1rem] font-semibold text-[#ffb23f]">
+                आँगन
+              </small>
+            </span>
           </a>
-          <a href="/showcase" className="night-btn night-btn-ghost !min-h-[48px] !px-4 !text-[1rem]">
-            See it live
-            <ArrowRightIcon />
+          <nav className="night-nav-pill" aria-label="Aangan">
+            <a href="/welcome.html#how">How it works</a>
+            <a href="/welcome.html#shield">Scam shield</a>
+            <a href="/showcase">Live demo</a>
+          </nav>
+          <a href="/welcome.html#download" className="night-btn night-btn-ghost !min-h-[48px] !gap-2 !px-4 !text-[1rem]">
+            <span className="text-[#3fe3c0]">
+              <ArrowRightIcon />
+            </span>
+            Download app
           </a>
         </div>
-      </nav>
+      </header>
 
-      <main className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-16 pt-8 lg:grid-cols-[1fr_1.1fr] lg:gap-14 lg:pt-14">
+      <main className="night-wrap grid items-center gap-12 pb-16 pt-8 lg:grid-cols-[1fr_1.1fr] lg:gap-16 lg:pt-14">
         <div>
           <p className="night-eyebrow night-rise">Step into your family room</p>
           <h1 className="night-display night-rise mt-5 text-balance text-[2.5rem] leading-[1.08] sm:text-[3.5rem]" style={{ animationDelay: '80ms' }}>
@@ -211,7 +216,7 @@ export function WelcomePage({ known, onLoggedIn }: Props) {
       </main>
 
       <section aria-label="What Aangan does" className="border-t border-line">
-        <ul className="mx-auto grid max-w-6xl gap-4 px-5 py-12 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="night-wrap grid gap-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
           {PROMISES.map((p) => (
             <li key={p.title} className="night-panel flex items-start gap-3 p-5">
               <span className="night-icon">{p.icon}</span>

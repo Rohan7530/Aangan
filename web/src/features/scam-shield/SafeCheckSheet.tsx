@@ -74,7 +74,7 @@ export function SafeCheckSheet({ open, onClose, me, lang, members, speech }: Pro
           type="button"
           onClick={() => void check()}
           disabled={!text.trim() || checking}
-          className="inline-flex min-h-[64px] items-center justify-center gap-3 rounded-2xl bg-accent px-6 text-[1.375rem] font-bold text-white hover:bg-accent-deep disabled:bg-line disabled:text-ink-muted"
+          className="inline-flex min-h-[64px] items-center justify-center gap-3 rounded-2xl bg-accent px-6 text-[1.375rem] font-bold text-on-accent hover:bg-accent-deep disabled:bg-line disabled:text-ink-muted"
         >
           <ShieldIcon />
           {checking ? t(lang, 'checking') : t(lang, 'check')}

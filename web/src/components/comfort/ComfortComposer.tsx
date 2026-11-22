@@ -126,7 +126,7 @@ export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill, speech
           <button
             type="submit"
             disabled={!canSend}
-            className="inline-flex min-h-[64px] shrink-0 items-center justify-center gap-2 rounded-full bg-accent px-5 text-[1.25rem] font-bold text-white hover:bg-accent-deep disabled:bg-fill disabled:text-ink-muted @3xl:px-7 @3xl:text-[1.375rem]"
+            className="send-btn inline-flex min-h-[64px] shrink-0 items-center justify-center gap-2 rounded-full bg-accent px-5 text-[1.25rem] font-bold text-on-accent hover:bg-accent-deep disabled:bg-fill disabled:text-ink-muted @3xl:px-7 @3xl:text-[1.375rem]"
           >
             <span>{sending ? 'Sending…' : 'Send'}</span>
             <span className="hidden @3xl:inline">

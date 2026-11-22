@@ -331,9 +331,118 @@ h2{font-size:clamp(1.6rem,3.4vw,2.6rem);line-height:1.12}
 footer{padding-block:28px 40px;color:var(--faint);font-size:.82rem}
 footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
+/* ---------- download: app or web ---------- */
+#download{scroll-margin-top:84px}
+.nav-links .btn.ghost{color:var(--ink);margin-left:8px}
+.nav-links .btn.ghost svg{color:var(--jade)}
+@media (max-width:520px){.nav-links .btn{padding:10px 12px}.nav-links .nav-dl span{display:none}}
+.get-app{display:inline-flex;align-items:center;gap:10px;color:#CFFBF0;font-weight:600;font-size:.95rem;text-decoration:none;padding:6px 0}
+.get-app svg{width:20px;height:20px;color:var(--jade)}
+.get-app .arr{width:16px;height:16px;color:currentColor;transition:transform .2s}
+.get-app:hover .arr{transform:translateX(4px)}
+.get-app b{font-weight:600;border-bottom:1px solid rgba(63,227,192,.45)}
+
+.dl-card{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:clamp(28px,5vw,64px);align-items:center;padding:clamp(28px,5vw,64px);background:radial-gradient(70% 90% at 100% 10%,rgba(255,178,63,.2),transparent 60%),radial-gradient(60% 80% at 0% 100%,rgba(63,227,192,.14),transparent 60%),linear-gradient(180deg,rgba(20,32,65,.82),rgba(11,18,34,.92))}
+.dl-card::before{content:"";position:absolute;inset:auto -10% -45% -10%;height:70%;background-image:linear-gradient(rgba(120,160,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(120,160,255,.10) 1px,transparent 1px);background-size:48px 48px;transform:perspective(500px) rotateX(62deg);transform-origin:bottom;-webkit-mask-image:linear-gradient(0deg,#000 10%,transparent 80%);mask-image:linear-gradient(0deg,#000 10%,transparent 80%);pointer-events:none}
+.dl-copy{position:relative;display:grid;gap:22px}
+.dl-copy h2 .glow{background:linear-gradient(92deg,#FFD08A,var(--marigold) 40%,var(--jade));-webkit-background-clip:text;background-clip:text;color:transparent}
+.dl-points{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.dl-points li{display:flex;gap:12px;align-items:flex-start;color:#C9D1E6}
+.dl-points li svg{flex:none;width:22px;height:22px;padding:4px;border-radius:8px;color:var(--marigold);background:rgba(255,178,63,.12);border:1px solid rgba(255,178,63,.3);box-sizing:content-box;margin-top:-2px}
+.dl-points b{color:var(--ink);font-weight:600}
+.dl-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.btn.apk{padding:16px 24px;font-size:1.05rem}
+.btn.apk .apk-text{display:grid;line-height:1.15;text-align:left}
+.btn.apk .apk-text small{font-size:.74rem;font-weight:600;opacity:.75;letter-spacing:.02em}
+.btn.apk svg{width:24px;height:24px}
+.btn.apk[aria-disabled="true"]{filter:saturate(.35) brightness(.8);cursor:not-allowed;transform:none;box-shadow:none}
+.dl-meta{font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px}
+.dl-meta span{border:1px solid var(--line-strong);border-radius:999px;padding:5px 10px}
+.dl-note{font-size:.88rem;color:var(--muted);margin:0;max-width:56ch}
+.dl-note b{color:#FFE2B3;font-weight:600}
+
+.dl-visual{position:relative;display:grid;place-items:center;min-height:460px;perspective:1200px}
+.dl-orbit{position:absolute;width:420px;height:420px;border-radius:50%;border:1px solid rgba(63,227,192,.35);box-shadow:0 0 30px rgba(63,227,192,.15);transform:rotateX(72deg) rotateZ(-14deg)}
+.dl-orbit.o2{width:340px;height:340px;border-color:rgba(255,178,63,.4);transform:rotateX(70deg) rotateZ(22deg)}
+.dl-phone{position:relative;z-index:1;width:230px;border-radius:36px;padding:12px;background:#05080F;border:1px solid var(--line-strong);box-shadow:0 0 0 6px #0D1426,0 50px 100px -30px rgba(0,0,0,.9),0 0 90px -20px rgba(255,178,63,.5);transform:rotateY(-14deg) rotateX(4deg)}
+.dl-screen{border-radius:26px;min-height:420px;padding:18px 16px;display:grid;align-content:start;gap:14px;background:radial-gradient(90% 50% at 50% 0%,rgba(255,178,63,.22),transparent 70%),linear-gradient(180deg,#0F1830,#0B1222)}
+.dl-notch{width:64px;height:5px;border-radius:5px;background:rgba(255,255,255,.18);margin:0 auto 4px}
+.dl-app{display:grid;justify-items:center;gap:8px;padding:10px 0 4px}
+.dl-app .mark{width:64px;height:64px;border-radius:20px}
+.dl-app .mark::after{inset:13px;border-radius:9px}
+.dl-app .mark i{inset:25px;border-radius:3px}
+.dl-app b{font-family:var(--display);font-size:1.05rem}
+.dl-app small{font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.dl-progress{height:8px;border-radius:8px;background:rgba(255,255,255,.08);overflow:hidden}
+.dl-progress i{display:block;height:100%;width:100%;border-radius:8px;background:linear-gradient(90deg,var(--marigold),var(--jade));transform-origin:left;animation:dl-fill 3.6s cubic-bezier(.4,0,.2,1) infinite}
+.dl-toast{display:flex;gap:10px;align-items:center;border-radius:14px;padding:10px 12px;font-size:.78rem;line-height:1.35}
+.dl-toast svg{flex:none;width:18px;height:18px}
+.dl-toast.ok{background:rgba(63,227,192,.09);border:1px solid rgba(63,227,192,.3);color:#CFFBF0}
+.dl-toast.ok svg{color:var(--jade)}
+.dl-toast.big{background:#FFF8EC;color:#20170B;font-family:var(--deva);font-size:1.05rem;font-weight:600;box-shadow:0 10px 30px -10px rgba(255,178,63,.5)}
+.dl-toast.big svg{color:#14513F}
+.dl-chip{position:absolute;z-index:2;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;font-size:.78rem;font-weight:600;background:rgba(15,24,48,.85);border:1px solid var(--line-strong);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 14px 30px -14px rgba(0,0,0,.8)}
+.dl-chip svg{width:16px;height:16px}
+.dl-chip.c1{top:16%;left:2%;color:#FFE2B3}.dl-chip.c1 svg{color:var(--marigold)}
+.dl-chip.c2{bottom:18%;right:0;color:#CFFBF0}.dl-chip.c2 svg{color:var(--jade)}
+@media (prefers-reduced-motion:no-preference){
+  .dl-phone{animation:dl-float 7s ease-in-out infinite}
+  .dl-orbit{animation:dl-spin 22s linear infinite}
+  .dl-orbit.o2{animation:dl-spin2 30s linear infinite}
+  .dl-chip.c1{animation:dl-bob 6s ease-in-out infinite}
+  .dl-chip.c2{animation:dl-bob 6s ease-in-out -3s infinite}
+  .btn.apk:not([aria-disabled="true"]){animation:dl-pulse 2.8s ease-in-out infinite}
+}
+@keyframes dl-float{50%{transform:rotateY(-14deg) rotateX(4deg) translateY(-12px)}}
+@keyframes dl-spin{to{transform:rotateX(72deg) rotateZ(346deg)}}
+@keyframes dl-spin2{to{transform:rotateX(70deg) rotateZ(-338deg)}}
+@keyframes dl-bob{50%{transform:translateY(-8px)}}
+@keyframes dl-fill{0%{transform:scaleX(0)}70%,100%{transform:scaleX(1)}}
+@keyframes dl-pulse{0%,100%{box-shadow:0 10px 30px -8px rgba(255,160,40,.6),0 1px 0 rgba(255,255,255,.5) inset,0 0 0 0 rgba(255,178,63,.45)}50%{box-shadow:0 10px 30px -8px rgba(255,160,40,.6),0 1px 0 rgba(255,255,255,.5) inset,0 0 0 10px rgba(255,178,63,0)}}
+@media (max-width:900px){.dl-card{grid-template-columns:1fr}.dl-visual{min-height:400px}.dl-orbit{width:320px;height:320px}.dl-orbit.o2{width:260px;height:260px}.dl-chip.c1{left:0}}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
   .desk,.mob,.sender,.reader{transform:none!important}
+}
+
+/* ---------- layout polish: wider column, three-zone header, hero anchored left ---------- */
+.wrap{max-width:1320px;padding-left:max(clamp(20px,4vw,56px),env(safe-area-inset-left,0px));padding-right:max(clamp(20px,4vw,56px),env(safe-area-inset-right,0px))}
+.nav{transition:background .25s,box-shadow .25s}
+.nav.scrolled{background:rgba(6,10,19,.86);box-shadow:0 10px 30px -18px rgba(0,0,0,.9)}
+.nav .wrap.nav-bar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:20px;padding-block:12px}
+.nav-bar .nav-links{justify-self:center;gap:2px;padding:4px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.03)}
+.nav-bar .nav-links a{font-size:.95rem;padding:9px 15px;border-radius:999px;white-space:nowrap;transition:color .2s,background .2s}
+@media (max-width:1320px){.nav-bar .nav-links a{padding:9px 11px;font-size:.92rem}}
+.nav-bar .nav-links a.active{color:var(--ink);background:rgba(255,178,63,.14);box-shadow:inset 0 0 0 1px rgba(255,178,63,.35)}
+.nav-actions{justify-self:end;display:flex;align-items:center;gap:10px}
+.nav-actions .btn{padding:10px 16px;font-size:.92rem;margin:0;white-space:nowrap}
+.nav-actions .btn.primary{color:#1B1103}
+.nav-actions .btn.ghost{color:var(--ink)}
+.nav-actions .btn.ghost svg{color:var(--jade)}
+.nav-toggle{display:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--line-strong);background:rgba(255,255,255,.04);cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.nav-toggle span{display:block;width:18px;height:2px;border-radius:2px;background:var(--ink);transition:transform .25s,opacity .2s}
+.nav-toggle[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav-toggle[aria-expanded="true"] span:nth-child(2){opacity:0}
+.nav-toggle[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+@media (max-width:1180px){
+  .nav .wrap.nav-bar{grid-template-columns:1fr auto}
+  .nav-toggle{display:inline-flex}
+  .nav-bar .nav-links{position:absolute;left:clamp(12px,3vw,24px);right:clamp(12px,3vw,24px);width:auto;justify-self:stretch;top:calc(100% + 8px);display:none;flex-direction:column;align-items:stretch;gap:4px;padding:10px;border-radius:18px;background:rgba(9,14,27,.97);border:1px solid var(--line-strong);box-shadow:0 30px 60px -20px rgba(0,0,0,.9)}
+  .nav-bar .nav-links.open{display:flex}
+  .nav-bar .nav-links a,.nav-links a:not(.btn){display:block;padding:14px 16px;border-radius:12px;font-size:1.02rem}
+}
+@media (max-width:560px){.nav-actions .nav-dl{display:none}.nav-actions{gap:8px}.nav-actions .btn{padding:10px 14px}.brand small{font-size:.72rem}}
+/* hero: full width, copy anchored to the left, never under the 3D phones */
+.hero .hero-inner.wrap,.hero .wrap.hero-inner{max-width:none;padding-left:max(clamp(20px,7vw,140px),env(safe-area-inset-left,0px))}
+.hero-copy{max-width:min(570px,42vw)}
+/* below 1100px the hero stacks: copy first, then the 3D scene (no overlap on tablets) */
+@media (max-width:1099px){
+  .hero{min-height:0}
+  .hero-stage{position:relative;height:560px;margin-top:-8px}
+  .hero-shade{background:linear-gradient(0deg,var(--night) 0%,rgba(6,10,19,0) 18%)}
+  .hero-inner{padding-block:56px 8px}
+  .hero-copy{max-width:680px}
 }
 </style>
 
@@ -345,24 +454,34 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
   <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></symbol>
   <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+  <symbol id="i-android" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 9.48l1.84-3.18a.38.38 0 0 0-.66-.38l-1.86 3.22a11.4 11.4 0 0 0-9.84 0L5.22 5.92a.38.38 0 0 0-.66.38L6.4 9.48A10.8 10.8 0 0 0 1 18h22a10.8 10.8 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"/></symbol>
+  <symbol id="i-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5h11v2"/><path d="M9.5 5v14"/><path d="M7.5 19h4"/><path d="M14 12v-1h7v1"/><path d="M17.5 11v8"/><path d="M16 19h3"/></symbol>
   <symbol id="i-family" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M15 14.5c2.8.2 5 2.4 5 5.5"/></symbol>
 </svg>
 
-<header class="nav">
-  <div class="wrap">
+<header class="nav" id="siteNav">
+  <div class="wrap nav-bar">
     <a class="brand" href="#top" aria-label="Aangan home">
       <span class="mark"><i></i></span>
       <span>Aangan<small>आँगन</small></span>
     </a>
-    <nav class="nav-links" aria-label="Sections">
+    <nav class="nav-links" id="navLinks" aria-label="Sections">
       <a href="#how">How it works</a>
       <a href="#shield">Scam shield</a>
       <a href="#ai">AI layer</a>
       <a href="#app">The app</a>
       <a href="#impact">Impact</a>
       <a href="/showcase">Live demo</a>
-      <a class="btn primary" href="/?start=1">Open Aangan</a>
     </nav>
+    <div class="nav-actions">
+      <a class="btn ghost nav-dl" href="#download" aria-label="Download the Android app"><svg class="ico"><use href="#i-android"/></svg><span>Download app</span></a>
+      <a class="btn primary" href="/?start=1">Open web app</a>
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -380,6 +499,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <a class="btn primary" href="/?start=1">Start your family room<svg class="ico"><use href="#i-arrow"/></svg></a>
         <a class="btn ghost" href="#demo"><svg class="ico"><use href="#i-shield-ok"/></svg>Test the scam shield</a>
       </div>
+      <a class="get-app" href="#download"><svg><use href="#i-android"/></svg><span>On a phone? <b>Get the Android app</b></span><svg class="arr"><use href="#i-arrow"/></svg></a>
       <div class="reads">
         <span>Dadi reads in</span>
         <span class="ticker" id="ticker" aria-live="off"><span class="on">हिन्दी</span><span>मराठी</span><span>தமிழ்</span><span>বাংলা</span><span>English</span></span>
@@ -626,6 +746,51 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   </div>
 </section>
 
+<!-- ================= DOWNLOAD: ANDROID APP OR WEB ================= -->
+<!-- The APK lives at web/public/downloads/aangan.apk (served as /downloads/aangan.apk).
+     Until that file exists, the button says "coming soon" instead of downloading a 404. -->
+<section class="band" id="download" style="padding-top:20px">
+  <div class="wrap">
+    <div class="dl-card panel">
+      <div class="dl-copy">
+        <p class="eyebrow">Aangan for Android</p>
+        <h2>Put the family courtyard <span class="glow">in Dadi's pocket.</span></h2>
+        <p class="lede">The same family room, now as an app on her phone. Large letters, Listen on every message, and the scam shield checking each message before she taps anything.</p>
+        <ul class="dl-points">
+          <li><svg><use href="#i-text"/></svg><span><b>Reads her way.</b> Her language, her text size, Comfort mode from the first message.</span></li>
+          <li><svg><use href="#i-shield-ok"/></svg><span><b>Scam shield built in.</b> Risky messages are flagged, and "Ask my family" is one tap away.</span></li>
+          <li><svg><use href="#i-mic"/></svg><span><b>Speak instead of type.</b> She talks; the family reads it in their own language.</span></li>
+        </ul>
+        <div class="dl-actions">
+          <a class="btn primary apk" id="apkBtn" href="/downloads/aangan.apk" download="Aangan.apk">
+            <svg><use href="#i-android"/></svg>
+            <span class="apk-text"><span id="apkLabel">Download for Android</span><small id="apkSub">Free · APK</small></span>
+            <svg class="ico" style="width:20px;height:20px"><use href="#i-download"/></svg>
+          </a>
+          <a class="btn ghost" href="/?start=1"><svg class="ico"><use href="#i-globe"/></svg>Or open the web app</a>
+        </div>
+        <p class="dl-note" id="apkNote">First time installing? When Android asks, tap <b>Settings</b> and allow <b>Install unknown apps</b> for your browser, then tap <b>Install</b>.</p>
+      </div>
+
+      <div class="dl-visual" aria-hidden="true">
+        <span class="dl-orbit"></span>
+        <span class="dl-orbit o2"></span>
+        <div class="dl-phone">
+          <div class="dl-screen">
+            <div class="dl-notch"></div>
+            <div class="dl-app"><span class="mark"><i></i></span><b>Aangan</b><small>Installing…</small></div>
+            <div class="dl-progress"><i></i></div>
+            <div class="dl-toast ok"><svg><use href="#i-shield-ok"/></svg><span>Scam shield is on for Dadi</span></div>
+            <div class="dl-toast big"><svg><use href="#i-speak"/></svg><span>कल सुबह 9 बजे डॉक्टर के पास चलना है।</span></div>
+          </div>
+        </div>
+        <span class="dl-chip c1"><svg><use href="#i-android"/></svg>Android app</span>
+        <span class="dl-chip c2"><svg><use href="#i-family"/></svg>Same room as the web</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ================= IMPACT ================= -->
 <section class="band" id="impact" style="padding-top:20px">
   <div class="wrap">
@@ -670,6 +835,31 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const icon = (id, cls = '') => `<svg class="${cls}"><use href="#${id}"/></svg>`;
+
+  /* ---------- Android download: only offer it if the APK is really there ---------- */
+  (async () => {
+    const btn = $('#apkBtn');
+    if (!btn) return;
+    const comingSoon = () => {
+      btn.removeAttribute('href');
+      btn.removeAttribute('download');
+      btn.setAttribute('aria-disabled', 'true');
+      btn.setAttribute('role', 'link');
+      $('#apkLabel').textContent = 'Android app: coming soon';
+      $('#apkSub').textContent = 'Use the web app today';
+      $('#apkNote').textContent = 'The Android app is on its way. Until then, Aangan works in any phone browser: open the web app and add it to your home screen.';
+    };
+    try {
+      const r = await fetch(btn.getAttribute('href'), { method: 'HEAD', cache: 'no-store' });
+      const type = r.headers.get('content-type') || '';
+      // A missing file comes back as 404, or as the app's HTML page (SPA fallback).
+      if (!r.ok || type.includes('text/html')) return comingSoon();
+      const bytes = Number(r.headers.get('content-length'));
+      if (bytes > 0) $('#apkSub').textContent = `Free · APK · ${(bytes / 1048576).toFixed(1)} MB`;
+    } catch {
+      comingSoon();
+    }
+  })();
 
   /* ---------- speech ---------- */
   function speak(text, lang, btn) {
@@ -1035,14 +1225,14 @@ function initHero() {
     const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return;
     renderer.setSize(w, h); composer.setSize(w, h); css.setSize(w, h);
     camera.aspect = w / h;
-    narrow = window.innerWidth < 900;
+    narrow = window.innerWidth < 1100;
     camera.position.z = narrow ? 8.2 : 10;
     camera.updateProjectionMatrix();
     const L = LAYOUT[narrow ? 'narrow' : 'wide'];
     phones.forEach((ph, i) => { ph.position.set(...L[i].p); ph.rotation.set(0, L[i].r, 0); ph.userData.base = ph.position.clone(); ph.userData.r = L[i].r; });
     const visH = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z, visW = visH * camera.aspect;
     if (narrow) { world.position.set(0, 0.35, 0); world.scale.setScalar(Math.min(1, visW / 4.3)); }
-    else { world.position.set(visW * 0.22, 0, 0); world.scale.setScalar(Math.min(1, (visW * 0.28) / 3.7)); }
+    else { world.position.set(visW * 0.25, 0, 0); world.scale.setScalar(Math.min(1, (visW * 0.27) / 3.7)); }
     buildBeams();
   }
   layout();
@@ -1228,4 +1418,27 @@ try { initHero(); } catch (e) { console.warn('Hero 3D unavailable', e); }
 try { initShield(); } catch (e) { console.warn('Shield 3D unavailable', e); }
 </script>
 
+
+<script>
+// Header: solid when scrolled, a menu on small screens, and the section you are reading highlighted.
+(() => {
+  const nav = document.getElementById('siteNav'), links = document.getElementById('navLinks'), toggle = document.getElementById('navToggle');
+  if (!nav || !links || !toggle) return;
+  const onScroll = () => nav.classList.toggle('scrolled', scrollY > 8);
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  const close = () => { links.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); };
+  toggle.addEventListener('click', () => { const open = !links.classList.contains('open'); links.classList.toggle('open', open); toggle.setAttribute('aria-expanded', String(open)); });
+  links.addEventListener('click', (e) => { if (e.target.closest('a')) close(); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && links.classList.contains('open')) { close(); toggle.focus(); } });
+  document.addEventListener('click', (e) => { if (!nav.contains(e.target)) close(); });
+  const anchors = [...links.querySelectorAll('a[href^="#"]')];
+  const sections = anchors.map((a) => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  if ('IntersectionObserver' in window && sections.length) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) anchors.forEach((a) => a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id)); });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    sections.forEach((s) => io.observe(s));
+  }
+})();
+</script>
 </body></html>

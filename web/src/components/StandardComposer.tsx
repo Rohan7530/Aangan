@@ -203,7 +203,7 @@ export function StandardComposer({ disabled, onSend, onPickPhoto, replyTo, onCan
             disabled={!canSend}
             aria-label={sending ? 'Sending' : 'Send'}
             title="Send"
-            className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-accent text-white hover:bg-accent-deep disabled:bg-line disabled:text-ink-muted"
+            className="send-btn grid h-12 w-12 shrink-0 place-items-center rounded-full bg-accent text-on-accent hover:bg-accent-deep disabled:bg-line disabled:text-ink-muted"
           >
             <SendIcon />
           </button>

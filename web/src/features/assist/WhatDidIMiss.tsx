@@ -143,7 +143,7 @@ export function WhatDidIMiss({ channelId, messages, me, lang, speech }: Props) {
                 <button
                   type="button"
                   onClick={() => (playing ? speech.stop() : speech.speak(SPEAK_ID, summary.spoken, speechLang(lang)))}
-                  className="mt-4 inline-flex min-h-[56px] items-center gap-3 rounded-2xl bg-accent px-6 text-[1.25rem] font-bold text-white hover:bg-accent-deep"
+                  className="mt-4 inline-flex min-h-[56px] items-center gap-3 rounded-2xl bg-accent px-6 text-[1.25rem] font-bold text-on-accent hover:bg-accent-deep"
                 >
                   {playing ? <StopIcon /> : <SpeakerIcon />}
                   {t(lang, playing ? 'stop' : 'listen')}

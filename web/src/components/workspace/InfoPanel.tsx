@@ -84,7 +84,7 @@ export function InfoPanel({ channelId, roomName, members, presence, myId, authKe
     <aside
       id={id}
       aria-label={`About ${roomName}`}
-      className={`flex h-full shrink-0 flex-col border-l border-line bg-canvas ${comfort ? 'comfort-info' : ''} ${
+      className={`app-side panel-enter flex h-full shrink-0 flex-col border-l border-line bg-canvas ${comfort ? 'comfort-info' : ''} ${
         fullWidth ? 'w-full' : comfort ? 'w-[360px]' : 'w-[272px] xl:w-[300px]'
       }`}
     >
@@ -138,7 +138,7 @@ export function InfoPanel({ channelId, roomName, members, presence, myId, authKe
             title="Change family photo"
           >
             <RoomAvatar id={channelId} name={roomName} size={comfort ? 112 : 96} />
-            <span className="absolute -bottom-1 -right-1 grid h-10 w-10 place-items-center rounded-full border-2 border-canvas bg-accent text-white shadow-[var(--shadow-1)]">
+            <span className="absolute -bottom-1 -right-1 grid h-10 w-10 place-items-center rounded-full border-2 border-canvas bg-accent text-on-accent shadow-[var(--shadow-1)]">
               <PhotoIcon />
             </span>
           </button>
@@ -194,7 +194,7 @@ export function InfoPanel({ channelId, roomName, members, presence, myId, authKe
                 <button
                   type="button"
                   onClick={copy}
-                  className={`mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-4 text-white hover:bg-accent-deep ${
+                  className={`mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-4 text-on-accent hover:bg-accent-deep ${
                     comfort ? 'min-h-[64px] text-[1.25rem] font-bold' : 'min-h-[48px] font-semibold'
                   }`}
                 >

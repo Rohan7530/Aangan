@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { RoomSummary } from '../../nexconn/rooms';
 import type { ConnectionState } from '../../nexconn/types';
 import { BrandMark } from '../BrandMark';
@@ -41,12 +41,12 @@ export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, conn
   return (
     <nav
       aria-label="My families"
-      className={`flex h-full shrink-0 flex-col border-r border-line bg-canvas ${fullWidth ? 'w-full' : rail ? 'w-16' : 'w-[272px] xl:w-[300px]'}`}
+      className={`app-side flex h-full shrink-0 flex-col border-r border-line bg-canvas ${fullWidth ? 'w-full' : rail ? 'w-16' : 'w-[272px] xl:w-[300px]'}`}
     >
       {/* brand + collapse */}
       <div className={`flex items-center gap-2 px-4 pb-1 pt-4 ${rail ? 'flex-col px-2' : ''}`}>
         <BrandMark size={34} />
-        {!rail && <span className="flex-1 text-[1.375rem] font-bold tracking-tight">Aangan</span>}
+        {!rail && <span className="font-display flex-1 text-[1.3125rem] font-semibold tracking-tight">Aangan</span>}
         {onToggleCollapsed && !fullWidth && (
           <button
             type="button"
@@ -84,11 +84,11 @@ export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, conn
 
       <ul className={`min-h-0 flex-1 overflow-y-auto pb-2 ${rail ? 'px-2 pt-2' : 'px-2'}`}>
         {!loaded && <li className="px-3 py-4 text-ink-muted">Loading your families…</li>}
-        {rooms.map((r) => {
+        {rooms.map((r, i) => {
           const active = r.channelId === activeId;
           const label = `${r.name}${r.unread ? `, ${r.unread} unread` : ''}`;
           return (
-            <li key={r.channelId}>
+            <li key={r.channelId} className="room-row" style={{ '--i': i } as CSSProperties}>
               <button
                 type="button"
                 onClick={() => onSelect(r.channelId)}

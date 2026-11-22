@@ -46,7 +46,7 @@ export function Sheet({ open, onClose, title, subtitle, children }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 rounded-2xl bg-accent px-6 font-semibold text-white hover:bg-accent-deep"
+            className="shrink-0 rounded-2xl bg-accent px-6 font-semibold text-on-accent hover:bg-accent-deep"
             style={{ minHeight: 'var(--tap, 48px)' }}
           >
             Done
