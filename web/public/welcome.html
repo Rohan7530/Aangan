@@ -476,7 +476,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <a href="/showcase">Live demo</a>
     </nav>
     <div class="nav-actions">
-      <a class="btn ghost nav-dl" href="#download" aria-label="Download the Android app"><svg class="ico"><use href="#i-android"/></svg><span>Download app</span></a>
+      <a class="btn ghost nav-dl" href="#download" aria-label="Use Aangan on your phone"><svg class="ico"><use href="#i-globe"/></svg><span>On your phone</span></a>
       <a class="btn primary" href="/?start=1">Open web app</a>
       <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Menu">
         <span></span><span></span><span></span>
@@ -499,7 +499,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <a class="btn primary" href="/?start=1">Start your family room<svg class="ico"><use href="#i-arrow"/></svg></a>
         <a class="btn ghost" href="#demo"><svg class="ico"><use href="#i-shield-ok"/></svg>Test the scam shield</a>
       </div>
-      <a class="get-app" href="#download"><svg><use href="#i-android"/></svg><span>On a phone? <b>Get the Android app</b></span><svg class="arr"><use href="#i-arrow"/></svg></a>
+      <a class="get-app" href="#download"><svg><use href="#i-globe"/></svg><span>On a phone? <b>It works in your browser</b></span><svg class="arr"><use href="#i-arrow"/></svg></a>
       <div class="reads">
         <span>Dadi reads in</span>
         <span class="ticker" id="ticker" aria-live="off"><span class="on">हिन्दी</span><span>मराठी</span><span>தமிழ்</span><span>বাংলা</span><span>English</span></span>
@@ -746,30 +746,24 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   </div>
 </section>
 
-<!-- ================= DOWNLOAD: ANDROID APP OR WEB ================= -->
-<!-- The APK lives at web/public/downloads/aangan.apk (served as /downloads/aangan.apk).
-     Until that file exists, the button says "coming soon" instead of downloading a 404. -->
+<!-- ================= ON HER PHONE: WEB TODAY, IPHONE APP IN PILOT ================= -->
 <section class="band" id="download" style="padding-top:20px">
   <div class="wrap">
     <div class="dl-card panel">
       <div class="dl-copy">
-        <p class="eyebrow">Aangan for Android</p>
+        <p class="eyebrow">Aangan on her phone</p>
         <h2>Put the family courtyard <span class="glow">in Dadi's pocket.</span></h2>
-        <p class="lede">The same family room, now as an app on her phone. Large letters, Listen on every message, and the scam shield checking each message before she taps anything.</p>
+        <p class="lede">The same family room works in any phone browser today, and our iPhone app is in pilot with families. Large letters, Listen on every message, and the scam shield checking each message before she taps anything.</p>
         <ul class="dl-points">
           <li><svg><use href="#i-text"/></svg><span><b>Reads her way.</b> Her language, her text size, Comfort mode from the first message.</span></li>
           <li><svg><use href="#i-shield-ok"/></svg><span><b>Scam shield built in.</b> Risky messages are flagged, and "Ask my family" is one tap away.</span></li>
           <li><svg><use href="#i-mic"/></svg><span><b>Speak instead of type.</b> She talks; the family reads it in their own language.</span></li>
         </ul>
         <div class="dl-actions">
-          <a class="btn primary apk" id="apkBtn" href="/downloads/aangan.apk" download="Aangan.apk">
-            <svg><use href="#i-android"/></svg>
-            <span class="apk-text"><span id="apkLabel">Download for Android</span><small id="apkSub">Free · APK</small></span>
-            <svg class="ico" style="width:20px;height:20px"><use href="#i-download"/></svg>
-          </a>
-          <a class="btn ghost" href="/?start=1"><svg class="ico"><use href="#i-globe"/></svg>Or open the web app</a>
+          <a class="btn primary" href="/?start=1"><svg class="ico"><use href="#i-globe"/></svg>Open the web app</a>
+          <a class="btn ghost" href="/showcase">See the live demo<svg class="ico"><use href="#i-arrow"/></svg></a>
         </div>
-        <p class="dl-note" id="apkNote">First time installing? When Android asks, tap <b>Settings</b> and allow <b>Install unknown apps</b> for your browser, then tap <b>Install</b>.</p>
+        <p class="dl-note">Keep it one tap away: on iPhone, tap <b>Share</b> then <b>Add to Home Screen</b>; on Android, tap <b>⋮</b> then <b>Add to Home screen</b>.</p>
       </div>
 
       <div class="dl-visual" aria-hidden="true">
@@ -778,13 +772,13 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <div class="dl-phone">
           <div class="dl-screen">
             <div class="dl-notch"></div>
-            <div class="dl-app"><span class="mark"><i></i></span><b>Aangan</b><small>Installing…</small></div>
+            <div class="dl-app"><span class="mark"><i></i></span><b>Aangan</b><small>Ready</small></div>
             <div class="dl-progress"><i></i></div>
             <div class="dl-toast ok"><svg><use href="#i-shield-ok"/></svg><span>Scam shield is on for Dadi</span></div>
             <div class="dl-toast big"><svg><use href="#i-speak"/></svg><span>कल सुबह 9 बजे डॉक्टर के पास चलना है।</span></div>
           </div>
         </div>
-        <span class="dl-chip c1"><svg><use href="#i-android"/></svg>Android app</span>
+        <span class="dl-chip c1"><svg><use href="#i-globe"/></svg>Any phone browser</span>
         <span class="dl-chip c2"><svg><use href="#i-family"/></svg>Same room as the web</span>
       </div>
     </div>
@@ -835,31 +829,6 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const icon = (id, cls = '') => `<svg class="${cls}"><use href="#${id}"/></svg>`;
-
-  /* ---------- Android download: only offer it if the APK is really there ---------- */
-  (async () => {
-    const btn = $('#apkBtn');
-    if (!btn) return;
-    const comingSoon = () => {
-      btn.removeAttribute('href');
-      btn.removeAttribute('download');
-      btn.setAttribute('aria-disabled', 'true');
-      btn.setAttribute('role', 'link');
-      $('#apkLabel').textContent = 'Android app: coming soon';
-      $('#apkSub').textContent = 'Use the web app today';
-      $('#apkNote').textContent = 'The Android app is on its way. Until then, Aangan works in any phone browser: open the web app and add it to your home screen.';
-    };
-    try {
-      const r = await fetch(btn.getAttribute('href'), { method: 'HEAD', cache: 'no-store' });
-      const type = r.headers.get('content-type') || '';
-      // A missing file comes back as 404, or as the app's HTML page (SPA fallback).
-      if (!r.ok || type.includes('text/html')) return comingSoon();
-      const bytes = Number(r.headers.get('content-length'));
-      if (bytes > 0) $('#apkSub').textContent = `Free · APK · ${(bytes / 1048576).toFixed(1)} MB`;
-    } catch {
-      comingSoon();
-    }
-  })();
 
   /* ---------- speech ---------- */
   function speak(text, lang, btn) {
