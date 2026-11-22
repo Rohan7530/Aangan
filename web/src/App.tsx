@@ -71,7 +71,16 @@ function FamilyApp() {
       </div>
     );
   }
-  if (!session) return <WelcomePage known={known} onLoggedIn={handleLoggedIn} />;
+  if (!session) {
+    // First visit (nobody has used Aangan on this device yet): show the story first.
+    // The landing page's buttons come back here with ?start=1.
+    const fresh = known.length === 0 && !new URLSearchParams(window.location.search).has('start');
+    if (fresh && window.location.pathname === '/') {
+      window.location.replace('/welcome.html');
+      return null;
+    }
+    return <WelcomePage known={known} onLoggedIn={handleLoggedIn} />;
+  }
   return (
     <ReaderPrefsProvider key={session.userId} userId={session.userId}>
       <Workspace session={session} onLogout={handleLogout} onSessionChange={handleLoggedIn} />

@@ -503,6 +503,25 @@ dialog.sheet[open]::backdrop {
     opacity 140ms ease,
     transform var(--spring-dur) var(--spring);
 }
+/* Beside the bubble on wide screens; above it on phones so it never makes the page scroll sideways. */
+.msg-actions-theirs {
+  left: calc(100% + 8px);
+}
+.msg-actions-mine {
+  right: calc(100% + 8px);
+}
+@media (max-width: 767px) {
+  .msg-actions {
+    top: auto;
+    bottom: calc(100% + 4px);
+  }
+  .msg-actions-theirs {
+    left: 0;
+  }
+  .msg-actions-mine {
+    right: 0;
+  }
+}
 .msg-row:hover .msg-actions,
 .msg-row:focus-within .msg-actions,
 .msg-row[data-selected] .msg-actions {
@@ -902,4 +921,174 @@ dialog.lightbox::backdrop {
   [data-reader-mode="standard"] button:not(:disabled):active {
     transform: none;
   }
+}
+
+/* ---------------- Scam shield ----------------
+   Calm, high-contrast tones in both themes. Each card's text is >= 7:1 on its
+   background (AAA), so Comfort readers can trust the warning at any size. */
+.shield-danger {
+  --sh-ink: #6e1a10;
+  --sh-bg: #fdecea;
+  --sh-line: #d70015;
+  --sh-solid: #b00012;
+}
+.shield-caution {
+  --sh-ink: #5c3d06;
+  --sh-bg: #fff4d6;
+  --sh-line: #c27c00;
+  --sh-solid: #8a5300;
+}
+.shield-safe {
+  --sh-ink: #14532a;
+  --sh-bg: #e6f6ea;
+  --sh-line: #1e7b34;
+  --sh-solid: #1e7b34;
+}
+:root[data-theme="dark"] .shield-danger {
+  --sh-ink: #ffd2cc;
+  --sh-bg: #3a1414;
+  --sh-line: #ff6961;
+  --sh-solid: #b00012;
+}
+:root[data-theme="dark"] .shield-caution {
+  --sh-ink: #ffe2a8;
+  --sh-bg: #33270b;
+  --sh-line: #ff9f0a;
+  --sh-solid: #8a5300;
+}
+:root[data-theme="dark"] .shield-safe {
+  --sh-ink: #b8f0c6;
+  --sh-bg: #0f2a17;
+  --sh-line: #30d158;
+  --sh-solid: #1e7b34;
+}
+.shield-card {
+  margin-top: 14px;
+  padding: 16px 16px 18px;
+  border-radius: var(--radius-card);
+  border: 1.5px solid var(--sh-line);
+  background: var(--sh-bg);
+  color: var(--sh-ink);
+}
+.shield-badge {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--sh-solid);
+  color: #fff;
+}
+.shield-note {
+  margin-top: 6px;
+  padding: 8px 12px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--sh-line);
+  background: var(--sh-bg);
+  color: var(--sh-ink);
+  font-size: 1rem;
+  line-height: 1.4;
+  max-width: 100%;
+}
+.shield-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 999px;
+  border: 1.5px solid var(--sh-solid, var(--color-accent));
+  background: var(--color-surface);
+  color: var(--sh-ink, var(--color-accent-ink));
+  font-weight: 700;
+}
+.shield-btn:hover {
+  background: var(--sh-bg, var(--color-accent-soft));
+}
+.shield-btn-solid {
+  background: var(--sh-solid, var(--color-danger-fill));
+  border-color: var(--sh-solid, var(--color-danger-fill));
+  color: #fff;
+}
+.shield-btn-solid:hover {
+  filter: brightness(0.9);
+}
+/* A Comfort bubble the shield flagged as dangerous. */
+.comfort-flagged .c-bubble {
+  box-shadow: inset 0 0 0 3px var(--color-danger-fill);
+}
+
+/* ---------------- AI helpers ("What did I miss?", quick replies) ---------------- */
+.assist-pill {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 72px;
+  padding: 12px 18px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+  color: var(--color-accent-ink);
+  box-shadow: var(--shadow-1);
+}
+.assist-pill:hover {
+  background: var(--color-accent-soft);
+}
+.assist-pill-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--color-accent);
+  color: #fff;
+}
+.assist-card {
+  padding: 16px 18px 20px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-1);
+}
+.quick-reply {
+  min-height: 52px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-accent);
+  background: var(--color-surface);
+  color: var(--color-accent-ink);
+  font-size: 1.1875rem;
+  font-weight: 700;
+}
+.quick-reply:hover {
+  background: var(--color-accent-soft);
+}
+
+/* "Is this safe?" entry in the sidebar (both modes). White on #004FA8 is 7.8:1. */
+.safe-cta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 64px;
+  padding: 10px 14px;
+  border-radius: var(--radius-card);
+  background: #004fa8;
+  color: #fff;
+  box-shadow: var(--shadow-1);
+}
+.safe-cta:hover {
+  background: #003d8f;
+}
+.safe-cta-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.18);
+}
+.safe-cta:focus-visible {
+  outline-color: var(--color-accent-dot);
 }

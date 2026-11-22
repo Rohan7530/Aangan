@@ -4,7 +4,9 @@ import { CheckIcon } from '../../components/icons';
 import { VoiceAttachment } from '../voice-reply/VoiceAttachment';
 import { formatTime, senderLabel } from '../../components/messageModel';
 import { useTone } from '../../components/tones';
+import type { ShieldVerdict } from '../../api';
 import type { RichMessage } from '../../nexconn/rich';
+import { ShieldWarning } from '../scam-shield/ShieldWarning';
 import { ListenButton } from './ListenButton';
 import { saysPrefix, speechLang, type Lang } from './translation';
 import { TranslationNote } from './TranslationNote';
@@ -22,6 +24,8 @@ interface Props {
   translation?: TranslationState;
   /** The reader's language: Listen reads translations in it. */
   readerLang?: Lang;
+  shield?: ShieldVerdict;
+  onAskFamily?: (msg: RichMessage, verdict: ShieldVerdict) => void;
 }
 
 function reactionSummary(reactions: Record<string, string[]>): string[] {
@@ -33,7 +37,7 @@ function reactionSummary(reactions: Record<string, string[]>): string[] {
 // Comfort mode: the same bubbles as Standard, larger and simpler.
 // Others on the left with avatar and name, grey bubble, and a big Listen button
 // inside it. Mine on the right, blue, no name. Time and "Seen by" under the bubble.
-export function ComfortMessage({ msg, mine, animate = false, speech, seenBy, as: Tag = 'li', onOpenImage, translation, readerLang = 'en' }: Props) {
+export function ComfortMessage({ msg, mine, animate = false, speech, seenBy, as: Tag = 'li', onOpenImage, translation, readerLang = 'en', shield, onAskFamily }: Props) {
   const tone = useTone(msg.senderId);
   const name = mine ? 'You' : senderLabel(msg);
   const isPhoto = msg.kind === 'image';
@@ -52,7 +56,7 @@ export function ComfortMessage({ msg, mine, animate = false, speech, seenBy, as:
   const alt = `Photo from ${mine ? 'you' : name}`;
 
   return (
-    <Tag id={`msg-${msg.id}`} className={`comfort-card c-row ${mine ? 'comfort-mine is-mine' : ''} ${animate ? 'msg-enter' : ''}`}>
+    <Tag id={`msg-${msg.id}`} className={`comfort-card c-row ${mine ? 'comfort-mine is-mine' : ''} ${shield?.level === 'danger' ? 'comfort-flagged' : ''} ${animate ? 'msg-enter' : ''}`}>
       {!mine && (
         <span className="mb-9 self-end">
           <Avatar id={msg.senderId} name={name} size={48} photo={msg.senderPhoto} />
@@ -95,6 +99,16 @@ export function ComfortMessage({ msg, mine, animate = false, speech, seenBy, as:
             <>
               <p className="comfort-text">{body}</p>
               {translation && <TranslationNote state={translation} original={msg.text} size="comfort" />}
+              {shield && (
+                <ShieldWarning
+                  verdict={shield}
+                  size="comfort"
+                  lang={readerLang}
+                  speakId={`shield-${msg.id}`}
+                  speech={speech}
+                  onAskFamily={onAskFamily ? () => onAskFamily(msg, shield) : undefined}
+                />
+              )}
             </>
           )}
 

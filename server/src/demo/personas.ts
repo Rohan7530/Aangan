@@ -58,6 +58,11 @@ export const DEMO_ROOMS: DemoRoomSpec[] = [
       { from: 'meera', text: 'Also, Dadi’s eye check-up is on Tuesday at 11. I’ll take her.' },
       { from: 'dadi', text: 'Thank you, Meera. You are all my blessings 🙏' },
       { from: 'papa', text: 'Last Sunday’s photos are printed. I’ll bring the album to lunch.' },
+      // A forwarded scam, the way they really arrive in family groups. The scam shield flags it.
+      {
+        from: 'papa',
+        text: 'Got this SMS, is it real? “Dear customer, your SBI account will be blocked today. Update your KYC at bit.ly/sbi-kyc-update and share the OTP to keep it active.”',
+      },
     ],
   },
   {

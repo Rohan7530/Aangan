@@ -1,0 +1,27 @@
+# Render Blueprint: one Docker web service (Node server + Python AI service).
+# In Render: New > Blueprint > pick this repo, then fill in the secret values.
+services:
+  - type: web
+    name: aangan
+    runtime: docker
+    plan: free
+    region: singapore
+    healthCheckPath: /api/health
+    envVars:
+      - key: NEXCONN_APP_KEY
+        sync: false
+      - key: NEXCONN_APP_SECRET
+        sync: false
+      - key: NEXCONN_AREA_CODE
+        value: SG
+      - key: AANGAN_FAMILY_CHANNEL_ID
+        sync: false
+      - key: AANGAN_FAMILY_CHANNEL_NAME
+        sync: false
+      - key: TRANSLATE_PROVIDER
+        value: sarvam
+      - key: SARVAM_API_KEY
+        sync: false
+      # Gemini key: the automatic backup when Sarvam is down or out of credits
+      - key: TRANSLATE_API_KEY
+        sync: false

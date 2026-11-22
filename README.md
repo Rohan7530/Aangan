@@ -72,3 +72,40 @@ What is sent is a real Nexconn voice message (`RC:HQVCMsg`, up to 60 s, recorded
 the duration and the words, and the words are translated and read aloud like any text. If the
 microphone audio cannot be recorded but speech-to-text worked, the transcript is sent as a
 text message marked "Spoken" instead, and the person is told before sending.
+
+## Notes: scam shield and AI helpers
+
+The AI features live in a Python 3.14 service (`ai/`, FastAPI) that the Node server starts and
+supervises. The browser only talks to our server.
+
+- **Rules first, AI second.** Every message is scored by weighted rules (English, Hindi,
+  Hinglish, Marathi: fake police/"digital arrest", KYC, OTP, prize, family emergency,
+  investment, job, parcel, electricity bill, links, payment requests). Only messages the rules
+  flag go to the LLM, which explains the risk in the reader's language. If the LLM is down or
+  out of quota, the rules' verdict and fixed advice are shown. The shield never stops working.
+- **Sized to the reader.** Comfort readers get a large card with what to do, Listen, and
+  "Ask my family". Standard readers get a one-line note they can expand. The original message
+  always stays visible.
+- **Is this safe?** Paste a message from SMS, WhatsApp or a call and get the same verdict.
+- **Ask my family.** Sends the message and verdict to a trusted member in a private two-person
+  room (created on first use).
+- **What did I miss?** A short summary of what others said since the reader last looked, read
+  aloud in their language. Scam-looking messages are called out in the summary.
+- **Quick replies.** Three short replies to the latest message, in the reader's language. They
+  fill the message box; the reader still presses Send. No suggestions for scam-looking text.
+
+**Models.** Sarvam (`sarvam-105b`) is the main model for translation, the shield, summaries and
+replies (`TRANSLATE_PROVIDER=sarvam`, `SARVAM_API_KEY`). Gemini (`TRANSLATE_API_KEY`) takes over
+automatically if Sarvam fails or runs out of credits. Check credits at dashboard.sarvam.ai >
+Settings > Billing.
+
+Setup: `npm run setup:ai` once, then `npm run dev`. Tests: `npm run test:ai` (pytest, mock) and
+`npm run smoke` (against `npm run dev:test`).
+
+## Deploy (Render)
+
+`render.yaml` + `Dockerfile` build one service with Node 22 and Python 3.14. In Render, choose
+New > Blueprint, pick the repo, and fill in the secret env vars (`NEXCONN_APP_KEY`,
+`NEXCONN_APP_SECRET`, `AANGAN_FAMILY_CHANNEL_ID`, `TRANSLATE_API_KEY`, ...). Health check:
+`/api/health`. The free plan's disk is wiped on each deploy, so people sign in again after a
+deploy; the showcase room is not re-posted.

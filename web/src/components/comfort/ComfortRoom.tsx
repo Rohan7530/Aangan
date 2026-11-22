@@ -2,6 +2,9 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { speechLang, useReaderPrefs, useTranslations, type Speech } from '../../features/reader-view';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useRoom } from '../../hooks/useRoom';
+import type { ShieldVerdict } from '../../api';
+import { QuickReplies, WhatDidIMiss } from '../../features/assist';
+import { AskFamilySheet, useShield } from '../../features/scam-shield';
 import type { RichMessage } from '../../nexconn/rich';
 import type { ConnectionState } from '../../nexconn/types';
 import type { Session } from '../../session';
@@ -59,6 +62,10 @@ export function ComfortRoom(props: Props) {
   const [photo, setPhoto] = useState<File | null>(null);
   const [lightbox, setLightbox] = useState<{ url: string; alt: string } | null>(null);
   const [prefill, setPrefill] = useState<{ text: string; nonce: number } | null>(null);
+  const shields = useShield(room.messages, session.userId, prefs.language, session.authKey);
+  const [asking, setAsking] = useState<{ text: string; verdict: ShieldVerdict | null } | null>(null);
+  const lastOther = [...room.messages].reverse().find((m) => m.senderId !== session.userId) ?? null;
+  const me = { userId: session.userId, name: session.name, authKey: session.authKey };
 
   const membersLine = room.memberCount === null ? null : `${room.memberCount} ${room.memberCount === 1 ? 'member' : 'members'}`;
   const bigButton =
@@ -171,6 +178,9 @@ export function ComfortRoom(props: Props) {
             readerLang={prefs.language}
             onSuggest={(text) => setPrefill({ text, nonce: Date.now() })}
             onOpenImage={(url, alt) => setLightbox({ url, alt })}
+            shields={shields}
+            onAskFamily={(msg, verdict) => setAsking({ text: msg.text, verdict })}
+            header={<WhatDidIMiss channelId={channelId} messages={room.messages} me={me} lang={prefs.language} speech={speech} />}
           />
           <ComfortComposer
             speechLang={speechLang(prefs.language)}
@@ -179,6 +189,11 @@ export function ComfortRoom(props: Props) {
             onSend={async (text) => onSent(await room.sendText(text))}
             onPickPhoto={setPhoto}
             prefill={prefill}
+            above={
+              lastOther && !shields.has(lastOther.id) ? (
+                <QuickReplies message={lastOther} lang={prefs.language} authKey={session.authKey} onPick={(text) => setPrefill({ text, nonce: Date.now() })} />
+              ) : null
+            }
           />
           <div aria-live="polite" aria-atomic="true" className="sr-only">
             {room.announcement}
@@ -197,6 +212,7 @@ export function ComfortRoom(props: Props) {
         }}
       />
       <Lightbox image={lightbox} onClose={() => setLightbox(null)} />
+      <AskFamilySheet target={asking} onClose={() => setAsking(null)} me={me} lang={prefs.language} members={room.members} />
     </ToneProvider>
   );
 }

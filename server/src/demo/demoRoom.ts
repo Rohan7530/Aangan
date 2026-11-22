@@ -74,16 +74,21 @@ async function setUp(cfg: Config, nexconn: NexconnClient): Promise<void> {
     if (joined !== 0) throw new Error(`Demo room ${channelId}: join failed with code ${joined}`);
     await registerRoom(channelId, name, null);
 
-    // 3. Seed the conversation once.
-    if (state[channelId]) continue;
-    for (const line of spec.script) {
+    // 3. Seed the conversation once. Nexconn is the source of truth: only a group
+    //    this server just created is seeded, so a fresh disk (every Render deploy)
+    //    never posts the conversation again. Progress is saved after each line, so
+    //    a restart halfway resumes instead of repeating lines.
+    const done = state[channelId]?.messages ?? (created === 0 ? 0 : spec.script.length);
+    if (done >= spec.script.length) continue;
+    for (const [i, line] of spec.script.entries()) {
+      if (i < done) continue;
       const p = PERSONAS[line.from];
       const code = await nexconn.sendGroupText(uid(p.key), channelId, line.text, { id: uid(p.key), name: p.name });
       if (code !== 0) throw new Error(`Demo room ${channelId}: seeding stopped at "${line.text}" (code ${code})`);
+      await markSeeded(channelId, i + 1);
       await sleep(350); // keeps order and stays far below the 20/s limit
     }
-    await markSeeded(channelId, spec.script.length);
-    console.log(`[demo] room ${channelId} seeded with ${spec.script.length} messages`);
+    console.log(`[demo] room ${channelId} seeded with ${spec.script.length - done} messages`);
   }
   console.log(`[demo] rooms ready: ${DEMO_ROOMS.map((s) => demoChannelId(cfg, s)).join(', ')}`);
   void prewarmTranslations();

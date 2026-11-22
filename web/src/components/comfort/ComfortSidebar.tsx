@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react';
+import type { ReaderLang } from '../../api';
+import { shieldEnglish, shieldText } from '../../features/scam-shield';
 import type { RoomSummary } from '../../nexconn/rooms';
 import type { ConnectionState } from '../../nexconn/types';
 import { BrandMark } from '../BrandMark';
-import { PlusIcon } from '../icons';
+import { PlusIcon, ShieldIcon } from '../icons';
 import { ProfileRow } from '../ProfileRow';
 import { formatListTime, senderLabel } from '../messageModel';
 import { RoomAvatar } from '../workspace/RoomAvatar';
@@ -20,18 +22,35 @@ interface Props {
   connection: ConnectionState;
   /** Phones: the room list is the whole screen. */
   fullWidth?: boolean;
+  /** Opens "Is this safe?". */
+  onCheckSafe?: () => void;
+  lang?: ReaderLang;
 }
 
 // Comfort family list: the same shell as Standard, larger and simpler.
 // Always visible on wide screens, the home screen on phones. Big rows, large
 // text, everything spelled out ("3 new messages"), no icon-only buttons.
-export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, settingsOpen, onToggleSettings, settingsPanel, me, connection, fullWidth }: Props) {
+export function ComfortSidebar({ rooms, loaded, activeId, onSelect, onNewRoom, settingsOpen, onToggleSettings, settingsPanel, me, connection, fullWidth, onCheckSafe, lang = 'en' }: Props) {
   return (
     <nav aria-label="My families" className={`flex h-full shrink-0 flex-col border-r border-line bg-canvas ${fullWidth ? 'w-full' : 'w-[340px] xl:w-[360px]'}`}>
       <div className="flex items-center gap-3 px-5 pb-2 pt-5">
         <BrandMark size={44} />
         <span className="text-[1.75rem] font-bold tracking-tight">Aangan</span>
       </div>
+
+      {onCheckSafe && (
+        <button type="button" onClick={onCheckSafe} className="safe-cta mx-4 mb-2 mt-2">
+          <span className="safe-cta-icon" aria-hidden="true">
+            <ShieldIcon />
+          </span>
+          <span className="min-w-0 flex-1 text-left">
+            <span className="block text-[1.375rem] font-bold leading-tight">{shieldText(lang, 'isThisSafe')}</span>
+            <span className="block text-[1.125rem] leading-snug">
+              {shieldEnglish(lang, 'isThisSafe') ? `${shieldEnglish(lang, 'isThisSafe')} · ` : ''}Check an SMS or WhatsApp message
+            </span>
+          </span>
+        </button>
+      )}
 
       <h2 className="px-5 pb-2 pt-2 text-[1.5rem] font-bold">My families</h2>
 

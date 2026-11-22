@@ -112,10 +112,10 @@ export function WelcomePage({ known, onLoggedIn }: Props) {
   return (
     <div className="min-h-full">
       <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4" aria-label="Aangan">
-        <span className="flex items-center gap-3">
+        <a href="/welcome.html" className="flex items-center gap-3" aria-label="Aangan: how it works">
           <BrandMark size={40} />
           <span className="text-[1.5rem] font-bold text-accent-ink">Aangan</span>
-        </span>
+        </a>
         <a
           href="/showcase"
           className="inline-flex min-h-[48px] items-center gap-2 rounded-2xl px-3 font-semibold text-accent-ink underline-offset-4 hover:underline"

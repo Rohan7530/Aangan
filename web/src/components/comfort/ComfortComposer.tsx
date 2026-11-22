@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
 import { UNSUPPORTED_REASON, useVoiceReply, voiceSupport } from '../../features/voice-reply/useVoiceReply';
 import { VoicePanel } from '../../features/voice-reply/VoicePanel';
 import { SpeakButton } from '../../features/voice-reply/VoiceReplySlot';
@@ -13,11 +13,13 @@ interface Props {
   prefill?: { text: string; nonce: number } | null;
   speechLang: string;
   onSendVoice: (transcript: string, audio: File | null) => Promise<void>;
+  /** Shown above the message box, e.g. quick replies. */
+  above?: ReactNode;
 }
 
 // Comfort composer: one large text field and large labelled buttons:
 // Photo, Speak (reserved slot), Send. Icons always come with text here.
-export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill, speechLang, onSendVoice }: Props) {
+export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill, speechLang, onSendVoice, above }: Props) {
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,6 +84,7 @@ export function ComfortComposer({ disabled, onSend, onPickPhoto, prefill, speech
             {error}
           </p>
         )}
+        {above}
         <label htmlFor={COMFORT_INPUT_ID} className="sr-only">
           Your message
         </label>

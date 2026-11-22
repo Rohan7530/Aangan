@@ -4,6 +4,7 @@ import { userByKey } from './store.js';
 export type Authed = Request & { user?: { userId: string; name: string } };
 
 // App-level auth: the browser sends the authKey it got from /api/login.
+// This is our own key, not a Nexconn credential.
 export async function requireUser(req: Authed, res: Response, next: NextFunction) {
   const key = (req.headers.authorization ?? '').replace(/^Bearer\s+/i, '').trim();
   const user = key ? await userByKey(key) : null;

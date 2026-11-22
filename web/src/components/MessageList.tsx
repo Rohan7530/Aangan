@@ -1,5 +1,6 @@
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, type ReactNode } from 'react';
 import { ComfortMessage, type Lang, type ReaderMode, type Speech, type TranslationState } from '../features/reader-view';
+import type { ShieldVerdict } from '../api';
 import type { RichMessage } from '../nexconn/rich';
 import { CourtyardIllustration } from './CourtyardIllustration';
 import { buildItems } from './messageModel';
@@ -19,6 +20,11 @@ interface Props extends MessageHandlers {
   /** Per-reader translations of other people's messages. */
   translations?: Map<string, TranslationState>;
   readerLang?: Lang;
+  /** Scam-shield results for messages that need a warning. */
+  shields?: Map<string, ShieldVerdict>;
+  onAskFamily?: (msg: RichMessage, verdict: ShieldVerdict) => void;
+  /** Shown above the first message (e.g. "What did I miss?"). */
+  header?: ReactNode;
 }
 
 const NEAR_BOTTOM_PX = 160;
@@ -39,6 +45,9 @@ export function MessageList({
   onOpenImage,
   translations,
   readerLang,
+  shields,
+  onAskFamily,
+  header,
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const nearBottom = useRef(true);
@@ -129,6 +138,8 @@ export function MessageList({
           </ul>
         </div>
       ) : (
+        <>
+        {header}
         <ol
           aria-label="Messages"
           className={`list-none pb-4 ${comfort ? 'mx-auto flex max-w-5xl flex-col gap-4 px-4 pt-2' : 'px-4 pt-1 sm:px-6'}`}
@@ -154,6 +165,8 @@ export function MessageList({
                 onOpenImage={onOpenImage}
                 translation={translations?.get(item.msg.id)}
                 readerLang={readerLang}
+                shield={shields?.get(item.msg.id)}
+                onAskFamily={onAskFamily}
               />
             ) : (
               <StandardMessage
@@ -166,6 +179,9 @@ export function MessageList({
                 seenBy={seen}
                 myReactionKey={myReactionKey}
                 translation={translations?.get(item.msg.id)}
+                shield={shields?.get(item.msg.id)}
+                readerLang={readerLang}
+                onAskFamily={onAskFamily}
                 onReply={onReply}
                 onReact={onReact}
                 onOpenImage={onOpenImage}
@@ -174,6 +190,7 @@ export function MessageList({
             );
           })}
         </ol>
+        </>
       )}
     </div>
   );

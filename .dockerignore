@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+**/node_modules
+**/dist
+server/data
+ai/.venv
+**/__pycache__
+**/.pytest_cache
+.playwright-mcp
+.git
+.claude
+docs

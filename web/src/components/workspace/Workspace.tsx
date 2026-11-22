@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ReaderSettingsSheet, useReaderPrefs, useSpeech } from '../../features/reader-view';
+import { SafeCheckSheet } from '../../features/scam-shield';
+import { listMembers, type Member } from '../../nexconn/group';
 import { useConnection } from '../../hooks/useConnection';
 import { useMediaQuery, useStoredFlag } from '../../hooks/useMediaQuery';
 import { useRooms } from '../../hooks/useRooms';
@@ -51,6 +53,8 @@ export function Workspace({ session, onLogout, onSessionChange, embedded = false
   const [mobileView, setMobileView] = useState<'list' | 'chat'>(initialRoom ? 'chat' : 'list');
   const [readerOpen, setReaderOpen] = useState(false);
   const [newRoomOpen, setNewRoomOpen] = useState(false);
+  const [safeOpen, setSafeOpen] = useState(false);
+  const [safeMembers, setSafeMembers] = useState<Member[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const myColor = useProfileColor(session.userId) ?? MY_DEFAULT_COLOR;
 
@@ -106,6 +110,14 @@ export function Workspace({ session, onLogout, onSessionChange, embedded = false
     await updateProfile(session.authKey, { color });
     setProfileColors({ [session.userId]: color });
   }
+
+  // "Is this safe?": the people who can be asked are everyone in the open family.
+  const openSafeCheck = useCallback(() => {
+    setSafeOpen(true);
+    listMembers(activeId)
+      .then((r) => r.ok && setSafeMembers(r.members))
+      .catch(() => undefined);
+  }, [activeId]);
 
   const select = useCallback(
     (id: string) => {
@@ -178,6 +190,7 @@ export function Workspace({ session, onLogout, onSessionChange, embedded = false
       }}
       {...settingsProps}
       fullWidth={fullWidth}
+      onCheckSafe={openSafeCheck}
     />
   );
 
@@ -195,6 +208,8 @@ export function Workspace({ session, onLogout, onSessionChange, embedded = false
         me={me}
         connection={conn.state}
         fullWidth={fullWidth}
+        onCheckSafe={openSafeCheck}
+        lang={prefs.language}
       />
     );
     const comfortRoom = (narrow: boolean) => (
@@ -269,6 +284,14 @@ export function Workspace({ session, onLogout, onSessionChange, embedded = false
       {body}
       <ReaderSettingsSheet open={readerOpen} onClose={() => setReaderOpen(false)} speech={speech} myName={session.name} />
 
+      <SafeCheckSheet
+        open={safeOpen}
+        onClose={() => setSafeOpen(false)}
+        me={{ userId: session.userId, authKey: session.authKey }}
+        lang={prefs.language}
+        members={safeMembers}
+        speech={speech}
+      />
       <NewRoomSheet
         open={newRoomOpen}
         authKey={session.authKey}

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type { RoomSummary } from '../../nexconn/rooms';
 import type { ConnectionState } from '../../nexconn/types';
 import { BrandMark } from '../BrandMark';
-import { PlusIcon, SidebarIcon } from '../icons';
+import { PlusIcon, ShieldIcon, SidebarIcon } from '../icons';
 import { ProfileRow } from '../ProfileRow';
 import { formatListTime, senderLabel } from '../messageModel';
 import { RoomAvatar } from './RoomAvatar';
@@ -23,6 +23,8 @@ interface Props {
   settingsPanel: ReactNode;
   /** Mobile: the room list is the whole screen. */
   fullWidth?: boolean;
+  /** Opens "Is this safe?". */
+  onCheckSafe?: () => void;
 }
 
 function preview(r: RoomSummary, myId: string): string {
@@ -32,7 +34,7 @@ function preview(r: RoomSummary, myId: string): string {
   return `${who}: ${what}`;
 }
 
-export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, connection, collapsed, onToggleCollapsed, settingsOpen, onToggleSettings, settingsPanel, fullWidth }: Props) {
+export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, connection, collapsed, onToggleCollapsed, settingsOpen, onToggleSettings, settingsPanel, fullWidth, onCheckSafe }: Props) {
   const rail = collapsed && !fullWidth;
   const totalUnread = rooms.reduce((n, r) => n + r.unread, 0);
 
@@ -58,6 +60,21 @@ export function Sidebar({ rooms, loaded, activeId, onSelect, onNewRoom, me, conn
           </button>
         )}
       </div>
+
+      {onCheckSafe && (
+        <div className={rail ? 'flex justify-center px-2 pt-2' : 'px-3 pt-2'}>
+          <button
+            type="button"
+            onClick={onCheckSafe}
+            aria-label={rail ? 'Is this safe? Check a message' : undefined}
+            title={rail ? 'Is this safe?' : undefined}
+            className={`safe-cta !min-h-[48px] font-semibold ${rail ? 'w-12 justify-center !px-0' : 'w-full !py-1.5'}`}
+          >
+            <ShieldIcon />
+            {!rail && <span>Is this safe? Check a message</span>}
+          </button>
+        </div>
+      )}
 
       {!rail && (
         <h2 className="px-4 pb-1 pt-3 text-[1.25rem] font-bold">

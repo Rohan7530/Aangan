@@ -221,3 +221,40 @@ export function GearIcon() {
     </svg>
   );
 }
+
+export function ShieldIcon() {
+  return (
+    <svg {...base}>
+      <path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.3 7.5 9.5 4.3-1.2 7.5-4.9 7.5-9.5V6L12 3z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+
+export function AlertIcon() {
+  return (
+    <svg {...base}>
+      <path d="M12 3 2.5 20h19L12 3z" />
+      <path d="M12 10v4" />
+      <path d="M12 17.5h.01" />
+    </svg>
+  );
+}
+
+export function SparkIcon() {
+  return (
+    <svg {...base}>
+      <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6" />
+    </svg>
+  );
+}
+
+export function UsersIcon() {
+  return (
+    <svg {...base}>
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5" />
+      <path d="M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.8c1.6.8 2.6 2.6 3 5.2" />
+    </svg>
+  );
+}

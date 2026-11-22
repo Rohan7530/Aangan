@@ -116,3 +116,58 @@ export async function getRoomPhotos(authKey: string, channelIds: string[]): Prom
   const r = await call<{ photos?: Record<string, string> }>(`/api/room-photos?ids=${encodeURIComponent(channelIds.join(','))}`, { authKey });
   return r.photos ?? {};
 }
+
+// ---- AI features (our server proxies the Python AI service) ----------------------
+
+export type ReaderLang = 'en' | 'hi' | 'mr' | 'ta' | 'bn';
+
+export interface ShieldVerdict {
+  level: 'safe' | 'caution' | 'danger';
+  score: number;
+  category: string | null;
+  signals: string[];
+  /** Short heading in the reader's language. */
+  title: string;
+  /** Up to three plain sentences in the reader's language. */
+  advice: string[];
+  explanation: string | null;
+  engine: 'rules' | 'ai';
+  cached: boolean;
+}
+
+/** Background check of a message someone sent in a room. */
+export function shieldScan(authKey: string, text: string, lang: ReaderLang) {
+  return call<ShieldVerdict>('/api/shield/scan', { method: 'POST', authKey, body: JSON.stringify({ text, lang }) });
+}
+
+/** "Is this safe?": a message the reader got elsewhere (SMS, WhatsApp, a call). */
+export function shieldCheck(authKey: string, text: string, lang: ReaderLang) {
+  return call<ShieldVerdict>('/api/shield/check', { method: 'POST', authKey, body: JSON.stringify({ text, lang }) });
+}
+
+/** "Ask my family": posts the message and verdict in a private room with the trusted person. */
+export function askFamily(authKey: string, params: { guardianId: string; text: string; level?: ShieldVerdict['level']; category?: string | null }) {
+  return call<{ ok: true; channelId: string; guardianName: string }>('/api/shield/ask-family', {
+    method: 'POST',
+    authKey,
+    body: JSON.stringify(params),
+  });
+}
+
+export interface Summary {
+  lines: string[];
+  spoken: string;
+  engine: 'ai' | 'fallback';
+}
+
+export function aiSummary(authKey: string, lang: ReaderLang, reader: string, messages: { sender: string; text: string; at: number }[]) {
+  return call<Summary>('/api/ai/summary', { method: 'POST', authKey, body: JSON.stringify({ lang, reader, messages }) });
+}
+
+export function aiReplies(authKey: string, lang: ReaderLang, text: string, sender: string | null) {
+  return call<{ replies: string[]; engine: 'ai' | 'fallback' }>('/api/ai/replies', {
+    method: 'POST',
+    authKey,
+    body: JSON.stringify({ lang, text, sender }),
+  });
+}

@@ -12,6 +12,8 @@ interface StoreData {
   users: Record<string, { name: string; authKey: string; color?: string; photo?: string }>;
   roomPhotos: Record<string, string>;
   rooms: Record<string, { name: string; code: string; createdBy: string | null; createdAt: string }>;
+  /** Private two-person "safety" rooms (elder + trusted person) already created on Nexconn. */
+  safetyRooms?: Record<string, { elder: string; guardian: string; createdAt: string }>;
 }
 
 let data: StoreData | null = null;
@@ -54,6 +56,25 @@ export async function upsertUser(userId: string, name: string): Promise<string> 
   d.users[userId] = { ...existing, name, authKey };
   await save();
   return authKey;
+}
+
+export async function userById(userId: string): Promise<{ userId: string; name: string } | null> {
+  const d = await load();
+  const u = d.users[userId];
+  return u ? { userId, name: u.name } : null;
+}
+
+export async function safetyRoomFor(elder: string, guardian: string): Promise<string | null> {
+  const d = await load();
+  for (const [channelId, r] of Object.entries(d.safetyRooms ?? {})) if (r.elder === elder && r.guardian === guardian) return channelId;
+  return null;
+}
+
+export async function markSafetyRoom(channelId: string, elder: string, guardian: string): Promise<void> {
+  const d = await load();
+  d.safetyRooms ??= {};
+  d.safetyRooms[channelId] = { elder, guardian, createdAt: new Date().toISOString() };
+  await save();
 }
 
 export async function userByKey(authKey: string): Promise<{ userId: string; name: string } | null> {
