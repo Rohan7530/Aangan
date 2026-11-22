@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Aangan: project write-up</title>
+<!-- Source for the Nexconn Build Challenge 2026 write-up. Build with: python docs/writeup/build.py
+     {{...}} placeholders (App Key, QR codes, video link) are filled in at build time. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Martian+Mono:wght@400;500&family=Noto+Sans+Devanagari:wght@400;600;700&family=Unbounded:wght@500;700&display=block" rel="stylesheet">
+<style>
+@page { size: A4; margin: 0; }
+:root {
+  --cream: #fbf3e6; --paper: #fffaf2; --white: #ffffff;
+  --ink: #20170b; --muted: #6b5638; --brown: #9a4a0b; --line: #ecdcc0; --line-strong: #d9c19a;
+  --marigold: #ffb23f; --marigold-soft: #ffefd4; --ember: #ff7a3d; --jade: #0c8a70; --jade-soft: #dff5ee;
+  --danger: #b4231b; --danger-soft: #fde6e3;
+  --night: #060a13; --navy: #0b1222; --surface: #0f1830; --fill: #1a2647; --mist: #aab4cf; --snow: #eef2fb;
+  --display: "Unbounded", "Arial Black", sans-serif;
+  --sans: "Figtree", "Noto Sans Devanagari", "Segoe UI", sans-serif;
+  --mono: "Martian Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #777; }
+body { font-family: var(--sans); color: var(--ink); font-size: 10.4pt; line-height: 1.5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.page { width: 210mm; height: 297mm; position: relative; overflow: hidden; background: var(--cream); padding: 17mm 17mm 16mm; page-break-after: always; break-after: page; display: flex; flex-direction: column; }
+.page:last-child { page-break-after: auto; break-after: auto; }
+@media screen { .page { margin: 10mm auto; box-shadow: 0 4px 30px rgb(0 0 0 / .35); } }
+
+/* running header + footer */
+.run { display: flex; justify-content: space-between; align-items: center; font-size: 8pt; color: var(--muted); letter-spacing: .02em; margin-bottom: 7mm; }
+.run .brand { display: flex; align-items: center; gap: 2.2mm; font-family: var(--display); font-weight: 700; color: var(--ink); font-size: 9pt; letter-spacing: -.01em; }
+.run .sec { text-transform: uppercase; letter-spacing: .14em; font-weight: 700; color: var(--brown); }
+.foot { position: absolute; left: 17mm; right: 17mm; bottom: 8mm; display: flex; justify-content: space-between; font-size: 7.5pt; color: var(--muted); border-top: 0.3mm solid var(--line); padding-top: 2mm; }
+
+/* brand mark */
+.mark { width: 6mm; height: 6mm; border-radius: 1.6mm; background: linear-gradient(135deg, var(--marigold), var(--ember) 55%, #3fe3c0); position: relative; flex: none; }
+.mark::before { content: ""; position: absolute; inset: 22%; border-radius: 0.9mm; background: var(--night); }
+.mark::after { content: ""; position: absolute; inset: 40%; border-radius: 0.4mm; background: var(--marigold); }
+.mark.big { width: 15mm; height: 15mm; border-radius: 4mm; }
+.mark.big::before { border-radius: 2.2mm; }
+.mark.big::after { border-radius: 1mm; }
+
+/* type */
+.kicker { font-size: 8.5pt; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--brown); margin-bottom: 2.5mm; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 21pt; line-height: 1.1; letter-spacing: -.02em; margin-bottom: 3.5mm; }
+.crop { object-fit: cover; object-position: top; }
+h2 { font-family: var(--display); font-weight: 700; font-size: 12.5pt; line-height: 1.2; letter-spacing: -.01em; margin-bottom: 2mm; }
+h3 { font-size: 10.5pt; font-weight: 800; margin-bottom: 1mm; }
+.lede { font-size: 11.4pt; line-height: 1.45; color: #3b2c16; margin-bottom: 5mm; max-width: 160mm; }
+p + p { margin-top: 2.2mm; }
+.muted { color: var(--muted); }
+.small { font-size: 8.6pt; line-height: 1.45; }
+b, strong { font-weight: 800; }
+.hl { background: linear-gradient(transparent 58%, rgb(255 178 63 / .45) 58%); padding: 0 .6mm; }
+.deva { font-family: "Noto Sans Devanagari", var(--sans); }
+a { color: var(--brown); text-decoration: none; }
+.mono { font-family: var(--mono); font-size: 8.4pt; }
+.tight td { padding: 1.5mm 2.2mm; }
+.tight td.mono { font-size: 7pt; line-height: 1.45; }
+
+/* layout helpers */
+.grow { flex: 1; }
+.row { display: flex; gap: 5mm; }
+.col { display: flex; flex-direction: column; gap: 4mm; }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+.g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4.5mm; }
+.g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4mm; }
+.card { background: var(--white); border: 0.3mm solid var(--line); border-radius: 4mm; padding: 5mm; }
+.card.soft { background: var(--paper); }
+.card.night { background: var(--navy); border-color: #22305a; color: var(--snow); }
+.card.accent { background: var(--marigold-soft); border-color: #f3cf91; }
+.mt2 { margin-top: 2mm; } .mt3 { margin-top: 3mm; } .mt4 { margin-top: 4mm; } .mt5 { margin-top: 5mm; } .mt6 { margin-top: 6mm; }
+.mb2 { margin-bottom: 2mm; } .mb3 { margin-bottom: 3mm; } .mb4 { margin-bottom: 4mm; }
+
+/* stats */
+.stat .n { font-family: var(--display); font-weight: 700; font-size: 21pt; line-height: 1; letter-spacing: -.02em; color: var(--ink); }
+.stat .n small { font-size: 11pt; }
+.stat .l { font-size: 9pt; line-height: 1.35; margin-top: 2mm; color: #3b2c16; }
+.stat .s { font-size: 7.4pt; color: var(--muted); margin-top: 1.6mm; }
+
+/* chips */
+.chips { display: flex; flex-wrap: wrap; gap: 1.6mm; }
+.chip { font-size: 7.6pt; font-weight: 700; padding: .8mm 2.4mm; border-radius: 99px; background: var(--marigold-soft); color: var(--brown); border: 0.25mm solid #f1cd8d; white-space: nowrap; }
+.chip.nx { background: #e8eefc; color: #233f8f; border-color: #c4d2f4; }
+.chip.ok { background: var(--jade-soft); color: #05624f; border-color: #a9e2d1; }
+.chip.next { background: #f1ece4; color: var(--muted); border-color: var(--line-strong); }
+.chip.dark { background: rgb(255 178 63 / .14); color: #ffc35f; border-color: rgb(255 178 63 / .35); }
+
+/* tables */
+table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 8.7pt; line-height: 1.4; }
+th { text-align: left; font-size: 7.6pt; letter-spacing: .1em; text-transform: uppercase; color: var(--brown); font-weight: 800; padding: 2mm 2.5mm; border-bottom: 0.4mm solid var(--line-strong); }
+td { padding: 2.1mm 2.5mm; vertical-align: top; border-bottom: 0.25mm solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+td b { color: var(--ink); }
+.tbl { background: var(--white); border: 0.3mm solid var(--line); border-radius: 4mm; padding: 1.5mm 2mm; }
+
+/* screenshots */
+figure { margin: 0; }
+.shot { display: block; width: 100%; border-radius: 3mm; border: 0.3mm solid var(--line-strong); box-shadow: 0 1.5mm 5mm rgb(60 35 5 / .14); background: var(--navy); }
+.phone { border-radius: 6mm; border: 1.6mm solid #111725; box-shadow: 0 2mm 6mm rgb(20 12 2 / .25); }
+figcaption { font-size: 8pt; color: var(--muted); margin-top: 2mm; line-height: 1.35; }
+figcaption b { color: var(--ink); }
+
+/* numbered points */
+.pts { display: grid; gap: 3mm; }
+.pt { display: grid; grid-template-columns: 7mm 1fr; gap: 2.5mm; align-items: start; }
+.pt .k { width: 7mm; height: 7mm; border-radius: 2mm; background: var(--marigold); color: #1b1103; font-weight: 800; font-size: 9pt; display: grid; place-items: center; }
+.pt h3 { margin: .4mm 0 .6mm; }
+
+/* svg diagrams */
+svg { display: block; width: 100%; height: auto; }
+svg text { font-family: var(--sans); }
+.d-box { fill: var(--white); stroke: var(--line-strong); stroke-width: 1.2; }
+.d-night { fill: var(--navy); stroke: #2a3a68; stroke-width: 1.2; }
+.d-mari { fill: var(--marigold-soft); stroke: #e9b45e; stroke-width: 1.4; }
+.d-blue { fill: #eaf0fd; stroke: #9db2ea; stroke-width: 1.3; }
+.d-jade { fill: var(--jade-soft); stroke: #7fd0b9; stroke-width: 1.3; }
+.d-red { fill: var(--danger-soft); stroke: #eb9b92; stroke-width: 1.3; }
+.d-t { font-size: 13px; font-weight: 800; fill: var(--ink); }
+.d-s { font-size: 10.5px; fill: #4b3a20; }
+.d-xs { font-size: 9.5px; fill: var(--muted); }
+.d-w { fill: var(--snow); } .d-wm { fill: var(--mist); }
+.d-line { stroke: #b08b55; stroke-width: 1.5; fill: none; }
+.d-lab { font-size: 9.5px; font-weight: 700; fill: var(--brown); }
+
+/* cover */
+.cover { background: radial-gradient(120mm 90mm at 78% 8%, rgb(255 178 63 / .30), transparent 70%), radial-gradient(90mm 70mm at 8% 92%, rgb(63 227 192 / .14), transparent 70%), linear-gradient(180deg, #0b1222, #060a13); color: var(--snow); padding: 17mm; }
+.cover .word { display: flex; align-items: center; gap: 4.5mm; font-family: var(--display); font-weight: 700; font-size: 30pt; letter-spacing: -.02em; }
+.cover h1 { color: var(--snow); font-size: 30pt; line-height: 1.07; margin: 11mm 0 4mm; max-width: 160mm; }
+.cover h1 em { font-style: normal; color: var(--marigold); }
+.cover .sub { font-size: 12.5pt; color: var(--mist); max-width: 150mm; line-height: 1.45; }
+.cover .hero { position: relative; height: 126mm; margin-top: 9mm; }
+.cover .hero .desk { position: absolute; left: 0; top: 0; width: 146mm; border-radius: 3mm; border: 0.4mm solid #2a3a68; box-shadow: 0 4mm 14mm rgb(0 0 0 / .5); }
+.cover .hero .ph { position: absolute; right: 0; top: 6mm; width: 53mm; border-radius: 6.5mm; border: 1.8mm solid #1c2440; box-shadow: 0 5mm 14mm rgb(0 0 0 / .6); }
+.cover .tag { position: absolute; font-size: 8pt; font-weight: 700; background: rgb(6 10 19 / .82); border: 0.3mm solid rgb(255 178 63 / .5); color: #ffc35f; padding: 1mm 2.6mm; border-radius: 99px; }
+.qr { background: #fff; border-radius: 3mm; padding: 2mm; width: 25mm; height: 25mm; display: grid; place-items: center; }
+.qr svg { width: 100%; height: 100%; }
+.qr.missing { background: rgb(255 255 255 / .08); border: 0.3mm dashed rgb(255 255 255 / .35); color: var(--mist); font-size: 7.5pt; text-align: center; line-height: 1.3; padding: 2.5mm; }
+.links { display: flex; gap: 7mm; }
+.links .lk { display: flex; gap: 3mm; align-items: center; color: inherit; text-decoration: none; }
+.links .lk .t u { text-decoration: underline; text-decoration-color: rgb(255 178 63 / .7); text-underline-offset: .6mm; color: #ffc35f; }
+.links .lk .t { font-size: 8pt; line-height: 1.35; color: var(--mist); }
+.links .lk .t b { display: block; color: var(--snow); font-size: 9.5pt; }
+
+.quote { font-family: var(--display); font-size: 14pt; line-height: 1.3; letter-spacing: -.01em; }
+.callout { border-left: 1.2mm solid var(--marigold); padding: 1mm 0 1mm 4mm; }
+.keybox { font-family: var(--mono); font-size: 10pt; background: var(--night); color: #ffc35f; border-radius: 2.5mm; padding: 2.5mm 4mm; display: inline-block; letter-spacing: .04em; }
+</style>
+</head>
+<body>
+
+<!-- 1 · COVER -->
+<section class="page cover">
+  <div class="word"><span class="mark big"></span>Aangan</div>
+  <h1>Every message, made for <em>the person reading it.</em></h1>
+  <p class="sub">A family group chat for India's elders, built on Nexconn Chat. The family keeps typing as it always has. Each grandparent receives every message in their own language, at their own size, read aloud on request, and checked for scams.</p>
+
+  <div class="hero">
+    <img class="desk" src="shots/arjun-standard-dark.png" alt="Arjun's Standard view">
+    <img class="ph" src="shots/dadi-comfort-dark.png" alt="Dadi's Comfort view">
+    <span class="tag" style="left:4mm; top:-4mm">Arjun, 24 · Standard · English</span>
+    <span class="tag" style="right:2mm; top:2mm">Dadi, 71 · Comfort · हिंदी</span>
+  </div>
+
+  <div class="grow"></div>
+  <div class="row" style="justify-content: space-between; align-items: flex-end;">
+    <div>
+      <div class="chips mb3"><span class="chip dark">Track: Humanitarian &amp; Social Good</span><span class="chip dark">Web + iPhone</span><span class="chip dark">Live on Nexconn</span></div>
+      <div style="font-size:9pt; color: var(--mist)">Team <b style="color:var(--snow)">Bonfire Boyz</b> · Nexconn Build Challenge 2026</div>
+    </div>
+  </div>
+  <div class="links mt5">
+    <a class="lk" href="https://aangan-d550.onrender.com"><div class="qr">{{QR_APP}}</div><div class="t"><b>Live app</b><u>aangan-d550<br>.onrender.com</u></div></a>
+    <a class="lk" href="{{VIDEO_HREF}}">{{QR_VIDEO_BLOCK}}<div class="t"><b>Demo video</b><u>{{VIDEO_LABEL}}</u></div></a>
+    <a class="lk" href="https://github.com/asmik417/Aangan"><div class="qr">{{QR_REPO}}</div><div class="t"><b>Source code</b><u>github.com/<br>asmik417/Aangan</u></div></a>
+  </div>
+</section>
+
+<!-- 2 · AT A GLANCE -->
+<section class="page">
+  <div class="run"><span class="brand"><span class="mark"></span>Aangan</span><span class="sec">At a glance</span></div>
+  <div class="kicker">The one-page version</div>
+  <h1>Grandparents are in the family group. They just can't use it.</h1>
+  <p class="lede">India's family life now runs through group chats, but most of its 149 million people over 60 cannot fully take part: the text is too small, the language is wrong, typing is hard, and the same chats carry the scams that target them. Aangan fixes this without asking anyone to change how they type.</p>
+
+  <div class="g4 mb4">
+    <div class="card stat"><div class="n">149<small>M</small></div><div class="l">Indians aged 60+, rising to 347M by 2050</div><div class="s">UNFPA 2023</div></div>
+    <div class="card stat"><div class="n">3 in 5</div><div class="l">elders cannot read or write</div><div class="s">LASI Wave 1</div></div>
+    <div class="card stat"><div class="n">4 in 5</div><div class="l">cannot use a digital device comfortably</div><div class="s">HelpAge India 2024</div></div>
+    <div class="card stat"><div class="n" style="font-size:17pt">₹4,005<small> cr</small></div><div class="l">lost by 1,03,488 seniors to fraud in 2025</div><div class="s">MHA reply, as reported</div></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <h2>The idea</h2>
+      <p>Messengers send the sender's version of a message to everyone. Aangan keeps one original and lets <span class="hl">the reader decide how it looks, sounds and reads</span>: language, script, text size, layout and voice. Arjun types Hinglish; Papa reads English; Dadi reads large Hindi and can tap Listen.</p>
+    </div>
+    <div class="card">
+      <h2>What works today</h2>
+      <div class="chips mt2">
+        <span class="chip ok">Comfort &amp; Standard modes</span><span class="chip ok">Translation per reader</span><span class="chip ok">Listen</span><span class="chip ok">Voice reply</span><span class="chip ok">Scam shield</span><span class="chip ok">Is this safe?</span><span class="chip ok">Ask my family</span><span class="chip ok">What did I miss?</span><span class="chip ok">Quick replies</span><span class="chip ok">Seen by</span><span class="chip ok">Photos &amp; reactions</span><span class="chip ok">Invites</span><span class="chip ok">iPhone app</span><span class="chip next">Daily check-in: next</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card night mt4">
+    <div class="row" style="align-items:center; justify-content: space-between">
+      <div>
+        <h2 style="color:var(--snow)">Built on Nexconn Chat SDK</h2>
+        <p class="small" style="color:var(--mist); max-width: 105mm">Group channels, real-time messages, voice messages, photos, read receipts, presence, message metadata, user profiles, built-in translation, and the Platform Chat API on the server. Page 12 maps every feature to its SDK call.</p>
+      </div>
+      <div style="text-align:right">
+        <div class="small" style="color:var(--mist); margin-bottom:1.5mm">Nexconn App Key</div>
+        <div class="keybox">{{APP_KEY}}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g3 mt4">
+    <div><h3>Live</h3><p class="small">One Render service serves the web app and API. iPhone app on Expo, same backend.</p></div>
+    <div><h3>Tested</h3><p class="small">118 automated AI tests, an API smoke test, typechecks for server, web and iPhone.</p></div>
+    <div><h3>Safe by design</h3><p class="small">App Secret never leaves the server. Every AI feature falls back to rules, never an error.</p></div>
+  </div>
+  <div class="foot"><span>Aangan · Nexconn Build Challenge 2026</span><span>2</span></div>
+</section>
+
+<!-- 3 · THE PROBLEM -->
+<section class="page">
+  <div class="run"><span class="brand"><span class="mark"></span>Aangan</span><span class="sec">The problem</span></div>
+  <div class="kicker">Why we built it</div>
+  <h1>The message reached Dadi's phone. Not in a form she could use.</h1>
+  <p class="lede">More elders live apart from their children: about one in five live alone or only with a spouse, "left behind at their ancestral homes" as the young move to cities. For these families the group chat is where plans are made, photos are shared and health is discussed. A chat built for fast English or Hinglish shuts the elders out.</p>
+
+  <div class="card mb4">
+    <h2 class="mb3">The barriers stack up</h2>
+    <svg viewBox="0 0 640 228" role="img" aria-label="Share of Indians aged 60 and over facing each barrier">
+      <g font-size="11">
+        <text x="232" y="18" text-anchor="end" class="d-s">Cannot use a digital device comfortably</text><rect x="244" y="5" width="320" height="18" rx="3" fill="#ffb23f"/><text x="572" y="18" class="d-t" font-size="11">80%</text>
+        <text x="232" y="54" text-anchor="end" class="d-s">Cannot read or write</text><rect x="244" y="41" width="241.6" height="18" rx="3" fill="#ffb23f"/><text x="493" y="54" class="d-t" font-size="11">60.4%</text>
+        <text x="232" y="90" text-anchor="end" class="d-s">Have no digital device</text><rect x="244" y="77" width="236" height="18" rx="3" fill="#e2c9a0"/><text x="488" y="90" class="d-t" font-size="11">59%</text>
+        <text x="232" y="126" text-anchor="end" class="d-s">Low near vision (measured)</text><rect x="244" y="113" width="128.8" height="18" rx="3" fill="#e2c9a0"/><text x="381" y="126" class="d-t" font-size="11">32.2%</text>
+        <text x="232" y="162" text-anchor="end" class="d-s">Cataract (self-reported)</text><rect x="244" y="149" width="92.8" height="18" rx="3" fill="#e2c9a0"/><text x="345" y="162" class="d-t" font-size="11">23.2%</text>
+        <text x="232" y="198" text-anchor="end" class="d-s">Frequently lonely</text><rect x="244" y="185" width="53.6" height="18" rx="3" fill="#e2c9a0"/><text x="306" y="198" class="d-t" font-size="11">13.4%</text>
+        <line x1="244" y1="0" x2="244" y2="208" stroke="#b08b55" stroke-width="1.2"/>
+      </g>
+      <text x="0" y="224" class="d-xs">Share of Indians aged 60+. LASI Wave 1 (2017–18, 31,902 people aged 60+); HelpAge India 2024 (5,169 elders, 20 cities); Srivastava &amp; Srivastava 2023.</text>
+    </svg>
+  </div>
+
+  <div class="g3">
+    <div class="card accent stat"><div class="n">₹22,845<small> cr</small></div><div class="l">lost by Indians to cyber fraud in 2024, three times 2023</div><div class="s">MHA, reported by Scroll</div></div>
+    <div class="card accent stat"><div class="n">1,23,672</div><div class="l">"digital arrest" cases in 2024, up from 39,925 in 2022</div><div class="s">NCRP data, reported by TOI / The Wire</div></div>
+    <div class="card accent stat"><div class="n">~60%</div><div class="l">of Nagpur's 2025 cyber fraud victims were senior citizens</div><div class="s">Nagpur Today</div></div>
+  </div>
+  <p class="small muted mt4">Hyderabad police found most digital-arrest victims were 60 to 80, often with children abroad. WhatsApp users over 65 were the most vulnerable to misinformation in an Indian study (Bapaye &amp; Bapaye, 2021). Full sources on page 16.</p>
+  <div class="foot"><span>Aangan · Nexconn Build Challenge 2026</span><span>3</span></div>
+</section>
+
+<!-- 4 · PAIN POINTS -->
+<section class="page">
+  <div class="run"><span class="brand"><span class="mark"></span>Aangan</span><span class="sec">Pain points</span></div>
+  <div class="kicker">Five barriers, one family</div>
+  <h1>An elder who struggles with one barrier usually struggles with several.</h1>
+  <p class="lede">That is why a single setting never brings them back into the conversation. Each row is a real scene from the Sharma family, our demo family.</p>
+  <div class="tbl">
+    <table>
+      <tr><th style="width:27%">Pain point</th><th style="width:43%">Evidence</th><th>In the Sharma family</th></tr>
+      <tr><td><b>1. Text too small to read</b></td><td>32.2% of Indians 60+ have low near vision and 23.2% report cataract, yet only 37.4% use spectacles (LASI).</td><td>"Lunch moved to 1 pm" scrolls past in small grey text. Dadi arrives at 12.</td></tr>
+      <tr><td><b>2. The wrong language or script</b></td><td>India has 121 languages (Census 2011); 98% of internet users go online in Indic languages (IAMAI-Kantar 2024). Generic translation fails on Hinglish: Nexconn's built-in engine turned "kal subah 9 baje aa jana" (come tomorrow at 9) into "if you wake up at 9" in our test.</td><td>Arjun writes Hinglish; Dadi reads Devanagari. She guesses, or waits for a call that doesn't come.</td></tr>
+      <tr><td><b>3. Typing, and reading itself, are hard</b></td><td>Only 39.6% of Indians 60+ are literate (LASI). 59% have no digital device; 66% find digital tools "too confusing" (HelpAge India).</td><td>Dadi has things to say but types one letter at a time, so she sends a thumbs-up and stops.</td></tr>
+      <tr><td><b>4. Fraud and fake forwards</b></td><td>Digital arrest scams: ₹91 crore in 2022 to ₹1,935.5 crore in 2024 (NCRP). Most Hyderabad victims were 60 to 80.</td><td>A message says her grandson is in trouble and asks for money on a link. Nobody sees it until the money is gone.</td></tr>
+      <tr><td><b>5. Loneliness and silent emergencies</b></td><td>13.4% of Indian elders feel frequently lonely; 22.9% report a fall (LASI). Loneliness is linked to 871,000 deaths a year worldwide (WHO 2025).</td><td>Dadi goes quiet in the group. The family assumes she is busy.</td></tr>
+    </table>
+  </div>
+
+  <h2 class="mt6 mb3">Who it affects</h2>
+  <div class="g3">
+    <div class="card"><h3>The elder</h3><p class="small"><b>Dadi, 71</b>, a widow in Lucknow. Reads Hindi comfortably, English slowly, types with one finger.</p><p class="small mt2"><b>Needs:</b> messages in her language and size, a way to listen, a way to reply by speaking.</p></div>
+    <div class="card"><h3>The adult child</h3><p class="small"><b>Arjun, 24</b>, working in Bengaluru. Types Hinglish in quick bursts between meetings.</p><p class="small mt2"><b>Needs:</b> to know she got the message and is safe, with no change to how he types.</p></div>
+    <div class="card"><h3>The whole family</h3><p class="small">One group holds lunch plans, photos, doctor visits and forwards, but splits into "the young group" and phone calls.</p><p class="small mt2"><b>Needs:</b> one room where everyone takes part their own way.</p></div>
+  </div>
+  <p class="small mt4 callout"><b>The person who suffers is the elder; the person who acts is the adult child.</b> Aangan is designed for the first and adopted through the second: one adult child invites five to ten family members.</p>
+  <div class="foot"><span>Aangan · Nexconn Build Challenge 2026</span><span>4</span></div>
+</section>
+
+<!-- 5 · THE IDEA -->
+<section class="page">
+  <div class="run"><span class="brand"><span class="mark"></span>Aangan</span><span class="sec">Our insight</span></div>
+  <div class="kicker">The idea</div>
+  <h1>The problem isn't the elder. It's that everyone gets the sender's version.</h1>
+  <p class="lede">Every option today asks the elder to adapt to the message. Aangan adapts the message to the elder. One message is stored once, unchanged; each member's app turns it into their form.</p>
+
+  <div class="card mb4">
+    <svg viewBox="0 0 680 300" role="img" aria-label="One Hinglish message reaches three family members in three forms">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#b08b55"/></marker></defs>
+      <!-- sender -->
+      <rect x="6" y="104" width="170" height="92" rx="12" class="d-mari"/>
+      <text x="20" y="128" class="d-xs">ARJUN TYPES, AS ALWAYS</text>
+      <text x="20" y="152" class="d-t" font-size="14">"Kal lunch 1 baje,</text>
+      <text x="20" y="172" class="d-t" font-size="14">sab aa jana"</text>
+      <text x="20" y="188" class="d-xs">Hinglish · fast · small</text>
+      <!-- nexconn -->
+      <path d="M176 150 H222" class="d-line" marker-end="url(#ar)"/>
+      <rect x="226" y="92" width="150" height="116" rx="12" class="d-blue"/>
+      <text x="301" y="118" text-anchor="middle" class="d-xs" style="fill:#233f8f; font-weight:700">NEXCONN GROUP CHANNEL</text>
+      <text x="301" y="146" text-anchor="middle" class="d-t">One original</text>
+      <text x="301" y="164" text-anchor="middle" class="d-t">message</text>
+      <text x="301" y="186" text-anchor="middle" class="d-xs">stored once, never rewritten</text>
+      <!-- readers -->
+      <path d="M376 130 C 410 130, 410 46, 444 46" class="d-line" marker-end="url(#ar)"/>
+      <path d="M376 150 H444" class="d-line" marker-end="url(#ar)"/>
+      <path d="M376 170 C 410 170, 410 254, 444 254" class="d-line" marker-end="url(#ar)"/>
+      <text x="380" y="210" class="d-lab">one per reader</text>
+
+      <rect x="448" y="8" width="226" height="76" rx="12" class="d-box"/>
+      <text x="462" y="28" class="d-xs">PAPA · STANDARD · ENGLISH</text>
+      <text x="462" y="52" class="d-t">Lunch tomorrow at 1 pm,</text>
+      <text x="462" y="70" class="d-t">everyone come.</text>
+
+      <rect x="448" y="100" width="226" height="100" rx="12" class="d-night"/>
+      <text x="462" y="120" class="d-wm" font-size="9.5">DADI · COMFORT · HINDI · LARGE</text>
+      <text x="462" y="150" class="d-w deva" font-size="18" font-weight="700" style="font-family:'Noto Sans Devanagari'">कल दोपहर 1 बजे खाना,</text>
+      <text x="462" y="174" class="d-w deva" font-size="18" font-weight="700" style="font-family:'Noto Sans Devanagari'">सब आ जाना।</text>
+      <rect x="600" y="180" width="62" height="14" rx="7" fill="#ffb23f"/><text x="631" y="190.5" text-anchor="middle" font-size="8.5" font-weight="800" fill="#1b1103">▶ Listen</text>
+
+      <rect x="448" y="216" width="226" height="76" rx="12" class="d-box"/>
+      <text x="462" y="236" class="d-xs">ARJUN · HIS OWN WORDS</text>
+      <text x="462" y="260" class="d-t">Kal lunch 1 baje, sab aa jana</text>
+      <text x="462" y="278" class="d-xs">Seen by Dadi, Papa</text>
+    </svg>
+  </div>
+
+  <div class="g3">
+    <div class="pt"><span class="k">1</span><div><h3>Reader-side rendering</h3><p class="small">Language, script, size, layout and voice are chosen by the reader, once, in "How I read". Nobody changes for anybody else.</p></div></div>
+    <div class="pt"><span class="k">2</span><div><h3>Built for how India types</h3><p class="small">Hinglish is treated as its own language. Times, names and numbers are kept exactly: "9 baje" stays 9.</p></div></div>
+    <div class="pt"><span class="k">3</span><div><h3>Trust in the interface</h3><p class="small">Every translation says it is one and keeps the original in view. If translation isn't good enough, the original shows with a plain note, never a guess.</p></div></div>
+  </div>
+
+  <div class="tbl mt5">
+    <table>
+      <tr><th style="width:30%">Today's option</th><th>Where it fails the elder</th></tr>
+      <tr><td><b>WhatsApp and similar</b></td><td>The sender's words, language and script are what everyone gets; scam forwards look like any other message.</td></tr>
+      <tr><td><b>Phone font size, screen readers</b></td><td>Scales the whole phone and breaks layouts; does nothing for language; hard to learn late in life.</td></tr>
+      <tr><td><b>"Senior" phones and launchers</b></td><td>Cut the elder off from the family's real chat, or are a second app the family never opens.</td></tr>
+      <tr><td><b>Translation apps</b></td><td>Copy, switch app, paste, read, switch back: impossible in a busy group.</td></tr>
+    </table>
+  </div>
+  <div class="foot"><span>Aangan · Nexconn Build Challenge 2026</span><span>5</span></div>
+</section>
+
+<!-- 6 · USP / PILLARS -->
+<section class="page">
+  <div class="run"><span class="brand"><span class="mark"></span>Aangan</span><span class="sec">Innovation</span></div>
+  <div class="kicker">What makes it different</div>
+  <h1>A personal AI interpreter and guardian for every elder, inside the family chat.</h1>
+  <p class="lede">Each message is made understandable, easy to answer and checked for scams. The family does not change how it types, and the elder is never moved to a separate "senior" space: grandson and grandmother see the same message at the same moment, each in their own way.</p>
+
+  <div class="card night mb4" style="text-align:center; padding: 4mm"><div class="quote" style="color:var(--snow)">Every message, made for the person reading it</div></div>
+  <div class="g3">
+    <div class="card">
+      <h2>Understand</h2>
+      <div class="col small mt3" style="gap:2mm">
+        <div><b>Translation per reader</b>, Hinglish-aware, in English, Hindi, Marathi, Tamil or Bengali</div>
+        <div><b>Listen</b>: any message read aloud in the reader's language</div>
+        <div><b>What did I miss?</b> A short AI summary of the recent messages, in her language</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Respond</h2>
+      <div class="col small mt3" style="gap:2mm">
+        <div><b>Voice reply</b>: speak, see the words, send a real voice message with its transcript</div>
+        <div><b>Quick replies</b> suggested in her own language, one tap to send</div>
+        <div><b>Seen by</b> under each message, so the family knows she read it</div>
+      </div>
+    </div>
+    <div class="card accent" style="border-width:0.5mm">
+      <h2>Protect</h2>
+      <div class="col small mt3" style="gap:2mm">
+        <div><b>Risk check on every message</b> in the family room</div>
+        <div><b>Is this safe?</b> for any SMS or WhatsApp message from outside</div>
+        <div><b>Ask my family</b>: one button alerts a trusted family member privately</div>
+        <div><b>Warnings sized to the reader</b>: large for Dadi, a small note for Arjun</div>
+      </div>
+    </div>
+  </div>
+  <div class="card soft mt4" style="text-align:center; padding: 3mm"><span class="small"><b>Foundation:</b> Nexconn group chat, read receipts, presence, voice messages, message metadata</span></div>
+
+  <h2 class="mt6 mb3">Why now</h2>
+  <div class="g3">
+    <div class="small"><b>AI that reads code-mixed Indian languages</b> became cheap and good enough in the last two years. We use Sarvam (built for Indian languages) first, Gemini as backup.</div>
+    <div class="small"><b>Speech in the browser</b>: recognition and synthesis now work on ordinary phones, so Listen and voice reply need no extra app.</div>
+    <div class="small"><b>Managed real-time chat</b>: Nexconn gives us groups, receipts, presence and voice messages, so a small team spends its effort on the reader.</div>
+  </div>
+  <div class="foot"><span>Aangan · Nexconn Build Challenge 2026</span><span>6</span></div>
+</section>
+
+<!-- 7 · FEATURE: TWO READERS -->
+<section class="page">
+  <div class="run"><span class="brand"><span class="mark"></span>Aangan</span><span class="sec">Feature tour · 1</span></div>
+  <div class="kicker">Comfort and Standard</div>
+  <h1>Same room, same moment, two ways to read it.</h1>
+  <p class="lede" style="margin-bottom:4mm">Standard is a full three-pane chat for the family. Comfort is the same live room with larger type, one column, labelled buttons and Listen in every incoming bubble. Each reader picks once.</p>
+  <figure><img class="shot" src="shots/arjun-standard-dark.png" alt=""><figcaption><b>Arjun, Standard, English.</b> My families on the left; the live chat shows Dadi's translated replies, "Seen by", and a small scam note.</figcaption></figure>
+  <div class="row mt4" style="align-items:flex-start">
+    <figure style="width:37mm"><img class="shot phone" src="shots/dadi-comfort-dark.png" alt=""></figure>
+    <figure style="width:37mm"><img class="shot phone" src="shots/dadi-comfort-light.png" alt=""></figure>
+    <div class="col grow" style="gap:3mm">
+      <figcaption style="margin:0"><b>Dadi, Comfort, Hindi.</b> The same conversation in large Devanagari, dark and light. The theme follows her phone.</figcaption>
+      <div class="pts">
+        <div class="pt"><span class="k">A</span><div class="small"><b>Text at AAA contrast</b> (7:1) in Comfort, at three sizes.</div></div>
+        <div class="pt"><span class="k">B</span><div class="small"><b>Labelled buttons</b>: "Listen", "Speak", "Send", never icons alone.</div></div>
+        <div class="pt"><span class="k">C</span><div class="small"><b>The original is always one glance away</b> under a translation.</div></div>
+      </div>
+      <div class="chips"><span class="chip nx">GroupChannel</span><span class="chip nx">addMessageHandler</span><span class="chip nx">createMessagesQuery</span><span class="chip nx">online status</span></div>
+    </div>
+  </div>
+  <div class="foot"><span>Aangan · Nexconn Build Challenge 2026</span><span>7</span></div>
+</section>
+
+<!-- 8 · FEATURE: SCAM SHIELD -->
+<section class="page">
+  <div class="run"><span class="brand"><span class="mark"></span>Aangan</span><span class="sec">Feature tour · 2</span></div>
+  <div class="kicker">Scam shield</div>
+  <h1>Protection sized to the reader.</h1>
+  <p class="lede" style="margin-bottom:4mm">A risky message gives Dadi a large, plain warning she can listen to, with one button to ask her family. Arjun sees a small note on the same message. Most scams arrive from outside the family, so "Is this safe?" checks anything she pastes.</p>
+  <div class="row" style="align-items:flex-start">
+    <figure style="width:45mm"><img class="shot phone crop" style="height:110mm; object-position: 50% 9%" src="shots/scam-comfort.png" alt=""><figcaption><b>Dadi:</b> a full warning in Hindi, Listen, and "Ask my family".</figcaption></figure>
+    <div class="col grow">
+      <figure><img class="shot crop" style="height:50mm" src="shots/is-this-safe.png" alt=""><figcaption><b>Is this safe?</b> A pasted fake-KYC SMS gets a danger verdict and plain advice.</figcaption></figure>
+      <figure><img class="shot" src="shots/scam-standard.png" alt=""><figcaption><b>Arjun:</b> the same message carries a small note, not an alarm.</figcaption></figure>
+    </div>
+  </div>
+  <div class="card mt4" style="padding:4mm">
+    <svg viewBox="0 0 700 150" role="img" aria-label="Scam shield pipeline">
+      <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#b08b55"/></marker></defs>
+      <rect x="2" y="30" width="110" height="64" rx="10" class="d-box"/><text x="57" y="56" text-anchor="middle" class="d-t" font-size="11.5">Message</text><text x="57" y="72" text-anchor="middle" class="d-xs">in the room, or</text><text x="57" y="84" text-anchor="middle" class="d-xs">pasted from SMS</text>
+      <path d="M112 62 H134" class="d-line" marker-end="url(#ar2)"/>
+      <rect x="138" y="30" width="128" height="64" rx="10" class="d-mari"/><text x="202" y="54" text-anchor="middle" class="d-t" font-size="11.5">Rules first</text><text x="202" y="70" text-anchor="middle" class="d-xs">weighted, instant, offline</text><text x="202" y="82" text-anchor="middle" class="d-xs">en · hi · Hinglish · mr</text>
+      <path d="M266 62 H288" class="d-line" marker-end="url(#ar2)"/>
+      <path d="M326 34 L362 62 L326 90 L290 62 Z" class="d-box"/><text x="326" y="66" text-anchor="middle" class="d-t" font-size="10.5">flagged?</text>
+      <path d="M326 90 V118" class="d-line" marker-end="url(#ar2)"/><text x="334" y="110" class="d-lab">no</text>
+      <rect x="262" y="120" width="128" height="26" rx="8" class="d-jade"/><text x="326" y="137" text-anchor="middle" class="d-s" font-weight="700">No warning, no AI call</text>
+      <path d="M362 62 H384" class="d-line" marker-end="url(#ar2)"/><text x="366" y="55" class="d-lab">yes</text>
+      <rect x="388" y="30" width="140" height="64" rx="10" class="d-blue"/><text x="458" y="54" text-anchor="middle" class="d-t" font-size="11.5">AI explains</text><text x="458" y="70" text-anchor="middle" class="d-xs">risk, category, plain reason</text><text x="458" y="82" text-anchor="middle" class="d-xs">in the reader's language</text>
+      <path d="M528 62 H550" class="d-line" marker-end="url(#ar2)"/>
+      <rect x="554" y="18" width="144" height="40" rx="10" class="d-red"/><text x="626" y="36" text-anchor="middle" class="d-t" font-size="11">Warning sized to reader</text><text x="626" y="50" text-anchor="middle" class="d-xs">large + Listen · or small note</text>
+      <rect x="554" y="66" width="144" height="40" rx="10" class="d-mari"/><text x="626" y="84" text-anchor="middle" class="d-t" font-size="11">Ask my family</text><text x="626" y="98" text-anchor="middle" class="d-xs">private Nexconn group</text>
+      <text x="458" y="118" text-anchor="middle" class="d-xs">AI down? The rules verdict is shown.</text><text x="458" y="131" text-anchor="middle" class="d-xs">Never an error screen.</text>
+      <text x="2" y="14" class="d-lab">HOW A MESSAGE IS CHECKED</text>
+    </svg>
+  </div>
+  <div class="chips mt3"><span class="chip nx">Message handlers</span><span class="chip nx">Platform API: group-channel/create + message/send</span><span class="chip">Categories: digital arrest · fake KYC · lottery · "grandson in trouble" · health hoax</span></div>
+  <div class="foot"><span>Aangan · Nexconn Build Challenge 2026</span><span>8</span></div>
+</section>
+
+<!-- 9 · FEATURE: SUMMARY + TRANSLATION -->
+<section class="page">
+  <div class="run"><span class="brand"><span class="mark"></span>Aangan</span><span class="sec">Feature tour · 3</span></div>
+  <div class="kicker">Understand and respond</div>
+  <h1>Catch up in one tap. Reply without typing.</h1>
+  <p class="lede" style="margin-bottom:4mm">"What did I miss?" sits under the room header. Tap it and the AI writes a short summary of the new messages, or the recent ones, in the reader's language, with Listen. Quick replies come in her language too.</p>
+  <div class="row" style="align-items:flex-start">
+    <figure style="width:45mm"><img class="shot phone crop" style="height:98mm" src="shots/summary-dadi.png" alt=""><figcaption><b>Dadi:</b> the summary in Hindi, scam warning included.</figcaption></figure>
+    <div class="col grow">
+      <figure><img class="shot crop" style="height:52mm" src="shots/summary-arjun.png" alt=""><figcaption><b>Arjun:</b> the same feature in Standard mode, in English.</figcaption></figure>
+      <figure><img class="shot" src="shots/translation-translated.png" alt=""><img class="shot mt2" src="shots/translation-original.png" alt=""><figcaption><b>Translation you can trust:</b> every translation is labelled; one tap shows Dadi's own Hindi words.</figcaption></figure>
+    </div>
+  </div>
+  <div class="g3 mt5">
+    <div class="card"><h3>Listen</h3><p class="small">Reads the translated message aloud in the reader's language. For elders who find reading tiring or cannot read.</p><div class="chips mt2"><span class="chip nx">Message content</span></div></div>
+    <div class="card"><h3>Voice reply</h3><p class="small">Speak, see the words, then send a real voice message with its transcript. Others read and translate it like text.</p><div class="chips mt2"><span class="chip nx">HD voice message</span><span class="chip nx">extra: transcript</span></div></div>
+    <div class="card"><h3>Seen by</h3><p class="small">Under each message, so Arjun knows Dadi read it without having to call.</p><div class="chips mt2"><span class="chip nx">Read receipts</span></div></div>
+  </div>
+  <div class="foot"><span>Aangan · Nexconn Build Challenge 2026</span><span>9</span></div>
+</section>
+
+<!-- 10 · FEATURE: SETTINGS, SHOWCASE, LANDING -->
+<section class="page">
+  <div class="run"><span class="brand"><span class="mark"></span>Aangan</span><span class="sec">Feature tour · 4</span></div>
+  <div class="kicker">The whole product</div>
+  <h1>Set up once by the family. Simple for the elder ever after.</h1>
+  <p class="lede" style="margin-bottom:4mm">Arjun starts a family and shares an invite link. Each person chooses how they read in Settings. A live two-view showcase lets judges see both readers side by side.</p>
+  <div class="g2">
+    <figure><img class="shot crop" style="height:52mm" src="shots/how-i-read.png" alt=""><figcaption><b>How I read:</b> each person picks Standard or Comfort, a language and a text size, once. Settings also hold name, photo, colour, light/dark/system and sound.</figcaption></figure>
+    <figure><img class="shot crop" style="height:52mm" src="shots/landing.png" alt=""><figcaption><b>Welcome page:</b> a 3D courtyard ("aangan") for first-time visitors.</figcaption></figure>
+  </div>
+  <figure class="mt4"><img class="shot" src="shots/showcase.png" alt=""><figcaption><b>Live showcase</b> at /showcase: Arjun's web app and Dadi's phone, both connected to Nexconn at the same time.</figcaption></figure>
+  <div class="g3 mt4">
+    <div class="small"><b>Invites.</b> An invite link (/join/…) adds a relative to the family's Nexconn group; one adult child brings the whole family.</div>
+    <div class="small"><b>Photos and reactions.</b> Photos in the chat; emoji reactions stored as Nexconn message metadata.</div>
+    <div class="small"><b>One sign-in.</b> Type your name; the same name on the same device keeps the same identity.</div>
+  </div>
+  <div class="foot"><span>Aangan · Nexconn Build Challenge 2026</span><span>10</span></div>
+</section>
+
+<!-- 11 · IPHONE APP -->
+<section class="page">
+  <div class="run"><span class="brand"><span class="mark"></span>Aangan</span><span class="sec">Feature tour · 5</span></div>
+  <div class="kicker">iPhone app</div>
+  <h1>Aangan in Dadi's pocket.</h1>
+  <p class="lede" style="margin-bottom:4mm">A native app built with React Native and TypeScript on Expo, on the same backend. Three big tiles, nothing else to learn. It follows the phone's light or dark setting and opens in the reader's own language.</p>
+  <div class="g4" style="align-items:start">
+    <figure><img class="shot phone" src="shots/mobile-welcome-dark.png" alt=""><figcaption><b>Welcome:</b> type your name, or try the demo family.</figcaption></figure>
+    <figure><img class="shot phone" src="shots/mobile-home-dark.png" alt=""><figcaption><b>Home:</b> Is this safe?, Family chat, Settings.</figcaption></figure>
+    <figure><img class="shot phone" src="shots/mobile-safe-dark.png" alt=""><figcaption><b>Is this safe?</b> Paste, check, hear the answer.</figcaption></figure>
+    <figure><img class="shot phone" src="shots/mobile-home-light.png" alt=""><figcaption><b>Light theme</b>, warm cream like the website.</figcaption></figure>
+  </div>
+  <div class="row mt4" style="align-items:flex-start">
+    <figure style="width:38.5mm"><img class="shot phone" src="shots/mobile-home-hi-dark.png" alt=""><figcaption><b>Hindi:</b> the whole app follows the reader's language.</figcaption></figure>
+    <figure style="width:38.5mm"><img class="shot phone crop" style="height:87mm; object-position: 0 0" src="shots/mobile-settings-light.png" alt=""><figcaption><b>Settings:</b> language, text size, reading mode.</figcaption></figure>
+    <div class="col grow">
+      <div class="card accent" style="padding:4mm"><h3>Same app, five languages</h3><p class="small">English, हिन्दी, मराठी, தமிழ், বাংলা. The Dadi demo opens in Hindi, Comfort, larger text.</p></div>
+      <div class="card" style="padding:4mm"><h3>Is this safe?, native</h3><p class="small">The verdict reads itself aloud; "Ask Arjun" alerts the family.</p></div>
+      <div class="card" style="padding:4mm"><h3>Family chat, live</h3><p class="small">Nexconn has no React Native SDK, so the chat is our Nexconn web client in a WebView, signed in with the app's session. 64-point tap targets throughout.</p></div>
+      <p class="small muted">Screens captured from the app's Expo web preview; the same code runs in Expo Go on iPhone.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Aangan · Nexconn Build Challenge 2026</span><span>11</span></div>
+</section>
+
+<!-- 12 · NEXCONN -->
+<section class="page">
+  <div class="run"><span class="brand"><span class="mark"></span>Aangan</span><span class="sec">Nexconn SDK usage</span></div>
+  <div class="kicker">Required: features that use Nexconn</div>
+  <h1>Every conversation in Aangan runs on Nexconn.</h1>
+  <div class="row mb4" style="align-items:center; justify-content: space-between">
+    <p class="small" style="max-width:110mm">Web client: <span class="mono">@nexconn/chat</span> and <span class="mono">@nexconn/engine</span> 26.2.1, isolated in one folder (<span class="mono">web/src/nexconn/</span>). Server: the signed Platform Chat API, with automatic failover to the backup domain. Area: Singapore.</p>
+    <div style="text-align:right"><div class="small muted mb2">Nexconn App Key</div><div class="keybox">{{APP_KEY}}</div></div>
+  </div>
+  <div class="tbl">
+    <table class="tight">
+      <tr><th style="width:27%">Aangan feature</th><th style="width:42%">Nexconn API</th><th>Where</th></tr>
+      <tr><td><b>Sign-in and live connection</b></td><td class="mono">POST /v4/auth/access-token/issue · NCEngine.initialize · connect · addConnectionStatusHandler</td><td>Server issues the token; client connects, shows an offline notice</td></tr>
+      <tr><td><b>Families (group chats) and invites</b></td><td class="mono">POST /v4/group-channel/create · /join · GroupChannel.createJoinedGroupsByRoleQuery · getGroupsInfo</td><td>New family, invite links, My families list</td></tr>
+      <tr><td><b>Real-time messages, replies</b></td><td class="mono">sendMessage (SendTextMessageParams, SendReferenceMessageParams) · addMessageHandler</td><td>Chat, with sender name and photo in senderUserInfo</td></tr>
+      <tr><td><b>History and unread counts</b></td><td class="mono">BaseChannel.createMessagesQuery · createChannelsQuery · getMessagesByIds</td><td>Scroll back, room list previews, unread badges</td></tr>
+      <tr><td><b>Voice reply</b></td><td class="mono">sendMediaMessage (HD voice, RC:HQVCMsg) with transcript in content.extra</td><td>Elders reply by speaking</td></tr>
+      <tr><td><b>Photos</b></td><td class="mono">sendMediaMessage (image)</td><td>Share photos, lightbox</td></tr>
+      <tr><td><b>Reactions</b></td><td class="mono">Message.setMetadata / deleteMetadata · onMessageMetadataUpdated</td><td>Emoji reactions on any message</td></tr>
+      <tr><td><b>"Seen by"</b></td><td class="mono">sendReadReceiptResponse · createMessagesReadReceiptUsersQuery</td><td>Family knows the elder read it</td></tr>
+      <tr><td><b>Who is online</b></td><td class="mono">userModule.subscribeEvent · getSubscribeUsersOnlineStatus</td><td>Online dots in the family list</td></tr>
+      <tr><td><b>Members and profiles</b></td><td class="mono">createGroupMembersByRoleQuery · GroupChannelHandler · userModule.updateMyUserProfile</td><td>Member list, name, photo, colour</td></tr>
+      <tr><td><b>Built-in translation (fallback)</b></td><td class="mono">translateModule.translateMessages · addTranslateHandler</td><td>en→hi, en→mr, Devanagari→en when the AI is unavailable</td></tr>
+      <tr><td><b>Ask my family, demo family</b></td><td class="mono">POST /v4/group-channel/message/send (isEchoToSender)</td><td>Private alert to the guardian; seeds the showcase room</td></tr>
+    </table>
+  </div>
+  <p class="small muted mt3">The App Secret stays on the server: requests are signed with SHA1(secret + nonce + timestamp). The browser never calls the Nexconn REST API directly.</p>
+  <div class="foot"><span>Aangan · Nexconn Build Challenge 2026</span><span>12</span></div>
+</section>
+
+<!-- 13 · ARCHITECTURE -->
+<section class="page">
+  <div class="run"><span class="brand"><span class="mark"></span>Aangan</span><span class="sec">Architecture</span></div>
+  <div class="kicker">How it fits together</div>
+  <h1>Live chat on Nexconn. The reader's layer on top.</h1>
+  <p class="lede" style="margin-bottom:5mm">Clients talk to Nexconn directly for everything live. Our server only does what needs a secret or an AI: tokens, groups, translation, the scam shield and summaries.</p>
+  <div class="card">
+    <svg viewBox="0 0 760 480" role="img" aria-label="Aangan architecture">
+      <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#b08b55"/></marker></defs>
+      <text x="20" y="14" class="d-lab">CLIENTS</text>
+      <rect x="20" y="22" width="168" height="104" rx="12" class="d-mari"/>
+      <text x="34" y="46" class="d-t">Web app</text><text x="34" y="64" class="d-s">React 19 · Vite · Tailwind 4</text><text x="34" y="80" class="d-s">Standard and Comfort</text><text x="34" y="96" class="d-s">speech: Listen, voice reply</text><text x="34" y="114" class="d-xs">Nexconn Chat SDK 26.2.1</text>
+      <rect x="204" y="22" width="168" height="104" rx="12" class="d-mari"/>
+      <text x="218" y="46" class="d-t">iPhone app</text><text x="218" y="64" class="d-s">Expo · React Native · TS</text><text x="218" y="80" class="d-s">native Home, Is this safe?</text><text x="218" y="96" class="d-s">chat = web app in WebView</text><text x="218" y="114" class="d-xs">same backend</text>
+
+      <rect x="480" y="22" width="262" height="276" rx="14" class="d-blue"/>
+      <text x="498" y="48" class="d-t" style="fill:#233f8f">Nexconn Cloud</text><text x="498" y="64" class="d-xs">area: Singapore</text>
+      <g class="d-s"><text x="498" y="92">• Group channels (families)</text><text x="498" y="112">• Real-time messages, replies</text><text x="498" y="132">• HD voice messages, images</text><text x="498" y="152">• Read receipts ("Seen by")</text><text x="498" y="172">• Presence (online dots)</text><text x="498" y="192">• Message metadata (reactions)</text><text x="498" y="212">• User profiles, avatars</text><text x="498" y="232">• Built-in translation</text><text x="498" y="252">• Platform Chat API</text></g>
+
+      <path d="M372 74 H476" class="d-line" marker-end="url(#ar3)" marker-start="url(#ar3)"/>
+      <text x="380" y="66" class="d-lab">Chat SDK</text><text x="380" y="90" class="d-xs">live, WebSocket</text>
+
+      <path d="M196 126 V176" class="d-line" marker-end="url(#ar3)" marker-start="url(#ar3)"/>
+      <text x="204" y="152" class="d-lab">HTTPS /api</text><text x="204" y="164" class="d-xs">Bearer authKey (ours)</text>
+
+      <rect x="20" y="180" width="352" height="150" rx="14" class="d-night"/>
+      <text x="38" y="206" class="d-w" font-size="13" font-weight="800">Aangan server</text><text x="150" y="206" class="d-wm" font-size="10">Express 5 · Node · on Render</text>
+      <g font-size="10.5" class="d-w"><text x="38" y="230">• Tokens and login</text><text x="38" y="248">• Families and invite codes</text><text x="38" y="266">• Translation, cached per text + language</text><text x="38" y="284">• Scam shield, summary, quick replies</text><text x="38" y="302">• Profiles and photos</text><text x="38" y="320">• Serves the web app · rate limits per route</text></g>
+
+      <path d="M372 250 H476" class="d-line" marker-end="url(#ar3)"/>
+      <text x="380" y="242" class="d-lab">Platform API</text><text x="380" y="266" class="d-xs">signed, secret stays here</text>
+
+      <path d="M86 330 V378" class="d-line" marker-end="url(#ar3)"/>
+      <path d="M270 330 V378" class="d-line" marker-end="url(#ar3)"/>
+      <text x="278" y="358" class="d-xs">127.0.0.1 + internal token</text>
+
+      <rect x="20" y="382" width="132" height="84" rx="12" class="d-box"/>
+      <text x="34" y="406" class="d-t" font-size="12">JSON store</text><text x="34" y="424" class="d-s">auth keys, invites</text><text x="34" y="440" class="d-s">photos (256 px)</text>
+
+      <rect x="170" y="382" width="202" height="84" rx="12" class="d-jade"/>
+      <text x="184" y="406" class="d-t" font-size="12">AI service</text><text x="262" y="406" class="d-xs">Python · FastAPI</text><text x="184" y="424" class="d-s">rules.py: weighted scam rules</text><text x="184" y="440" class="d-s">LLM only for flagged text</text><text x="184" y="456" class="d-xs">supervised, restarts with backoff</text>
+
+      <path d="M372 424 H476" class="d-line" marker-end="url(#ar3)"/>
+      <text x="380" y="416" class="d-lab">LLM</text>
+      <rect x="480" y="382" width="262" height="84" rx="12" class="d-box"/>
+      <text x="498" y="406" class="d-t" font-size="12">Sarvam (primary)</text><text x="498" y="424" class="d-s">Indian languages, Hinglish</text><text x="498" y="442" class="d-t" font-size="12">Gemini (automatic backup)</text><text x="498" y="458" class="d-xs">bad key, no credits, outage → switch</text>
+    </svg>
+  </div>
+  <div class="g3 mt4">
+    <div class="small"><b>One wrapper folder.</b> Only <span class="mono">web/src/nexconn/</span> imports the SDK; every function takes the channel ID explicitly.</div>
+    <div class="small"><b>One deploy.</b> A single Docker container on Render: Node serves the API and web app and starts the Python AI service.</div>
+    <div class="small"><b>Cost grows with writing, not reading.</b> Each message is translated once per language and cached.</div>
+  </div>
+  <h2 class="mt6 mb3">What happens when Arjun taps Send</h2>
+  <div class="g4">
+    <div class="pt"><span class="k">1</span><div class="small"><b>Nexconn delivers</b> the original text, with his name and photo in senderUserInfo, to every member live.</div></div>
+    <div class="pt"><span class="k">2</span><div class="small"><b>Each reader's app</b> asks our server for its own language; the answer is cached for the next reader.</div></div>
+    <div class="pt"><span class="k">3</span><div class="small"><b>The scam rules</b> run on the message; only a flagged one goes to the AI.</div></div>
+    <div class="pt"><span class="k">4</span><div class="small"><b>Each screen renders</b> in its reader's size and mode, and sends a read receipt for "Seen by".</div></div>
+  </div>
+  <div class="foot"><span>Aangan · Nexconn Build Challenge 2026</span><span>13</span></div>
+</section>
+
+<!-- 14 · QUALITY + ELDER DESIGN -->
+<section class="page">
+  <div class="run"><span class="brand"><span class="mark"></span>Aangan</span><span class="sec">Completeness</span></div>
+  <div class="kicker">Built to be relied on</div>
+  <h1>A wrong time is worse than no translation.</h1>
+  <p class="lede">For an elder, a confident mistake does more harm than an honest "not available". So every AI step has a guard, and every failure has a calm fallback.</p>
+  <div class="g2">
+    <div class="col">
+      <div class="card"><h3>AI that never breaks the chat</h3><p class="small">Every AI endpoint falls back to rules or fixed text and never returns an error. Sarvam is tried first; a bad key, empty credits or an outage switches to Gemini automatically.</p></div>
+      <div class="card"><h3>Translation guards</h3><p class="small">Answers in the wrong script, or that come back untranslated, are rejected rather than shown. Times, names and numbers are kept. The original is shown whenever a translation is shown or unavailable.</p></div>
+      <div class="card"><h3>Secrets stay on the server</h3><p class="small">The Nexconn App Secret and AI keys never reach the browser. Our own auth keys are separate from Nexconn tokens. Every route is rate limited.</p></div>
+    </div>
+    <div class="col">
+      <div class="card"><h3>Tested without touching real families</h3><p class="small">A separate test room with mocked AI and translation. The smoke test refuses to run unless the server is mocked, and the server refuses if the test room equals the family room.</p></div>
+      <div class="card"><h3>Automated checks</h3><div class="row mt2" style="gap:6mm"><div class="stat"><div class="n">118</div><div class="l">AI tests (pytest)</div></div><div class="stat"><div class="n">3</div><div class="l">typechecks: server, web, iPhone</div></div><div class="stat"><div class="n">1</div><div class="l">API smoke test</div></div></div></div>
+      <div class="card"><h3>Self-healing AI service</h3><p class="small">The server starts and supervises the Python service, restarts it with backoff, and adopts a healthy one already running.</p></div>
+    </div>
+  </div>
+
+  <h2 class="mt6 mb3">Designed for elders, in the details</h2>
+  <div class="g3">
+    <div class="pt"><span class="k">1</span><div class="small"><b>Chosen once, by the reader:</b> text size (three steps), language (five), Comfort or Standard.</div></div>
+    <div class="pt"><span class="k">2</span><div class="small"><b>Large tap targets</b> (64 pt on iPhone) and labelled buttons; never an icon alone.</div></div>
+    <div class="pt"><span class="k">3</span><div class="small"><b>Plain words.</b> "Is this safe?", "Ask my family", "What did I miss?": no jargon anywhere.</div></div>
+    <div class="pt"><span class="k">4</span><div class="small"><b>AAA contrast</b> for Comfort text in light and dark; warnings readable at any size.</div></div>
+    <div class="pt"><span class="k">5</span><div class="small"><b>Listen everywhere:</b> messages, summaries and scam verdicts can all be heard.</div></div>
+    <div class="pt"><span class="k">6</span><div class="small"><b>Never a separate "senior" space:</b> the elder stays in the real family room.</div></div>
+  </div>
+  <div class="foot"><span>Aangan · Nexconn Build Challenge 2026</span><span>14</span></div>
+</section>
+
+<!-- 15 · BUSINESS -->
+<section class="page">
+  <div class="run"><span class="brand"><span class="mark"></span>Aangan</span><span class="sec">Business &amp; growth</span></div>
+  <div class="kicker">From hackathon to product</div>
+  <h1>Free for families. Paid for by those who protect them.</h1>
+  <p class="lede">The elder is the user; the adult child is the buyer. Aangan stays free for every family and earns from people and organisations that pay for an elder's safety.</p>
+  <div class="g3 mb4">
+    <div class="card"><h3>Free for every family</h3><p class="small">The shared room, Comfort mode, translation, Listen, voice reply.</p></div>
+    <div class="card accent"><h3>Family Plus</h3><p class="small">Paid by the adult child: scam alerts to a trusted member, daily check-in alerts, more AI languages.</p></div>
+    <div class="card"><h3>Partners</h3><p class="small">Senior living communities, elder-care NGOs, and banks or insurers that want fewer fraud losses among older customers.</p></div>
+  </div>
+  <div class="g2 mb4">
+    <div class="card soft"><h3>Built-in growth loop</h3><p class="small">One adult child sets Aangan up and sends invite links, so one decision brings <b>5 to 10 active Nexconn users</b> per family. Each invited relative can start their own family.</p></div>
+    <div class="card soft"><h3>Low running cost</h3><p class="small">Translation is cached once per message and language; the AI only sees messages the rules flag. The Nexconn Free Chat Plan covers 10,000 monthly active users.</p></div>
+  </div>
+
+  <div class="card">
+    <h2 class="mb3">Roadmap: three phases, two gates</h2>
+    <svg viewBox="0 0 700 170" role="img" aria-label="Roadmap">
+      <defs><marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#b08b55"/></marker></defs>
+      <rect x="0" y="0" width="216" height="118" rx="10" class="d-mari" style="stroke-width:2"/>
+      <text x="12" y="22" class="d-t" font-size="12">Now: hackathon build</text><text x="12" y="38" class="d-xs">Oct 23 to Nov 22, 2026</text>
+      <g class="d-s"><text x="12" y="62">Reading layer, Comfort mode</text><text x="12" y="80">Translation, Listen, voice reply</text><text x="12" y="98">Scam shield, summary, iPhone app</text></g>
+      <rect x="242" y="0" width="216" height="118" rx="10" class="d-box"/>
+      <text x="254" y="22" class="d-t" font-size="12">Pilot with real families</text><text x="254" y="38" class="d-xs">Dec 2026 to Mar 2027</text>
+      <g class="d-s"><text x="254" y="62">Daily "I'm fine" check-in</text><text x="254" y="80">Android app from the same code</text><text x="254" y="98">Track elder replies per week</text></g>
+      <rect x="484" y="0" width="216" height="118" rx="10" class="d-box"/>
+      <text x="496" y="22" class="d-t" font-size="12">Partners and paid plan</text><text x="496" y="38" class="d-xs">Apr to Dec 2027</text>
+      <g class="d-s"><text x="496" y="62">NGOs, senior communities</text><text x="496" y="80">Bank and insurer fraud tie-ups</text><text x="496" y="98">Family Plus subscription</text></g>
+      <line x1="0" y1="138" x2="694" y2="138" stroke="#b08b55" stroke-width="1.3" marker-end="url(#ar4)"/>
+      <path d="M229 130 l8 8 l-8 8 l-8 -8z" fill="#ffb23f" stroke="#b08b55"/><text x="229" y="162" text-anchor="middle" class="d-xs">Gate: submitted Nov 22</text>
+      <path d="M471 130 l8 8 l-8 8 l-8 -8z" fill="#fff" stroke="#b08b55"/><text x="471" y="162" text-anchor="middle" class="d-xs">Gate: elders reply weekly</text>
+    </svg>
+  </div>
+
+  <div class="tbl mt4">
+    <table>
+      <tr><th style="width:30%">Success looks like</th><th>How we count it (no message content read)</th></tr>
+      <tr><td><b>Elders take part again</b></td><td>Messages sent per elder per week, before and after joining (Nexconn message counts)</td></tr>
+      <tr><td><b>Elders understand</b></td><td>Share of messages read by elders (read receipts) and played aloud (Listen events)</td></tr>
+      <tr><td><b>Fewer fall for fraud</b></td><td>Warnings shown, "Ask my family" alerts sent and answered</td></tr>
+    </table>
+  </div>
+  <p class="small mt3 callout"><b>Traction, honestly:</b> Aangan has been built and tested by our team with the demo family; it has no outside users yet. The pilot with real families is the first gate, measured with the numbers above.</p>
+  <div class="foot"><span>Aangan · Nexconn Build Challenge 2026</span><span>15</span></div>
+</section>
+
+<!-- 16 · TEAM, LINKS, SOURCES -->
+<section class="page">
+  <div class="run"><span class="brand"><span class="mark"></span>Aangan</span><span class="sec">Team &amp; links</span></div>
+  <div class="kicker">Bonfire Boyz</div>
+  <h1>Try it now.</h1>
+  <div class="card night">
+    <div class="links" style="justify-content: space-between">
+      <a class="lk" href="https://aangan-d550.onrender.com"><div class="qr">{{QR_APP}}</div><div class="t"><b>Live app</b><u>aangan-d550<br>.onrender.com</u></div></a>
+      <a class="lk" href="{{VIDEO_HREF}}">{{QR_VIDEO_BLOCK}}<div class="t"><b>Demo video</b><u>{{VIDEO_LABEL}}</u></div></a>
+      <a class="lk" href="https://github.com/asmik417/Aangan"><div class="qr">{{QR_REPO}}</div><div class="t"><b>Source code</b><u>github.com/<br>asmik417/Aangan</u></div></a>
+    </div>
+    <p class="small mt4" style="color:var(--mist)">Open <a href="https://aangan-d550.onrender.com/showcase" style="color:#ffc35f; text-decoration: underline"><b>aangan-d550.onrender.com/showcase</b></a> to see Arjun's web app and Dadi's phone side by side, live, no sign-up. The free server sleeps when idle; the first visit can take up to a minute.</p>
+  </div>
+
+  <div class="g3 mt5">
+    <div class="card"><div class="small muted">Team lead</div><h3 class="mt2">Roshan Kumar Nayak</h3></div>
+    <div class="card"><div class="small muted">Team member</div><h3 class="mt2">Debi Prasad Mohapatra</h3></div>
+    <div class="card"><div class="small muted">Team member</div><h3 class="mt2">Rohan Jyoti Mishra</h3></div>
+  </div>
+
+  <h2 class="mt6 mb3">See it in three minutes</h2>
+  <div class="card">
+    <div class="pts">
+      <div class="pt"><span class="k">1</span><div class="small"><b>Open /showcase.</b> Arjun's web app (Standard, English) and Dadi's phone (Comfort, Hindi) show the same live family room.</div></div>
+      <div class="pt"><span class="k">2</span><div class="small"><b>On Dadi's phone, tap "क्या छूट गया? / What did I miss?"</b> for a Hindi summary, then <b>Listen</b> on any message.</div></div>
+      <div class="pt"><span class="k">3</span><div class="small"><b>Scroll to the fake SBI message.</b> Dadi gets a large warning with "Ask my family"; Arjun gets a small note.</div></div>
+      <div class="pt"><span class="k">4</span><div class="small"><b>Tap "Is this safe?"</b> in Arjun's app and paste any suspicious SMS, such as a fake KYC message.</div></div>
+      <div class="pt"><span class="k">5</span><div class="small"><b>Start your own family:</b> open the live app, type a name, create a family and open its invite link on a second device.</div></div>
+    </div>
+  </div>
+
+  <h2 class="mt6 mb2">Sources</h2>
+  <p class="small muted mb2">Opened Nov 21, 2026. Figures reported by news outlets are marked as such.</p>
+  <ol class="small" style="columns: 2; column-gap: 7mm; padding-left: 4mm; font-size: 7.6pt; line-height: 1.4;">
+    <li>UNFPA, India Ageing Report 2023</li>
+    <li>IIPS, LASI Wave 1 (2017–18): Elderly in India</li>
+    <li>HelpAge India, WEAAD 2024 report</li>
+    <li>HelpAge India 2025 survey, via Outlook Money</li>
+    <li>Census of India 2011, Language (Paper 1 of 2018)</li>
+    <li>IAMAI-Kantar, Internet in India 2024</li>
+    <li>Palakodety et al., romanised Hindi share (arXiv 1909.12940)</li>
+    <li>National Blindness &amp; Visual Impairment Survey, via Down To Earth</li>
+    <li>MHA Lok Sabha reply on cyber fraud 2024, via Scroll</li>
+    <li>MHA Rajya Sabha reply on senior citizen fraud 2025, via NewKerala</li>
+    <li>NCRP digital arrest data, via TOI / The Wire</li>
+    <li>Hyderabad police on digital arrest victims, Telangana Today</li>
+    <li>Nagpur cyber fraud 2025, Nagpur Today</li>
+    <li>Bapaye &amp; Bapaye, JMIR Public Health 2021</li>
+    <li>Srivastava &amp; Srivastava, Indian J. Psychiatry 2023</li>
+    <li>WHO, social connection and early death, Jun 30, 2025</li>
+    <li>Fleming &amp; Brayne, BMJ 2008</li>
+    <li>Kahlon et al., JAMA Psychiatry 2021</li>
+    <li>Aangan's own test of Nexconn built-in translation, Nov 18, 2026</li>
+    <li>Nexconn Build Challenge 2026 rules</li>
+  </ol>
+  <div class="grow"></div>
+  <div class="row" style="align-items:center; gap:3mm"><span class="mark"></span><span class="small muted">Aangan (आँगन): the open courtyard at the heart of an Indian home, where the whole family gathers.</span></div>
+  <div class="foot"><span>Aangan · Nexconn Build Challenge 2026</span><span>16</span></div>
+</section>
+
+</body>
+</html>

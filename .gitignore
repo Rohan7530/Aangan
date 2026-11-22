@@ -25,3 +25,7 @@ server/data/
 ai/.venv/
 __pycache__/
 .pytest_cache/
+
+# Write-up build output (contains the App Key)
+docs/writeup/out/
+docs/writeup/_build.html
